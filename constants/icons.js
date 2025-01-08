@@ -20,6 +20,8 @@ import motor from "../assets/icons/motor.png";
 import wlevel from "../assets/icons/wlevel.png";
 import clock from "../assets/icons/clock.png";
 import drop from "../assets/icons/drop.png";
+import edit from "../assets/icons/edit.png";
+import del from "../assets/icons/delete.png";
 
 export default {
   play,
@@ -44,4 +46,6 @@ export default {
   wlevel,
   clock,
   drop,
+  edit,
+  del,
 };

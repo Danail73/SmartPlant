@@ -1,4 +1,4 @@
-import { FlatList, SafeAreaView, StyleSheet, Text, View, Image} from 'react-native'
+import { FlatList, SafeAreaView, StyleSheet, Text, View, Image } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { getAllPlants } from '../../lib/appwrite'
@@ -6,13 +6,14 @@ import useAppWrite from '../../lib/useAppWrite'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { images } from '../../constants'
 import Container from '../../components/Container'
+import { PaperProvider } from 'react-native-paper'
 
 
 const Home = () => {
   const { data: plants, refetch } = useAppWrite(getAllPlants);
   const [refreshing, setRefreshing] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
-  
+
 
   const onRefreshing = async () => {
     setRefreshing(true);
@@ -40,11 +41,12 @@ const Home = () => {
   }, [activeItem]);
 
   return (
-    <Container 
-      colors={['#4ec09c', '#a8d981']}
-      statusBarStyle={'light'}
-    >
-      <View className="px-10">
+    <PaperProvider>
+      <Container
+        colors={['#4ec09c', '#a8d981']}
+        statusBarStyle={'light'}
+      >
+        <View className="px-10">
           <View className="h-20 items-center justify-between flex-row pl-4 pt-4">
             <Text className="text-notFullWhite font-pmedium text-3xl">Home</Text>
             <Text className="text-notFullWhite font-pmedium text-3xl">25 °C</Text>
@@ -61,7 +63,7 @@ const Home = () => {
             </View>
           </View>
 
-          <View className="">
+          <View style={{ overflow: 'visible' }}>
             <Text className="text-notFullWhite font-pmedium text-lg pl-4">Daily Plants</Text>
             <FlatList
               data={plants || []}
@@ -76,7 +78,8 @@ const Home = () => {
             />
           </View>
         </View>
-    </Container>
+      </Container>
+    </PaperProvider>
   );
 };
 

@@ -5,6 +5,7 @@ import { icons, images } from '../constants'
 import { StyleSheet } from 'react-native'
 import plantImages from '../constants/plantImages'
 import PlantBoardMenu from './PlantBoardMenu'
+import { PaperProvider } from 'react-native-paper'
 
 const PlantBoardComponent = ({ title, plantId }) => {
     const plantImagesArray = [plantImages.plant1, plantImages.plant2, plantImages.plant3]
@@ -22,6 +23,7 @@ const PlantBoardComponent = ({ title, plantId }) => {
             setImage(getRandomImage());
         }
     }, [image])
+
 
     return (
         <View
@@ -65,22 +67,10 @@ const PlantBoardComponent = ({ title, plantId }) => {
                     router.push(`/device?plantId=${plantId}`);
                 }}*/}
 
-            <TouchableOpacity
-                className="absolute right-1 justify-center"
-                onPress={() => {
-                    setMenuVisible(true);
-                }}
-            >
-                <Image
-                    source={icons.menu}
-                    className="w-8 h-8"
-                    style={{ tintColor: '#999' }}
-                    resizeMode='contain'
-                />
-            </TouchableOpacity>
-
             <PlantBoardMenu
-                menuVisible={menuVisible}
+                buttonStyles={'absolute right-1 justify-center'}
+                colors={['#000']}
+                plantId={plantId}
             />
         </View>
     )

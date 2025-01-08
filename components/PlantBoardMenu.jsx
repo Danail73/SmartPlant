@@ -1,55 +1,147 @@
-import { View, Text, Modal, Pressable, TouchableOpacity, StyleSheet } from 'react-native'
-import React from 'react'
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, Pressable, Animated, Image, Text } from 'react-native';
+import { Menu, Divider, IconButton, Provider as PaperProvider } from 'react-native-paper';
+import { icons } from '../constants';
+import { router } from 'expo-router';
 
-const PlantBoardMenu = ({menuVisible}) => {
-    return (
-        <Modal
-            transparent={true}
-            visible={menuVisible}
-            animationType="fade"
-            onRequestClose={() => setMenuVisible(false)}
-        >
-            <Pressable
-                style={styles.modalOverlay}
-                //onPress={() => setMenuVisible(false)}
-            >
-                <View style={styles.menuContainer}>
-                    <TouchableOpacity onPress={() => {}}>
-                        <Text style={styles.menuOption}>Edit</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {}}>
-                        <Text style={styles.menuOption}>Delete</Text>
-                    </TouchableOpacity>
-                </View>
-            </Pressable>
-        </Modal>
-    )
-}
+const PlantBoardMenu = ({ colors, plantId }) => {
+  const [visible, setVisible] = useState(false);
+  const rotation = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0)).current;
+  const [menuAlignment, setMenuAlignment] = useState('left');
+
+  const openMenu = () => {
+    setVisible(true);
+
+    Animated.parallel([
+      Animated.timing(rotation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const closeMenu = () => {
+    Animated.timing(scale, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start(() => {
+      // After the menu is fully closed, update visibility
+      setVisible(false);
+  
+      // Then, rotate the icon back
+      Animated.timing(rotation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
+  const navigateToDevice = () => {
+    router.push(`/device?plantId=${plantId}`);
+  }
+
+  const rotateInterpolate = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '90deg'],
+  });
+
+  const handleLayout = (event) => {
+    const { x } = event.nativeEvent.layout; // Get the X position of the component
+    if (x > screenWidth / 2) {
+      setMenuAlignment('right'); // Closer to the right side
+    } else {
+      setMenuAlignment('left'); // Closer to the left side
+    }
+  };
+
+  // Dynamic alignment for the menu
+  const translateXValue = menuAlignment === 'right' ? 30 : -20;
+
+  return (
+
+    <View style={styles.container}>
+      <Menu
+        visible={visible}
+        style={{transform: [{ translateY: -65 }, { translateX: translateXValue }]}}
+        onDismiss={closeMenu}
+        anchor={
+          <Pressable onPress={openMenu}>
+            <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
+              <IconButton
+                icon={icons.menu}
+                color={colors[0]} 
+                size={30}
+              />
+            </Animated.View>
+          </Pressable>
+        }
+        contentStyle={styles.menuContent}
+      >
+        {/* Menu Items */}
+        <Menu.Item
+          onPress={() => {
+            closeMenu();
+            navigateToDevice()
+          }}
+          title={(
+            <View className="flex-row pl-5">
+              <Image
+                source={icons.edit}
+                className="w-6 h-6"
+                style={{tintColor:'blue'}}
+                resizeMode='contain'
+              />
+              <Text className="font-pregular pl-1 text-lg" style={{color:'blue'}}>Edit</Text>
+            </View>
+          )}
+        />
+        <Menu.Item
+          onPress={() => {
+            console.log(`Delete plant ${plantId}`);
+            closeMenu();
+          }}
+          title={(
+            <View className="flex-row pl-2">
+              <Image
+                source={icons.del}
+                className="w-7 h-7"
+                style={{tintColor:'red'}}
+                resizeMode='contain'
+              />
+              <Text className="font-pregular pl-1 text-lg" style={{color:'red'}}>Delete</Text>
+            </View>
+          )}
+        />
+      </Menu>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    menuContainer: {
-        backgroundColor: 'white',
-        padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-        width: 130,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    menuOption: {
-        fontSize: 16,
-        color: '#333',
-        paddingVertical: 10,
-    },
-})
+  container: {
+    position: 'absolute',
+    right: -10,
+    zIndex: 1000,
+  },
+  menu: {
+    transform: [{ translateY: -75 }, { translateX: -20 }]
+  },
+  menuContent: {
+    borderRadius: 10,
+    width: 100,
+    height: 120,
+    justifyContent: 'center',
+    alignItems:'center'
+  },
+});
 
-export default PlantBoardMenu
+export default PlantBoardMenu;
