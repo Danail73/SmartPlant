@@ -1,17 +1,22 @@
-import { View, Text } from 'react-native'
+import { View, Text, TextInput } from 'react-native'
 import React from 'react'
 
 const FormField = ({ title, value, placeholder,
-     handleChangeText, otherStyles, ...props }) => {
+     handleChangeText, textStyles,inputStyles,  otherStyles, ...props }) => {
   return (
-    <View className={`space-y-2 ${otherStyles}`}>
-
-      <Text 
-        className="text-base text-gray-100 font-pmedium"
+    <View className={`bg-notFullWhite h-[100px] w-[250px] p-3 ${otherStyles}`}>
+      <Text className={` text-lg font-pmedium text-gray-900 ${textStyles}`}>{title}</Text>
+      <View 
+        className="shadow-md shadow-black"
+        style={{elevation:5}}
       >
-        FormField
-      </Text>
-
+        <TextInput
+          className={`border-gray-50 border w-[230px] mt-1 bg-white rounded-lg ${inputStyles}`}
+          placeholder={placeholder}
+          value={value}
+          onChange={handleChangeText}
+        />
+      </View>
     </View>
   )
 }
