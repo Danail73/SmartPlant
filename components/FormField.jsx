@@ -14,7 +14,7 @@ const FormField = ({ title, value, placeholder,
           className={`border-gray-50 border w-[230px] mt-1 bg-white rounded-lg ${inputStyles}`}
           placeholder={placeholder}
           value={value}
-          onChange={handleChangeText}
+          onChangeText={handleChangeText}
         />
       </View>
     </View>
