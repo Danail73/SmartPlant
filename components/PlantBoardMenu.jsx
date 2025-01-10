@@ -3,8 +3,9 @@ import { View, StyleSheet, Pressable, Animated, Image, Text } from 'react-native
 import { Menu, Divider, IconButton, Provider as PaperProvider } from 'react-native-paper';
 import { icons } from '../constants';
 import { router } from 'expo-router';
+import { deletePlant } from '../lib/appwrite';
 
-const PlantBoardMenu = ({ colors, plantId }) => {
+const PlantBoardMenu = ({ colors, plantId, useCallBack }) => {
   const [visible, setVisible] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0)).current;
@@ -33,10 +34,8 @@ const PlantBoardMenu = ({ colors, plantId }) => {
       duration: 100,
       useNativeDriver: true,
     }).start(() => {
-      // After the menu is fully closed, update visibility
       setVisible(false);
   
-      // Then, rotate the icon back
       Animated.timing(rotation, {
         toValue: 0,
         duration: 300,
@@ -47,6 +46,14 @@ const PlantBoardMenu = ({ colors, plantId }) => {
 
   const navigateToDevice = () => {
     router.push(`/device?plantId=${plantId}`);
+  }
+
+  const handleDeletePlant = async () => {
+    try {
+      const response = await deletePlant(plantId);
+    } catch (error) {
+      console.error(Error, error)
+    }
   }
 
   const rotateInterpolate = rotation.interpolate({
@@ -63,7 +70,6 @@ const PlantBoardMenu = ({ colors, plantId }) => {
     }
   };
 
-  // Dynamic alignment for the menu
   const translateXValue = menuAlignment === 'right' ? 30 : -20;
 
   return (
@@ -106,7 +112,8 @@ const PlantBoardMenu = ({ colors, plantId }) => {
         />
         <Menu.Item
           onPress={() => {
-            console.log(`Delete plant ${plantId}`);
+            handleDeletePlant();
+            useCallBack
             closeMenu();
           }}
           title={(

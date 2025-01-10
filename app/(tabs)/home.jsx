@@ -1,25 +1,31 @@
 import { FlatList, SafeAreaView, StyleSheet, Text, View, Image } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import { getAllPlants } from '../../lib/appwrite'
 import useAppWrite from '../../lib/useAppWrite'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { images } from '../../constants'
 import Container from '../../components/Container'
 import { PaperProvider } from 'react-native-paper'
+import { getAllPlants } from '../../lib/appwrite'
 
 
 const Home = () => {
-  const { data: plants, refetch } = useAppWrite(getAllPlants);
-  const [refreshing, setRefreshing] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
+  const [plants, setPlants] = useState([])
 
-
-  const onRefreshing = async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  };
+  const fetchPlants = async () => {
+    try{
+      const plants = await getAllPlants();
+      if(plants){
+        setPlants(plants);
+      }
+      else{
+        //no plants yet
+      }
+    } catch (error) {
+      console.error(Error, error)
+    }
+  }
 
   const viewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -33,8 +39,7 @@ const Home = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      onRefreshing();
-      //console.log(activeItem)
+      fetchPlants();
     }, 1000);
 
     return () => clearInterval(interval);
@@ -69,7 +74,7 @@ const Home = () => {
               data={plants || []}
               keyExtractor={(item) => item.$id || item.id.toString()}
               renderItem={({ item }) => (
-                <PlantBoardComponent title={item.name} plantId={item.id} />
+                <PlantBoardComponent title={item.name} plantId={item.$id}/>
               )}
               horizontal
               showsHorizontalScrollIndicator={false}

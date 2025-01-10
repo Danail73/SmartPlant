@@ -7,7 +7,6 @@ import { PaperProvider, Modal } from 'react-native-paper';
 import FormField from '../../components/FormField';
 import { getCurrentUser } from '../../lib/appwrite';
 import { createPlant } from '../../lib/appwrite';
-import plantImages from '../../constants/plantImages';
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
@@ -146,7 +145,7 @@ const TabsLayout = () => {
                 {...props}
                 onPress={() => {
                   if (menuVisible) {
-                    handleCreatePlant()
+                    handleCreatePlant();
                     hideModal();
                   } else {
                     showModal();
