@@ -56,14 +56,16 @@ const TabsLayout = () => {
     if (!form.plantId || !form.name) {
       Alert.alert("You must fill all forms")
     }
-    try {
-      await createPlant(form.plantId, form.name, [user.$id]);
-    }
-    catch (error) {
-      console.log(error);
-    }
-    finally {
-      clearForm();
+    else {
+      try {
+        await createPlant(form.plantId, form.name, [user.$id]);
+      }
+      catch (error) {
+        console.log(error);
+      }
+      finally {
+        clearForm();
+      }
     }
   }
 
@@ -150,7 +152,6 @@ const TabsLayout = () => {
                   } else {
                     showModal();
                   }
-
                 }}
                 style={{
                   position: 'absolute',

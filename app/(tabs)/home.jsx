@@ -74,7 +74,7 @@ const Home = () => {
               data={plants || []}
               keyExtractor={(item) => item.$id || item.id.toString()}
               renderItem={({ item }) => (
-                <PlantBoardComponent title={item.name} plantId={item.$id}/>
+                <PlantBoardComponent item={item}/>
               )}
               horizontal
               showsHorizontalScrollIndicator={false}

@@ -13,6 +13,7 @@ import { useGlobalContext } from '../context/GlobalProvider';
 import { LinearGradient } from 'expo-linear-gradient';
 import BackButton from '../components/BackButton';
 import Container from '../components/Container';
+import { fetchTemp, fetchLampState, fetchLightInfo, fetchWaterLevel, turnLampOff, turnLampOn } from '../api/plantControl';
 
 
 
@@ -27,9 +28,6 @@ const Device = () => {
   const [motorOn, setMotorOn] = useState(false);
 
   const { plantId } = useLocalSearchParams();
-  const baseUrl = 'http://192.168.10.122:3000' + `/${plantId}`;
-
-  //console.log(baseUrl)
 
   const logout = async () => {
     await signOut()
@@ -41,159 +39,93 @@ const Device = () => {
 
   const toggleSwitch = async () => {
     try {
-      setIsEnabled(!isEnabled);
       if (!isEnabled) {
-        if (!isTurnedOn) {
-          const response = await turnLampOn(setLoading, setIsTurnedOn);
-          setIsTurnedOn(true);
-        }
+        await handleTurnLampOn();
       } else {
-        if (isTurnedOn) {
-          const response = await turnLampOff(setLoading, setIsTurnedOn);
-          setIsTurnedOn(false);
-        }
+        await handleTurnLampOff();
       }
     } catch (error) {
       throw error;
     }
   };
 
-  const fetchTemperature = async (req, res) => {
+  const handleFetchTemperature = async (req, res) => {
     try {
-      setLoading(true);
-      const response = await axios.get(baseUrl + '/getTemp');
-      if (response.status === 200) {
-        const { value, state } = response.data.temperature;
-        setTemperature(state);
-      }
-      else {
-        console.error('Failed to fetch the temp')
-      }
+      const response = await fetchTemp(plantId)
+      setTemperature(response);
     }
     catch (error) {
       throw error;
     }
-    finally {
-      setLoading(false);
-    }
   }
 
-  const fetchLampInfo = async (req, res) => {
+  const handleFetchLampInfo = async (req, res) => {
     try {
-      await setLoading(true);
-      const response = await axios.get(baseUrl + '/lamp');
-      if (response.status === 200) {
-        const state = response.data.lamp.state;
-        if (String(state).trim() === "OFF") {
-          setIsEnabled(false);
-          setIsTurnedOn(false);
-        } else if (String(state).trim() === "ON") {
-          setIsEnabled(true);
-          setIsTurnedOn(true);
-        } else {
-          console.log(`Unexpected state value: "${state}"`);
-        }
-      }
-      else {
-        console.error('Failed to fetch the lamp info')
-      }
+      const response = await fetchLampState(plantId);
+      setIsTurnedOn(response);
     }
     catch (error) {
       throw error;
     }
-    finally {
-      setLoading(false);
-    }
   }
 
-  const turnLampOn = async (req, res) => {
+  const handleTurnLampOn = async (req, res) => {
     try {
-      setLoading(true);
-      const response = await axios.get(baseUrl + '/lampOn');
-      if (response.status === 200) {
+      const response = await turnLampOn(plantId);
+      if (response) {
+        setIsEnabled(true);
         setIsTurnedOn(true);
-        return response;
-      }
-      else {
-        console.error('Failed to turn lamp on')
       }
     }
     catch (error) {
       throw error;
     }
-    finally {
-      setLoading(false);
-    }
   }
 
-  const turnLampOff = async (req, res) => {
+  const handleTurnLampOff = async (req, res) => {
     try {
-      setLoading(true);
-      const response = await axios.get(baseUrl + '/lampOff');
-      if (response.status === 200) {
+      const response = await turnLampOff(plantId);
+      if (response) {
+        setIsEnabled(false);
         setIsTurnedOn(false);
-        return response;
-      }
-      else {
-        console.error('Failed to turn lamp off')
       }
     }
     catch (error) {
       throw error;
-    }
-    finally {
-      setLoading(false);
     }
   }
 
-  const fetchLightInfo = async (req, res) => {
+  const handleFetchLightInfo = async (req, res) => {
     try {
-      setLoading(true);
-      const response = await axios.get(baseUrl + '/light');
-      if (response.status === 200) {
-        const { value, state } = response.data.light;
-        setLightInfo(state);
-      }
-      else {
-        console.error('Failed to fetch light info')
-      }
+      const response = await fetchLightInfo(plantId)
+      setLightInfo(response);
     }
     catch (error) {
       throw error;
-    }
-    finally {
-      setLoading(false);
     }
   }
 
-  const fetchWaterLevel = async (req, res) => {
+  const handleFetchWaterLevel = async (req, res) => {
     try {
-      setLoading(true);
-      const response = await axios.get(baseUrl + '/waterLevel');
-      if (response.status === 200) {
-        const { value, state } = response.data.water;
-        setWaterLevel(state);
-      }
-      else {
-        console.error('Failed to fetch water level')
-      }
+      const response = await fetchWaterLevel(plantId)
+      setWaterLevel(response);
     }
     catch (error) {
       throw error;
-    }
-    finally {
-      setLoading(false);
     }
   }
 
   useEffect(() => {
     const interval = setInterval(async () => {
+      setLoading(true);
       try {
-        await fetchTemperature();
-        await fetchLightInfo();
-        await fetchWaterLevel();
+        await handleFetchTemperature();
+        await handleFetchLightInfo();
+        await handleFetchWaterLevel();
       } catch (error) {
-        //console.log(error)
+        //console.error(error)
+      } finally {
+        setLoading(false);
       }
     }, 5000);
 
@@ -202,12 +134,15 @@ const Device = () => {
 
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
+      setLoading(true);
       try {
-        fetchLampInfo();
+        await handleFetchLampInfo();
         setIsEnabled(isTurnedOn);
       } catch (error) {
-
+        //console.error(error)
+      } finally {
+        setLoading(false);
       }
     }, 1000);
 

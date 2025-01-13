@@ -7,7 +7,7 @@ import plantImages from '../constants/plantImages'
 import PlantBoardMenu from './PlantBoardMenu'
 import { PaperProvider } from 'react-native-paper'
 
-const PlantBoardComponent = ({ title, plantId, useCallBack }) => {
+const PlantBoardComponent = ({ item }) => {
     const plantImagesArray = [plantImages.plant1, plantImages.plant2, plantImages.plant3]
     const [image, setImage] = useState('');
     const [menuVisible, setMenuVisible] = useState(false);
@@ -41,7 +41,7 @@ const PlantBoardComponent = ({ title, plantId, useCallBack }) => {
                 className="justify-center flex-col"
             >
                 <Text className="text-gray-700 font-psemibold text-sm">
-                    {title}
+                    {item.name}
                 </Text>
 
                 <View className="flex-row items-start mt-2">
@@ -70,8 +70,7 @@ const PlantBoardComponent = ({ title, plantId, useCallBack }) => {
             <PlantBoardMenu
                 buttonStyles={'absolute right-1 justify-center'}
                 colors={['#000']}
-                plantId={plantId}
-                useCallBack={useCallBack}
+                item={item}
             />
         </View>
     )
