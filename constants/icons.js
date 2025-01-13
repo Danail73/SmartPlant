@@ -22,6 +22,7 @@ import clock from "../assets/icons/clock.png";
 import drop from "../assets/icons/drop.png";
 import edit from "../assets/icons/edit.png";
 import del from "../assets/icons/delete.png";
+import friends from "../assets/icons/friends.png";
 
 export default {
   play,
@@ -48,4 +49,5 @@ export default {
   drop,
   edit,
   del,
+  friends,
 };

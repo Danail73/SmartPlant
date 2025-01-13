@@ -34,64 +34,6 @@ const TabIcon = ({ icon, color, name, focused }) => {
 };
 
 const TabsLayout = () => {
-  const [menuVisible, setMenuVisible] = useState(false);
-  const translateY = useRef(new Animated.Value(400)).current;
-  const scale = useRef(new Animated.Value(0)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const [form, setForm] = useState({
-    plantId: '',
-    name: '',
-  });
-  const [user, setUser] = useState(null);
-
-  const getUser = async () => {
-    setUser(await getCurrentUser())
-  }
-
-  const clearForm = () => {
-    setForm({ plantId: '', name: '' })
-  }
-
-  const handleCreatePlant = async () => {
-    if (!form.plantId || !form.name) {
-      Alert.alert("You must fill all forms")
-    }
-    else {
-      try {
-        await createPlant(form.plantId, form.name, [user.$id]);
-      }
-      catch (error) {
-        console.log(error);
-      }
-      finally {
-        clearForm();
-      }
-    }
-  }
-
-  useEffect(() => {
-    getUser()
-  }, [])
-
-  const showModal = () => {
-    setMenuVisible(true);
-    Animated.parallel([
-      Animated.timing(translateY, { toValue: 430, duration: 300, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-    ]).start();
-  };
-
-  const hideModal = () => {
-    Animated.parallel([
-      Animated.timing(translateY, { toValue: 600, duration: 300, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 0, duration: 300, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-    ]).start(() => {
-      setMenuVisible(false);
-    });
-  };
-
   return (
     <PaperProvider>
       <Tabs
@@ -138,55 +80,22 @@ const TabsLayout = () => {
         />
 
         <Tabs.Screen
-          name="create"
+          name="friends"
+          style={{ paddingTop: 20 }}
           options={{
-            title: 'Create',
+            title: 'Friends',
             headerShown: false,
-            tabBarButton: (props) => (
-              <TouchableOpacity
-                {...props}
-                onPress={() => {
-                  if (menuVisible) {
-                    handleCreatePlant();
-                    hideModal();
-                  } else {
-                    showModal();
-                  }
-                }}
-                style={{
-                  position: 'absolute',
-                  bottom: '60%',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  alignSelf: 'center',
-                  width: 60,
-                  height: 60,
-                  borderRadius: 35,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 5 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 10,
-                  elevation: 5,
-                }}
-              >
-                <LinearGradient
-                  colors={['#fdb442', '#f69f2c']}
-                  start={[0, 0]}
-                  end={[1, 1]}
-                  style={{ borderRadius: 30 }}
-                  className="items-center justify-center w-full h-full"
-                >
-                  <Image
-                    source={icons.plus}
-                    resizeMode="contain"
-                    className="w-8 h-8"
-                    style={{ tintColor: '#f2f9f1' }}
-                  />
-                </LinearGradient>
-              </TouchableOpacity>
+            tabBarIcon: ({ color, focused }) => (
+              <TabIcon
+                icon={icons.friends}
+                color={color}
+                name="Friends"
+                focused={focused}
+              />
             ),
           }}
         />
+
 
         <Tabs.Screen
           name="profile"
@@ -205,39 +114,6 @@ const TabsLayout = () => {
           }}
         />
       </Tabs>
-
-      {/* Modal for the Create Menu */}
-
-      <Modal
-        visible={menuVisible}
-        onDismiss={hideModal}
-      >
-        <Animated.View
-          className={`bg-notFullWhite items-center justify-center`}
-          style={[
-            styles.createMenu,
-            {
-              transform: [
-                { translateY: translateY },
-                { scale: scale }
-              ]
-            },
-          ]}
-        >
-          <FormField
-            title="plantId"
-            placeholder={"Enter plantId"}
-            textStyles={''}
-            inputStyles={''}
-            handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
-          />
-          <FormField
-            title="name"
-            placeholder={"Enter name"}
-            handleChangeText={(e) => { setForm({ ...form, name: e }) }}
-          />
-        </Animated.View>
-      </Modal>
     </PaperProvider>
   );
 };
