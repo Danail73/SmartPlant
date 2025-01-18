@@ -1,6 +1,8 @@
 import axios from "axios";
 const baseUrl = 'http://192.168.3.20:3000/';
 
+//export let canselToken = false;
+
 export const fetchTemp = async (plantId) => {
     try {
         const response = await fetchData(plantId, '/getTemp');
@@ -11,7 +13,7 @@ export const fetchTemp = async (plantId) => {
         else
             console.log('Failed to fetch temperature')
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 }
 
@@ -30,7 +32,7 @@ export const fetchLampState = async (plantId) => {
         else
             console.log('Failed to fetch lamp state');
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 }
 
@@ -45,7 +47,7 @@ export const fetchLightInfo = async (plantId) => {
             console.error('Failed to fetch light info')
         }
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 }
 
@@ -61,7 +63,7 @@ export const fetchWaterLevel = async (plantId) => {
         }
 
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 }
 
@@ -73,7 +75,7 @@ export const turnLampOn = async (plantId) => {
         else
             console.log('Failed to turn lamp on')
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 }
 
@@ -85,7 +87,7 @@ export const turnLampOff = async (plantId) => {
         else
             console.log('Failed to turn lamp off')
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 }
 
@@ -94,7 +96,7 @@ const fetchData = async (plantId, url) => {
         const response = await axios.get(baseUrl + plantId + url);
         return response;
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 
 }

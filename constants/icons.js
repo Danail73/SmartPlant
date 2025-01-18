@@ -23,6 +23,8 @@ import drop from "../assets/icons/drop.png";
 import edit from "../assets/icons/edit.png";
 import del from "../assets/icons/delete.png";
 import friends from "../assets/icons/friends.png";
+import addFriend from "../assets/icons/addFriend.png";
+import close from "../assets/icons/close.png";
 
 export default {
   play,
@@ -50,4 +52,6 @@ export default {
   edit,
   del,
   friends,
+  addFriend,
+  close,
 };

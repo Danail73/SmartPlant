@@ -4,9 +4,10 @@ import { Link, Redirect, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { images } from '../constants';
 import CustomButton from '../components/CustomButton';
-import {PaperProvider} from 'react-native-paper'
+import { PaperProvider } from 'react-native-paper'
 
 import { useGlobalContext } from '../context/GlobalProvider';
+import Container from '../components/Container';
 
 
 export default function App() {
@@ -16,7 +17,9 @@ export default function App() {
 
   return (
     <PaperProvider>
-      <SafeAreaView className="bg-greeny h-full">
+      <Container
+        colors={['#cccf9e', '#E7E8D1']}
+      >
         <ScrollView contentContainerStyle={{ height: '100%' }}>
           <View className="w-full justify-center items-center h-full px-4">
             <Image
@@ -44,9 +47,9 @@ export default function App() {
 
         </ScrollView>
 
-        <StatusBar backgroundColor='#161622'
-          style='light' />
-      </SafeAreaView>
+        <StatusBar
+          style='dark' />
+      </Container>
     </PaperProvider>
   );
 }

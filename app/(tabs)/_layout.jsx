@@ -41,6 +41,7 @@ const TabsLayout = () => {
           tabBarShowLabel: false,
           tabBarActiveTintColor: '#2b65e3',
           tabBarInactiveTintColor: '#BFBFBF',
+          tabBarHideOnKeyboard:true,
           tabBarStyle: {
             position: 'absolute',
             bottom: 30,

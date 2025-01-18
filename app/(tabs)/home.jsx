@@ -8,6 +8,7 @@ import { getAllPlants, createPlant, getCurrentUser } from '../../lib/appwrite'
 import { Modal } from 'react-native-paper'
 import FormField from '../../components/FormField'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useGlobalContext } from '../../context/GlobalProvider'
 
 
 const Home = () => {
@@ -21,11 +22,9 @@ const Home = () => {
     plantId: '',
     name: '',
   });
-  const [user, setUser] = useState(null);
+  const {user, setUser, isLoggedIn} = useGlobalContext();
 
-  const getUser = async () => {
-    setUser(await getCurrentUser())
-  }
+  
 
   const clearForm = () => {
     setForm({ plantId: '', name: '' })
@@ -69,16 +68,24 @@ const Home = () => {
 
   const fetchPlants = async () => {
     try {
-      const plants = await getAllPlants();
-      if (plants) {
-        setPlants(plants);
+      const user = await getCurrentUser()
+      if (user) {
+        try {
+          const plants = await getAllPlants();
+          if (plants) {
+            setPlants(plants);
+          }
+          else {
+            //no plants yet
+          }
+        } catch (error) {
+          console.log(error)
+        }
       }
       else {
         //no plants yet
       }
-    } catch (error) {
-      console.error(Error, error)
-    }
+    } catch (error) { }
   }
 
   const viewableItemsChanged = useCallback(({ viewableItems }) => {
@@ -90,10 +97,6 @@ const Home = () => {
   const viewConfig = {
     viewAreaCoveragePercentThreshold: 50,
   };
-
-  useEffect(() => {
-    getUser();
-  })
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -189,7 +192,7 @@ const Home = () => {
               end={[1, 1]}
 
               style={{
-                borderRadius:35,
+                borderRadius: 35,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 5 },
                 shadowOpacity: 0.1,

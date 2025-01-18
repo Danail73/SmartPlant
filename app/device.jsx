@@ -18,7 +18,7 @@ import { fetchTemp, fetchLampState, fetchLightInfo, fetchWaterLevel, turnLampOff
 
 
 const Device = () => {
-  const { uset, setUser, setIsLoggedIn } = useGlobalContext();
+  const { user, setUser, setIsLoggedIn } = useGlobalContext();
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [temperature, setTemperature] = useState('');
@@ -30,11 +30,13 @@ const Device = () => {
   const { plantId } = useLocalSearchParams();
 
   const logout = async () => {
-    await signOut()
-    setUser(null)
-    setIsLoggedIn(false)
+    try {
+      await signOut()
+      setUser(null)
+      setIsLoggedIn(false)
 
-    router.replace('/login')
+      router.replace('/login')
+    } catch (error) { }
   }
 
   const toggleSwitch = async () => {
