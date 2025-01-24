@@ -22,9 +22,9 @@ const Home = () => {
     plantId: '',
     name: '',
   });
-  const {user, setUser, isLoggedIn} = useGlobalContext();
+  const { user, setUser, isLoggedIn } = useGlobalContext();
 
-  
+
 
   const clearForm = () => {
     setForm({ plantId: '', name: '' })
@@ -186,22 +186,8 @@ const Home = () => {
               handleChangeText={(e) => { setForm({ ...form, name: e }) }}
             />
 
-            <LinearGradient
-              colors={['#fdb442', '#f69f2c']}
-              start={[0, 0]}
-              end={[1, 1]}
-
-              style={{
-                borderRadius: 35,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 5 },
-                shadowOpacity: 0.1,
-                shadowRadius: 10,
-                elevation: 5,
-              }}
-              className="items-center justify-center w-16 h-16"
-            >
-              <Pressable
+            <View>
+              <TouchableOpacity
                 onPress={() => {
                   if (menuVisible) {
                     handleCreatePlant();
@@ -210,17 +196,28 @@ const Home = () => {
                     showModal();
                   }
                 }}
-                className="w-full h-full rounded-full items-center justify-center"
+                className="w-16 h-16 rounded-full"
               >
-                <Image
-                  source={icons.plus}
-                  resizeMode="contain"
-                  className="w-8 h-8 rounded-full"
-                  style={{ tintColor: '#f2f9f1' }}
-                />
-              </Pressable>
+                <LinearGradient
+                  colors={['#fdb442', '#f69f2c']}
+                  start={[0, 0]}
+                  end={[1, 1]}
 
-            </LinearGradient>
+                  style={{
+                    borderRadius: 35,
+                  }}
+                  className="items-center justify-center w-16 h-16"
+                >
+                  <Image
+                    source={icons.plus}
+                    resizeMode="contain"
+                    className="w-8 h-8 rounded-full"
+                    style={{ tintColor: '#f2f9f1' }}
+                  />
+
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         </Modal>
       </Container>

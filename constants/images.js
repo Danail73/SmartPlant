@@ -13,5 +13,7 @@ import cucumberWarrior from "../assets/images/cucumberWarrior.png";
 import plant1 from "../assets/images/plant1.png";
 import plant2 from "../assets/images/plant2.png";
 import good from "../assets/images/goodState.png";
+import noResult from "../assets/images/no-results.png";
+import findFriends from "../assets/images/find-my-friend.png";
 
-export default { leaf, leafLogin, profile, thumbnail, cards, path, logo, logoSmall, empty, forestLogin, forestSignUp , cucumberWarrior, plant1, plant2, good};
+export default { leaf, leafLogin, profile, thumbnail, cards, path, logo, logoSmall, empty, forestLogin, forestSignUp, cucumberWarrior, plant1, plant2, good, noResult, findFriends };

@@ -4,6 +4,7 @@ import plus from "../assets/icons/addIcon.png";
 import profile from "../assets/icons/userIcon.png";
 import back from "../assets/icons/back.png";
 import menu from "../assets/icons/menu.png";
+import menu1 from "../assets/icons/menu1.png";
 import search from "../assets/icons/search.png";
 import upload from "../assets/icons/upload.png";
 import rightArrow from "../assets/icons/right-arrow.png";
@@ -25,6 +26,7 @@ import del from "../assets/icons/delete.png";
 import friends from "../assets/icons/friends.png";
 import addFriend from "../assets/icons/addFriend.png";
 import close from "../assets/icons/close.png";
+import arrow from "../assets/icons/arrow.png";
 
 export default {
   play,
@@ -34,6 +36,7 @@ export default {
   profile,
   back,
   menu,
+  menu1,
   search,
   upload,
   rightArrow,
@@ -54,4 +57,5 @@ export default {
   friends,
   addFriend,
   close,
+  arrow,
 };

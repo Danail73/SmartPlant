@@ -36,7 +36,7 @@ const Device = () => {
       setIsLoggedIn(false)
 
       router.replace('/login')
-    } catch (error) { }
+    } catch (error) { console.log(error)}
   }
 
   const toggleSwitch = async () => {
