@@ -38,7 +38,7 @@ const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, ic
                     <View className="absolute right-3">
                         <TouchableOpacity
                             className="w-14 h-14 rounded-full"
-                            onPress={async () => await handleSendRequest()}
+                            onPress={handleSendRequest}
                         >
                             <LinearGradient
                                 colors={['#6666ff', '#3333ff']}

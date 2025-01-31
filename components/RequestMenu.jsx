@@ -1,11 +1,12 @@
 import { View, Text, Image, TouchableOpacity, Animated, FlatList } from 'react-native'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { icons } from '../constants'
-import { getFirendRequests, getSentRequests, getUser } from '../lib/appwrite'
+import { subscribeToFriendRequests, subscribeToUsers } from '../lib/appwrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 import FriendComponent from './FriendComponent'
 
-const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
+const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
+    const { user } = useGlobalContext();
     const [upperVisible, setUpperVisible] = useState(false)
     const [bottomVisible, setBottomVisible] = useState(false)
     const rotationUpper = useRef(new Animated.Value(0)).current;
@@ -50,6 +51,8 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
         inputRange: [0, 1],
         outputRange: ['0deg', '90deg'],
     });
+
+    
 
     return (
         <View className="absolute w-[70%]  bg-notFullWhite right-0 top-12 bottom-[110px] rounded-l-lg">
@@ -97,7 +100,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                                 titleStyles={'text-sm mb-[0.3]'}
                                 iconStyles={'w-9 h-9'}
                                 otherStyles={'w-[99%]'}
-                                requestId={item.requestId}
+                                requestId={item.request.$id}
                                 isPending={true}
                                 forInvite={false}
                             />
@@ -138,7 +141,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                                 titleStyles={'text-sm mb-[0.3]'}
                                 iconStyles={'w-9 h-9'}
                                 otherStyles={'w-[99%]'}
-                                requestId={item.requestId}
+                                requestId={item.request.$id}
                                 forInvite={false}
                             />
                         )}

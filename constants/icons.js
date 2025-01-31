@@ -27,6 +27,9 @@ import friends from "../assets/icons/friends.png";
 import addFriend from "../assets/icons/addFriend.png";
 import close from "../assets/icons/close.png";
 import arrow from "../assets/icons/arrow.png";
+import email from "../assets/icons/email.png";
+import password from "../assets/icons/passwordKey.png"
+import username from "../assets/icons/username.png"
 
 export default {
   play,
@@ -58,4 +61,7 @@ export default {
   addFriend,
   close,
   arrow,
+  email,
+  password,
+  username,
 };

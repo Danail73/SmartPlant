@@ -8,7 +8,7 @@ const DeleteMenuComponent = ({ item, addItemToRemove, discardItemToRemove }) => 
 
     return (
         <View className="flex-row items-center gap-3">
-            <FriendComponent item={item} otherStyles={'w-[270px]'} />
+            <FriendComponent item={item.friend} otherStyles={'w-[270px]'} />
             <TouchableOpacity
                 onPress={() => {
                     if (isSelected)

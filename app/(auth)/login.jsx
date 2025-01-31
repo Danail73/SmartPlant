@@ -34,7 +34,7 @@ const LoginScreen = () => {
       setUser(result);
       setIsLoggedIn(true);
       
-      router.replace('/home')
+      router.replace('/friends')
     }
     catch (error) {
       Alert.alert('Error', error.message)

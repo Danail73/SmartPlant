@@ -2,45 +2,45 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import { ImageBackground, SafeAreaView, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-
 import { images, icons } from '../../constants';
-
 import { createUser } from '../../lib/appwrite';
-
 import { useGlobalContext } from '../../context/GlobalProvider';
+import { decryptPassword, encryptPassword, generateRandomKey } from '../../lib/crypto';
 
 const SignUp = () => {
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
-  const[form, setForm] = useState({
-    username:'',
-    email:'',
-    password:''
+  const [form, setForm] = useState({
+    username: '',
+    email: '',
+    password: ''
   })
 
   const { setUser, setIsLoggedIn } = useGlobalContext();
 
-  const[isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submit = async () => {
-    if(!form.username || !form.email || !form.password){
+    if (!form.username || !form.email || !form.password) {
       Alert.alert('Error', 'Please fill in all the fields')
     }
 
     setIsSubmitting(true);
 
-    try{
-      const result = await createUser(form.email, form.password, form.username)
+    try {
+      const key = await generateRandomKey();
+      const encryptedPassword = await encryptPassword(form.password, key)
+      const result = await createUser(form.email, form.password, encryptedPassword, key, form.username)
       setUser(result);
       setIsLoggedIn(true);
 
       router.replace('/home')
     }
     catch (error) {
-      Alert.alert('Error', error.message)
+      console.log(error.message)
     }
-    finally{
+    finally {
       setIsSubmitting(false);
     }
   }
@@ -60,7 +60,7 @@ const SignUp = () => {
           </View>
         )}
 
-        
+
 
         <View className="flex-1 justify-center items-center">
           <View className="w-4/5 bg-gray-200 rounded-lg p-6 opacity-85">
@@ -74,7 +74,7 @@ const SignUp = () => {
               placeholderTextColor="#6b7280"
               autoCapitalize="none"
               value={form.username}
-              onChangeText={(e) => setForm({...form, username: e})}
+              onChangeText={(e) => setForm({ ...form, username: e })}
             />
 
             <TextInput
@@ -84,7 +84,7 @@ const SignUp = () => {
               keyboardType="email-address"
               autoCapitalize="none"
               value={form.email}
-              onChangeText={(e) => setForm({...form, email: e})}
+              onChangeText={(e) => setForm({ ...form, email: e })}
             />
 
             <View className="border border-black w-full p-3 rounded mb-6 flex-row items-center">
@@ -95,14 +95,14 @@ const SignUp = () => {
                 autoCapitalize="none"
                 secureTextEntry={!showPassword}
                 value={form.password}
-                onChangeText={(e) => setForm({...form, password: e})}
+                onChangeText={(e) => setForm({ ...form, password: e })}
               />
 
-              <TouchableOpacity 
-                onPress={()=>setShowPassword(!showPassword)}
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
               >
-                <Image 
-                  source={!showPassword ? icons.eye : icons.eyeHide} 
+                <Image
+                  source={!showPassword ? icons.eye : icons.eyeHide}
                   className="w-6 h-6"
                   resizeMode='contain'
                 />
@@ -111,7 +111,7 @@ const SignUp = () => {
 
             <TouchableOpacity
               className="bg-blue-500 w-full py-3 rounded"
-              onPress={()=>submit()}
+              onPress={() => submit()}
             >
               <Text className="text-center text-white text-lg font-semibold">
                 Sign up
@@ -120,7 +120,7 @@ const SignUp = () => {
             <View className="flex-row mt-4 justify-center">
               <Text className="text-gray-600">Already have an account? </Text>
               <TouchableOpacity
-                onPress={()=>router.push('/login')}
+                onPress={() => router.push('/login')}
               >
                 <Text className="text-blue-500 font-semibold">Login</Text>
               </TouchableOpacity>

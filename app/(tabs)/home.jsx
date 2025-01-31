@@ -1,4 +1,4 @@
-import { FlatList, SafeAreaView, StyleSheet, Text, View, Image, Animated, TouchableOpacity, Pressable } from 'react-native'
+import { FlatList, SafeAreaView, StyleSheet, Text, View, Image, Animated, TouchableOpacity, Dimensions } from 'react-native'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { icons, images } from '../../constants'
@@ -9,6 +9,7 @@ import { Modal } from 'react-native-paper'
 import FormField from '../../components/FormField'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useGlobalContext } from '../../context/GlobalProvider'
+
 
 
 const Home = () => {
@@ -23,6 +24,7 @@ const Home = () => {
     name: '',
   });
   const { user, setUser, isLoggedIn } = useGlobalContext();
+  const ITEM_WIDTH = Dimensions.get('window').width*0.7
 
 
 
@@ -98,13 +100,14 @@ const Home = () => {
     viewAreaCoveragePercentThreshold: 50,
   };
 
-  useEffect(() => {
+  /*useEffect(() => {
     const interval = setInterval(() => {
       fetchPlants();
+      console.log('hi')
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeItem]);
+  }, [activeItem]);*/
 
   return (
     <PaperProvider>
@@ -153,6 +156,10 @@ const Home = () => {
               showsHorizontalScrollIndicator={false}
               onViewableItemsChanged={viewableItemsChanged}
               viewabilityConfig={viewConfig}
+              pagingEnabled
+              snapToAlignment="center"
+              snapToInterval={ITEM_WIDTH}
+              decelerationRate="fast"
             />
           </View>
         </View>

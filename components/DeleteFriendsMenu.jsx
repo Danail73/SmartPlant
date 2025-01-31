@@ -15,18 +15,15 @@ const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
         setFriendsToRemove(users)
     }
     const discardItemToRemove = (item) => {
-        const users = friendsToRemove.filter((u) => u.$id != item.$id);
+        const users = friendsToRemove.filter((u) => u.friend.$id != item.friend.$id);
         setFriendsToRemove(users);
     }
 
-    const handleRemoveFriends = () => {
+    const handleRemoveFriends = async () => {
         setIsLoading(true)
-        friendsToRemove.forEach((user) => {
+        friendsToRemove.forEach(async (item) => {
             try {
-                getAcceptedRequest(user.$id, currentUser.$id)
-                    .then((request) => {
-                        respondFriendRequest(request.$id, 'declined')
-                    })
+                const response = await respondFriendRequest(item.request.$id, 'declined')
             } catch (error) {
                 console.log(error)
             }
@@ -48,7 +45,7 @@ const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
                 {friends ? (
                     <FlatList
                         data={friends || []}
-                        keyExtractor={(item) => item.$id || item.id.toString()}
+                        keyExtractor={(item) => item.friend.$id || item.id.toString()}
                         renderItem={({ item }) => (
                             <DeleteMenuComponent item={item} addItemToRemove={addItemToRemove} discardItemToRemove={discardItemToRemove} />
                         )}
@@ -78,9 +75,10 @@ const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
                 />
                 <CustomButton
                     title='Remove'
-                    handlePress={async () => await handleRemoveFriends()}
+                    handlePress={handleRemoveFriends}
                     containerStyles={'border rounded-lg w-[40%] h-[45%]'}
                     textStyles={'font-pmedium text-lg'}
+                    disabled={(friendsToRemove && friendsToRemove.length>0) ? false : true}
                 />
             </View>
         </View>

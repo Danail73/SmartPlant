@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 
-const Container = ({ children ,colors, statusBarStyle }) => {
+const Container = ({ children ,colors, statusBarStyle, areaStyles }) => {
 
   useEffect(() => {
     NavigationBar.setBehaviorAsync('overlay-swipe')
@@ -20,7 +20,7 @@ const Container = ({ children ,colors, statusBarStyle }) => {
       style={styles.gradient}
     >
       <StatusBar style={statusBarStyle} />
-      <SafeAreaView style={styles.area}>{children}</SafeAreaView>
+      <SafeAreaView style={styles.area} className={`${areaStyles}`}>{children}</SafeAreaView>
     </LinearGradient>
   )};
 
