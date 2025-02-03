@@ -32,8 +32,10 @@ export default function App() {
               <CustomButton
                 title="Sign-up"
                 handlePress={() => router.push('/sign-up')}
+                useAnimatedIcon={false}
                 imageSource={images.leaf}
                 imageStyles={"mb-5"}
+                textContainerStyles={'absolute'}
               />
               <View className="m-2"></View>
               <CustomButton
@@ -41,6 +43,7 @@ export default function App() {
                 handlePress={() => router.push('/login')}
                 imageSource={images.leafLogin}
                 imageStyles={"mt-5"}
+                textContainerStyles={'absolute'}
               />
             </View>
           </View>

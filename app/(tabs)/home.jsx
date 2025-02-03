@@ -1,20 +1,22 @@
-import { FlatList, SafeAreaView, StyleSheet, Text, View, Image, Animated, TouchableOpacity, Dimensions } from 'react-native'
+import { FlatList, StyleSheet, Text, View, Image, Animated, TouchableOpacity } from 'react-native'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { icons, images } from '../../constants'
 import Container from '../../components/Container'
 import { PaperProvider } from 'react-native-paper'
-import { getAllPlants, createPlant, getCurrentUser } from '../../lib/appwrite'
+import { getAllPlants, createPlant, subscribeToPlants } from '../../lib/appwrite'
 import { Modal } from 'react-native-paper'
 import FormField from '../../components/FormField'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useGlobalContext } from '../../context/GlobalProvider'
+import { usePlantsContext } from '../../context/PlantsProvider'
 
 
 
 const Home = () => {
+  const { user } = useGlobalContext();
   const [activeItem, setActiveItem] = useState(null);
-  const [plants, setPlants] = useState([])
+  const {plants, setPlants} = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
   const translateY = useRef(new Animated.Value(400)).current;
   const scale = useRef(new Animated.Value(0)).current;
@@ -23,10 +25,6 @@ const Home = () => {
     plantId: '',
     name: '',
   });
-  const { user, setUser, isLoggedIn } = useGlobalContext();
-  const ITEM_WIDTH = Dimensions.get('window').width*0.7
-
-
 
   const clearForm = () => {
     setForm({ plantId: '', name: '' })
@@ -68,28 +66,6 @@ const Home = () => {
     });
   };
 
-  const fetchPlants = async () => {
-    try {
-      const user = await getCurrentUser()
-      if (user) {
-        try {
-          const plants = await getAllPlants();
-          if (plants) {
-            setPlants(plants);
-          }
-          else {
-            //no plants yet
-          }
-        } catch (error) {
-          console.log(error)
-        }
-      }
-      else {
-        //no plants yet
-      }
-    } catch (error) { }
-  }
-
   const viewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
       setActiveItem(viewableItems[0].item);
@@ -100,14 +76,33 @@ const Home = () => {
     viewAreaCoveragePercentThreshold: 50,
   };
 
-  /*useEffect(() => {
-    const interval = setInterval(() => {
-      fetchPlants();
-      console.log('hi')
-    }, 1000);
+  const handlePlantUpdated = (response) => {
+    console.log(response.payload)
+    const eventType = response.event;
+    console.log(eventType)
+    const updatedItem = response.payload
+    if (eventType.includes('delete')) {
+      setPlants((previous) => previous.filter((item) => item.$id != updatedItem.$id))
+    }
+    else if (eventType.includes('create')) {
+      setPlants((previous) => [...previous, updatedItem])
+    }
+    else {
+      setPlants((previous) => previous.filter(
+        (item) => item.$id == updatedItem.$id ? updatedItem : item
+      ))
+    }
+  }
 
-    return () => clearInterval(interval);
-  }, [activeItem]);*/
+  /*useEffect(() => {
+    const unsubscribePlants = subscribeToPlants(user.$id, handlePlantUpdated)
+
+    return () => unsubscribePlants
+  }, [])
+
+  useEffect(() => {
+    fetchPlants()
+  })*/
 
   return (
     <PaperProvider>
@@ -121,16 +116,30 @@ const Home = () => {
             <Text className="text-notFullWhite font-pmedium text-3xl">25 °C</Text>
           </View>
 
-          <View className="flex-row items-center my-3">
-            <Image
-              source={images.good}
-              className="w-[170px] h-[170px]"
-              resizeMode='contain'
-            />
-            <View className="items-center justify-center pl-2">
-              <Text className="font-pmedium text-notFullWhite text-xl">Everything{'\n'}good here!</Text>
+          {plants && plants.length > 0 && (
+            <View className="flex-row items-center my-3">
+              <Image
+                source={images.good}
+                className="w-[170px] h-[170px]"
+                resizeMode='contain'
+              />
+              <View className="items-center justify-center pl-2">
+                <Text className="font-pmedium text-notFullWhite text-xl">Everything{'\n'}good here!</Text>
+              </View>
             </View>
-          </View>
+          )}
+          {!plants || plants.length == 0 && (
+            <View className="flex-row items-center my-3">
+              <Image
+                source={images.noResult}
+                className="w-[170px] h-[170px]"
+                resizeMode='contain'
+              />
+              <View className="items-center justify-center pl-2">
+                <Text className="font-pmedium text-notFullWhite text-xl">Looks like you{'\n'}don't have plants</Text>
+              </View>
+            </View>
+          )}
 
           <View style={{ overflow: 'visible' }}>
             <View className="justify-between flex-row px-4">
@@ -146,21 +155,24 @@ const Home = () => {
                 />
               </TouchableOpacity>
             </View>
-            <FlatList
-              data={plants || []}
-              keyExtractor={(item) => item.$id || item.id.toString()}
-              renderItem={({ item }) => (
-                <PlantBoardComponent item={item} />
-              )}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              onViewableItemsChanged={viewableItemsChanged}
-              viewabilityConfig={viewConfig}
-              pagingEnabled
-              snapToAlignment="center"
-              snapToInterval={ITEM_WIDTH}
-              decelerationRate="fast"
-            />
+            {(plants && plants.length > 0) ? (
+              <FlatList
+                data={plants || []}
+                keyExtractor={(item) => item.$id || item.id.toString()}
+                renderItem={({ item }) => (
+                  <PlantBoardComponent item={item} />
+                )}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                onViewableItemsChanged={viewableItemsChanged}
+                viewabilityConfig={viewConfig}
+                decelerationRate="fast"
+              />
+            ) : (
+              <View>
+                <Text>Looks like you don't have plants yet</Text>
+              </View>
+            )}
           </View>
         </View>
         <Modal

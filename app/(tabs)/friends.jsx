@@ -1,221 +1,56 @@
-import React, { useEffect, useState, useCallBack } from 'react';
-import { View, Text, Dimensions, FlatList, TouchableOpacity, Image, TextInput, Pressable, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Dimensions, FlatList, TouchableOpacity, Image, TextInput, Pressable, SafeAreaView, StyleSheet } from 'react-native';
 import Container from '../../components/Container';
 import { PaperProvider } from 'react-native-paper';
-import { getAllFriends, getAllOtherUsers, getCurrentUser, getUser, getUsers, getUsersWithIds, subscribeToFriendRequests, subscribeToUsers } from '../../lib/appwrite';
+import { subscribeToFriendRequests, subscribeToUsers } from '../../lib/appwrite';
 import FriendComponent from '../../components/FriendComponent';
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { icons, images } from '../../constants';
 import RequestMenu from '../../components/RequestMenu';
 import { BlurView } from 'expo-blur';
-import { getFriendRequests, getSentRequests } from '../../lib/appwrite';
 import DeleteFriendsMenu from '../../components/DeleteFriendsMenu';
-import { use } from 'react';
+import AnimatedIcon from '../../components/AnimatedIcon';
+import { useFriendsContext } from '../../context/FriendsProvider';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
+import { TouchableWithoutFeedback } from 'react-native';
 
 
-const { width } = Dimensions.get('window');
+
+const { width, height } = Dimensions.get('window');
 
 
 const Friends = () => {
-  const { user, isLoggedIn } = useGlobalContext()
+  const { user } = useGlobalContext()
+  const { fetchData, friends, requestFriends, invitedFriends, others } = useFriendsContext();
   const [menuVisible, setMenuVisible] = useState(false);
-  const [friends, setFriends] = useState([]);
+  const menuTranslateX = useSharedValue(width);
+  const menuTranslateY = useSharedValue(0);
+  const rotation = useSharedValue(0);
   const [upperSearchVisible, setUpperSearchVisible] = useState(false)
   const [bottomSearchVisible, setBottomSearchVisible] = useState(false)
   const [upperSearchQuery, setUpperSearchQuery] = useState('');
   const [bottomSearchQuery, setBottomSearchQuery] = useState('');
-  const [requestFriends, setRequestFriends] = useState([]);
-  const [invitedFriends, setInvitedFriends] = useState([]);
   const [deleteMenuVisible, setDeleteMenuVisible] = useState(false);
-  const [others, setOthers] = useState([])
-  const [allUsers, setAllUsers] = useState([])
-
-
-  const fetchAllRequests = async () => {
-    try {
-      const requests = await getFriendRequests(user.$id)
-      return requests
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const getAccepted = (reguests) => {
-    const accepted = reguests.filter((item) => item.status == 'accepted')
-    return accepted
-
-  }
-  const getInvites = (requests) => {
-    const pendingInvites = requests.filter((item) => item.status === 'pending' && item.fromUser == user.$id)
-    return pendingInvites
-  }
-  const getIncoming = (requests) => {
-    const incomingRequests = requests.filter((item) => item.status === 'pending' && item.toUser == user.$id)
-    return incomingRequests
-  }
-
-
-  const getFriends = (accepted, users) => {
-    if (accepted.length > 0) {
-      const tempIds = accepted.map((item) => item.fromUser)
-      accepted.forEach((item) => {
-        if (!tempIds.includes(item.toUser)) {
-          tempIds.push(item.toUser)
-        }
-      })
-      const ids = tempIds.filter((item) => item != user.$id)
-      const fetchedUsers = fetchUsersWithIds(ids, users)
-
-      if (fetchedUsers) {
-        const users_requests = accepted.map((item) => {
-          const user = fetchedUsers.find((u) => u.$id == item.toUser || u.$id == item.fromUser)
-          return { friend: user, request: item }
-        })
-
-        setFriends(users_requests)
-        return users_requests
-      }
-    }
-    else {
-      setFriends([])
-      return null
-    }
-  }
-
-  const getRequestFriends = (pending, users) => {
-    if (pending.length > 0) {
-      const ids = pending.map((item) => item.toUser)
-      const fetchedUsers = fetchUsersWithIds(ids, users)
-
-      if (fetchedUsers) {
-        const users_requests = pending.map((item) => {
-          const user = fetchedUsers.find((u) => u.$id == item.toUser)
-          return { friend: user, request: item }
-        })
-
-        setInvitedFriends(users_requests)
-        return users_requests
-      }
-    }
-    else {
-      setInvitedFriends([])
-      return null
-    }
-  }
-
-  const getIncomingRequests = (incoming, users) => {
-    if (incoming.length > 0) {
-      const ids = incoming.map((item) => item.fromUser)
-      const fetchedUsers = fetchUsersWithIds(ids, users);
-
-      if (fetchedUsers) {
-        const users_requests = incoming.map((item) => {
-          const user = fetchedUsers.find((u) => u.$id == item.fromUser)
-          return { friend: user, request: item }
-        })
-
-        setRequestFriends(users_requests)
-        return users_requests
-      }
-    }
-    else {
-      setRequestFriends([])
-      return null
-    }
-  }
-
-  const fetchUsersWithIds = (ids, users) => {
-    if (ids.length > 0) {
-      try {
-        const f = users.filter((item) => ids.includes(item.$id))
-        return f
-      } catch (error) {
-        console.log('error')
-      }
-    }
-  }
-
-  const fetchUsers = async () => {
-    const unfiltered = await getUsers()
-    const filtered = unfiltered.filter((item) => item.$id != user.$id)
-    setAllUsers(filtered)
-    return filtered
-  }
-
-  const getOtherUsers = (users, fr, inv, req) => {
-    const other = users.filter((item) =>
-      (!fr || !fr.some(friend => friend.friend?.$id === item.$id)) &&
-      (!inv || !inv.some(invite => invite.friend?.$id === item.$id)) &&
-      (!req || !req.some(request => request.friend?.$id === item.$id))
-    );
-    setOthers(other);
-  }
-
-  const updateEverything = (requests, users) => {
-    const accepted = getAccepted(requests);
-    const pending = getInvites(requests);
-    const incoming = getIncoming(requests);
-
-    const fr = getFriends(accepted, users);
-    const inv = getRequestFriends(pending, users);
-    const req = getIncomingRequests(incoming, users);
-    getOtherUsers(users, fr, req, inv);
-  }
-
-  const fetchData = async () => {
-    try {
-      const [users, requests] = await Promise.all([
-        fetchUsers(),
-        fetchAllRequests()
-      ]);
-
-      if (users && requests) {
-        updateEverything(requests, users)
-      }
-    } catch (error) {
-      console.log("Error fetching data:", error);
-    }
-  };
-
-  const handleUpdated = (request) => {
-    fetchData()
-  }
-
-  useEffect(() => {
-    const unsubscribeRequests = subscribeToFriendRequests(user.$id, handleUpdated)
-    const unsubscribeUsers = subscribeToUsers(handleUpdated)
-
-    return () => {
-      unsubscribeRequests()
-      unsubscribeUsers()
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchData();
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getOtherUsers(allUsers, friends, requestFriends, invitedFriends)
-      //console.log(requestFriends)
-    }, 2000)
-    return () => clearInterval(interval)
-  }, [allUsers, friends, requestFriends, invitedFriends])
+  const [upperIconsVisible, setUpperIconsVisible] = useState(true)
+  const [bottomIconsVisible, setBottomIconsVisible] = useState(true)
 
   const handleChangeTextUpper = (query) => setUpperSearchQuery(query)
 
   const handleClearUpper = () => {
-    if (!upperSearchQuery)
+    if (!upperSearchQuery) {
       setUpperSearchVisible(false)
+      setUpperIconsVisible(true)
+    }
     setUpperSearchQuery('')
   }
 
   const handleChangeTextBottom = (query) => setBottomSearchQuery(query)
 
   const handleClearBottom = () => {
-    if (!bottomSearchQuery)
+    if (!bottomSearchQuery) {
       setBottomSearchVisible(false)
+      setBottomIconsVisible(true)
+    }
     setBottomSearchQuery('')
   }
 
@@ -233,6 +68,53 @@ const Friends = () => {
     return result;
   };
 
+  const openRequestMenu = () => {
+    setMenuVisible(true);
+    menuTranslateX.value = withTiming(0, { duration: 700 });
+    menuTranslateY.value = withTiming(height * 5 / 12, { duration: 700 })
+    rotation.value = withTiming(0, { duration: 700 })
+  }
+
+  const closeRequestMenu = () => {
+    menuTranslateX.value = withTiming(width, { duration: 700 }, () => {
+      runOnJS(setMenuVisible)(false)
+    })
+    menuTranslateY.value = withTiming(0, { duration: 700 })
+    rotation.value = withTiming(180, { duration: 300 })
+  }
+
+  const menuAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: menuTranslateX.value }],
+    };
+  });
+  const backAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: menuTranslateX.value }, { translateY: menuTranslateY.value }]
+    }
+  })
+
+  const rotateAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotation.value}deg` }],
+    };
+  });
+  
+
+  const handleUpdated = (request) => {
+    fetchData()
+  }
+
+  useEffect(() => {
+    const unsubscribeRequests = subscribeToFriendRequests(user.$id, handleUpdated)
+    const unsubscribeUsers = subscribeToUsers(handleUpdated)
+
+    return () => {
+      unsubscribeRequests()
+      unsubscribeUsers()
+    }
+  }, [])
+
   return (
     <PaperProvider>
       <Container
@@ -242,7 +124,7 @@ const Friends = () => {
         <View className="px-10 mt-3 flex-row items-center justify-between">
           <Text className="text-notFullWhite font-pmedium text-3xl">Friends</Text>
           <TouchableOpacity
-            onPress={() => setMenuVisible(true)}
+            onPress={openRequestMenu}
           >
             <Image
               source={icons.menu1}
@@ -268,23 +150,27 @@ const Friends = () => {
                       setUpperSearchVisible(true)
                       setBottomSearchVisible(false);
                       setBottomSearchQuery('')
+                      setUpperIconsVisible(false)
                     }}
                   >
-                    <Image
-                      source={icons.search}
-                      className="w-8 h-8"
-                      resizeMode='contain'
-                      style={{ tintColor: '#f2f9f1' }}
+                    <AnimatedIcon
+                      iconSource={icons.searchAnim}
+                      isVisible={upperIconsVisible}
+                      width={35}
+                      height={35}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => setDeleteMenuVisible(true)}
+                    onPress={() => {
+                      setDeleteMenuVisible(true)
+                      setUpperIconsVisible(false)
+                    }}
                   >
-                    <Image
-                      source={icons.del}
-                      className="w-8 h-8"
-                      resizeMode='contain'
-                      style={{ tintColor: '#f2f9f1' }}
+                    <AnimatedIcon
+                      iconSource={icons.bin}
+                      isVisible={upperIconsVisible}
+                      width={33}
+                      height={33}
                     />
                   </TouchableOpacity>
                 </View>
@@ -294,11 +180,11 @@ const Friends = () => {
           )}
           {upperSearchVisible && (
             <View className={`flex-row items-center bg-[#eee8f4] rounded-full h-[56px] w-[90%] px-4`}>
-              <Image
-                source={icons.search}
-                className="w-7 h-7"
-                resizeMode='contain'
-                style={{ tintColor: '#4d4752' }}
+              <AnimatedIcon
+                iconSource={icons.searchAnim}
+                isVisible={upperSearchVisible}
+                width={35}
+                height={35}
               />
               <TextInput
                 style={{ textAlignVertical: 'center' }}
@@ -354,13 +240,14 @@ const Friends = () => {
                     setBottomSearchVisible(true)
                     setUpperSearchVisible(false)
                     setUpperSearchQuery('')
+                    setBottomIconsVisible(false)
                   }}
                 >
-                  <Image
-                    source={icons.search}
-                    className="w-8 h-8"
-                    resizeMode='contain'
-                    style={{ tintColor: '#f2f9f1' }}
+                  <AnimatedIcon
+                    iconSource={icons.searchAnim}
+                    isVisible={bottomIconsVisible}
+                    width={35}
+                    height={35}
                   />
                 </TouchableOpacity>
               </View>
@@ -369,11 +256,11 @@ const Friends = () => {
           )}
           {bottomSearchVisible && (
             <View className={`flex-row items-center bg-[#eee8f4] rounded-full h-[56px] w-[90%] px-4`}>
-              <Image
-                source={icons.search}
-                className="w-7 h-7"
-                resizeMode='contain'
-                style={{ tintColor: '#4d4752' }}
+              <AnimatedIcon
+                iconSource={icons.searchAnim}
+                isVisible={bottomSearchVisible}
+                width={35}
+                height={35}
               />
               <TextInput
                 style={{ textAlignVertical: 'center' }}
@@ -418,19 +305,37 @@ const Friends = () => {
           )}
         </View>
         {menuVisible && (
-          <View className="flex-1 w-full h-full absolute ">
-            <BlurView
-              className="h-[104%]"
-              intensity={100}
-              tint='systemUltraThinMaterial'
-            >
-              <RequestMenu
-                onPress={() => { setMenuVisible(false) }}
-                requestFriends={requestFriends}
-                invitedFriends={invitedFriends}
-              />
-            </BlurView>
-          </View>
+          <TouchableWithoutFeedback className="flex-1 w-full h-full absolute" onPress={closeRequestMenu}>
+            <View className="flex-1 w-full h-full absolute ">
+              <BlurView
+                className="h-[104%]"
+                intensity={40}
+                tint='dark'
+              >
+                <Animated.View
+                  style={[menuAnimatedStyle]}
+                  className="w-[87%] h-[6%] top-[40%] right-0 absolute bg-notFullWhite items-start justify-center rounded-l-lg border "
+                >
+                  <TouchableOpacity
+                    onPress={closeRequestMenu}
+                    className="items-center ml-[4%]"
+                  >
+                    <Animated.Image
+                      source={icons.rightArrow1}
+                      className="w-9 h-9"
+                      resizeMode="contain"
+                      style={[rotateAnimatedStyle]}
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+                <Animated.View
+                  style={[menuAnimatedStyle, styles.requestMenu]}
+                >
+                  <RequestMenu requestFriends={requestFriends} invitedFriends={invitedFriends} />
+                </Animated.View>
+              </BlurView>
+            </View>
+          </TouchableWithoutFeedback>
         )}
         {deleteMenuVisible && (
           <SafeAreaView className="flex-1 w-full h-full absolute">
@@ -439,7 +344,10 @@ const Friends = () => {
               intensity={100}
               tint='systemUltraThinMaterial'
             >
-              <DeleteFriendsMenu friends={friends} cancel={() => setDeleteMenuVisible(false)} currentUser={user} />
+              <DeleteFriendsMenu friends={friends} cancel={() => {
+                setDeleteMenuVisible(false)
+                setUpperIconsVisible(true)
+              }} currentUser={user} />
             </BlurView>
           </SafeAreaView>
         )}
@@ -447,5 +355,18 @@ const Friends = () => {
     </PaperProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  requestMenu: {
+    position: 'absolute',
+    right: 0,
+    width: '100%',
+    height: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5
+  }
+})
 
 export default Friends;

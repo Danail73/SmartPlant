@@ -15,6 +15,7 @@ const GlobalProvider = ({ children }) => {
                 if(response){
                     setIsLoggedIn(true);
                     setUser(response)
+                    tempUser = response
                 }
                 else{
                     setIsLoggedIn(false);

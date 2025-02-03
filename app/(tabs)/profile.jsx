@@ -1,18 +1,23 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity, KeyboardAvoidingView, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Container from '../../components/Container'
 import FormField from '../../components/FormField'
-import { getCurrentAccount, getCurrentSession, currentAccountPassword } from '../../lib/appwrite'
+import { getCurrentAccount, signOut, updateEmail, updatePassword, updateUser, updateUsername } from '../../lib/appwrite'
 import { useGlobalContext } from '../../context/GlobalProvider'
-import { decryptPassword } from '../../lib/crypto'
+import { decryptPassword, encryptPassword } from '../../lib/crypto'
 import { BlurView } from 'expo-blur'
 import { icons } from '../../constants'
 import CustomButton from '../../components/CustomButton'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useFriendsContext } from '../../context/FriendsProvider'
+import { usePlantsContext } from '../../context/PlantsProvider'
+import { router } from 'expo-router'
 
 const Profile = () => {
+  const { friends } = useFriendsContext()
+  const { plants } = usePlantsContext()
   const [account, setAccount] = useState(null)
-  const { user } = useGlobalContext()
+  const { user, setUser, setIsLoggedIn } = useGlobalContext()
   const [email, setEmail] = useState({
     previous: '',
     current: ''
@@ -30,6 +35,7 @@ const Profile = () => {
     current: ''
   })
   const [editPic, setEditPic] = useState(false)
+  const [saveVisible, setSaveVisible] = useState(false)
 
   const getAccount = async () => {
     try {
@@ -41,8 +47,20 @@ const Profile = () => {
   }
 
   const getDecryptedPassword = async () => {
-    if (user)
-      return await decryptPassword(user.password_key[0], user.password_key[1])
+    if (user) {
+      const pass = await decryptPassword(user.password_key[0], user.password_key[1])
+      return pass
+    }
+  }
+
+  const logout = async () => {
+    try {
+      await signOut()
+      setUser(null)
+      setIsLoggedIn(false)
+
+      router.replace('/login')
+    } catch (error) { console.log(error) }
   }
 
   /*const pickImage = async () => {
@@ -65,8 +83,68 @@ const Profile = () => {
     }
   };*/
 
+  const cancel = () => {
+    setUsername({ ...username, current: username.previous })
+    setEmail({ ...email, current: email.previous })
+    setPassword({ ...password, current: password.previous })
+  }
+
+  const handleUpdateUsername = async () => {
+    try {
+      const response = await updateUsername(username.current)
+      return response
+    } catch (error) {
+      console.log(Error, error)
+    }
+  }
+
+  const handleUpdateEmail = async () => {
+    try {
+      const response = await updateEmail(email.current, password.current)
+      return response
+    } catch (error) {
+      console.log(Error, error)
+    }
+  }
+
+  const handleUpdatePassword = async () => {
+    try {
+      const response = await updatePassword(password.current, password.previous)
+      return response
+    } catch (error) {
+      console.log(Error, error)
+    }
+  }
+
+  const handleUpdateUser = async () => {
+    try {
+      const encryptedPassword = await encryptPassword(password.current, user.password_key[1])
+      const form = { userId: user.$id, username: username.current, email: email.current, password: encryptedPassword, key: user.password_key[1] }
+      const response = await updateUser(form)
+      return response
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const save = async () => {
+    try {
+      if (username.current != username.previous) {
+        const response = await handleUpdateUsername()
+      }
+      if (email.current != email.previous) {
+        const response = await handleUpdateEmail()
+      }
+      if (password.current != password.previous) {
+        const response = await handleUpdatePassword()
+      }
+      const updatedUser = await handleUpdateUser();
+      setUser(updatedUser)
+    } catch (error) {}
+  }
+
   useEffect(() => {
-    if (user) {
+    if (user && user?.$id) {
       getDecryptedPassword()
         .then((pass) => {
           setPassword({ previous: pass, current: pass })
@@ -74,32 +152,42 @@ const Profile = () => {
       setEmail({ previous: user.email, current: user.email })
       setUsername({ previous: user.username, current: user.username })
       setProfilePic({ previous: user.avatar, current: user.avatar })
-      getAccount()
     }
-  }, [])
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      if (username.previous != username.current || email.previous != email.current || password.current != password.previous) {
+        setSaveVisible(true)
+      }
+      else {
+        setSaveVisible(false)
+      }
+    }
+  }, [username, email, password])
 
   return (
-    <KeyboardAwareScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
-      extraScrollHeight={100}
-      enableOnAndroid={true}
-      keyboardShouldPersistTaps='always'
+
+    <Container
+      colors={['#4ec09c', '#a8d981']}
+      statusBarStyle={'light'}
     >
-      <Container
-        colors={['#4ec09c', '#a8d981']}
-        statusBarStyle={'light'}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior='padding'
+        contentContainerStyle={{ flexGrow: 1 }}
       >
-        <View className="w-[120%] h-[50%] absolute top-[-28%] left-[-10%] shadow-md shadow-black" style={{ elevation: 5 }}>
+        <View className="w-[120%] h-[50%] absolute top-[-29%] left-[-10%] shadow-md shadow-black" style={{ elevation: 5 }}>
           <View className="rounded-full w-full h-full items-center justify-end z-10 bg-[#3A5332]">
             <Text className="font-psemibold text-2xl text-[#f2f9f1] mb-2">{user.username}</Text>
-            <View className="border-2 rounded-full w-[15%] h-[17%] bottom-[-5%] z-20 bg-[#3A5332]">
+            <View className="border-2 rounded-full w-[15%] h-[18%] bottom-[-5%] z-20 bg-[#3A5332]">
               <View className="w-full h-full">
                 <TouchableOpacity
                   className="w-full h-full items-center justify-center"
                   onPress={() => {
                     setEditPic(!editPic)
                     if (!editPic) {
-                      pickImage()
+                      //pickImage()
                     }
                   }}
                 >
@@ -129,33 +217,61 @@ const Profile = () => {
             </View>
           </View>
         </View>
-        <View className="items-center h-[37%] mt-[50%]">
-          <View
-            className="w-[90%] h-full items-center bg-notFullWhite rounded-xl shadow-sm shadow-inherit"
-          >
+        <View className="items-center justify-center mt-[55%] flex-row gap-4">
+          <View className="flex-row gap-1 items-center justify-center">
+            <Image
+              source={icons.friendsFilled}
+              className="w-8 h-8"
+              style={{ tintColor: '#f2f9f1' }}
+              resizeMode='contain'
+            />
+            <Text className="font-pmedium text-[#f2f9f1]">{friends.length}</Text>
+          </View>
+          <View className="flex-row gap-1 items-center justify-center">
+            <Image
+              source={icons.plantsFilled}
+              className="w-8 h-8"
+              style={{ tintColor: '#f2f9f1' }}
+              resizeMode='contain'
+            />
+            <Text className="font-pmedium text-[#f2f9f1]">{plants.length}</Text>
+          </View>
+          <CustomButton
+            containerStyles={'absolute right-[10%] items-center justify-center'}
+            useAnimatedIcon={true}
+            imageSource={icons.logoutAnim}
+            iVisible={true}
+            width={40}
+            height={40}
+            textContainerStyles={'h-0 w-0'}
+            handlePress={logout}
+          />
+        </View>
+        <View className="items-center mt-[10%] h-[40%]">
+          <View className="w-[90%] h-full p-1 items-center z-20">
             <FormField
               value={username.current}
-              otherStyles={'rounded-lg w-[96%] px-5 mb-1 mt-3 justify-center min-h-[22.8%] max-h-[24%]'}
+              otherStyles={'rounded-lg w-[96%] px-5 mb-1 mt-3 justify-center min-h-[24%] max-h-[24%]'}
               inputStyles={'font-pregular w-[97%] border-gray-500'}
               handleChangeText={(e) => setUsername({ ...username, current: e })}
               useIcon={true}
               iconSource={icons.username}
               iconStyles={'w-8 h-8'}
             />
-            <View className="h-[0.37%] max-h-[0.5%] bg-black w-[88%]"></View>
+            <View className="h-[0.1rem] bg-black w-[88%]"></View>
             <FormField
               value={email.current}
-              otherStyles={'rounded-lg w-[96%] px-5 my-1 justify-center min-h-[22.8%] max-h-[24%]'}
+              otherStyles={'rounded-lg w-[96%] px-5 my-1 justify-center min-h-[24%] max-h-[24%]'}
               inputStyles={'font-pregular w-[97%] border-gray-500'}
               handleChangeText={(e) => setEmail({ ...email, current: e })}
               useIcon={true}
               iconSource={icons.email}
               iconStyles={'w-8 h-8'}
             />
-            <View className="h-[0.28%] max-h-[0.5%] bg-black w-[88%]"></View>
+            <View className="h-[0.1rem] bg-black w-[88%]"></View>
             <FormField
               value={password.current}
-              otherStyles={'rounded-lg w-[96%] px-5 mt-1 justify-center min-h-[22.8%] max-h-[24%]'}
+              otherStyles={'rounded-lg w-[96%] px-5 mt-1 justify-center min-h-[24%] max-h-[24%]'}
               inputStyles={'font-pregular w-[97%] border-gray-500 mr-1'}
               handleChangeText={(e) => setPassword({ ...password, current: e })}
               useIcon={true}
@@ -163,15 +279,49 @@ const Profile = () => {
               iconStyles={'w-8 h-8'}
               hideText={true}
             />
-            <CustomButton
-              containerStyles={'bg-blue-400 w-[25%] rounded-md h-[16%] right-[-20%]'}
-              title='Save'
-              textStyles={'text-white'}
-            />
+            {saveVisible && (
+              <View className="flex-1 flex-row gap-5 mt-1">
+                <CustomButton
+                  containerStyles={'bg-white border w-[36%] rounded-md min-h-[80%] max-h-[90%] '}
+                  title='Cancel'
+                  textStyles={'text-black font-pthin'}
+                  textContainerStyles={' w-[70%] h-[100%] items-center justify-center border-l-2'}
+                  imageContainerStyles={'w-[30%] h-[100%] bg-red-700 rounded-l items-center justify-center'}
+                  useAnimatedIcon={true}
+                  width={30}
+                  height={30}
+                  iVisible={true}
+                  imageSource={icons.cancelAnim}
+                  opacityStyles={'flex-row w-[100%] h-[100%]'}
+                  handlePress={cancel}
+                />
+                <CustomButton
+                  containerStyles={'bg-blue-500 w-[36%] rounded-md min-h-[80%] max-h-[90%] border'}
+                  title='Save'
+                  textStyles={'text-white font-pthin'}
+                  textContainerStyles={' w-[70%] h-[100%] items-center justify-center border-l-2'}
+                  imageContainerStyles={'w-[30%] h-[100%] bg-blue-700 rounded-l items-center justify-center'}
+                  useAnimatedIcon={true}
+                  width={30}
+                  height={30}
+                  iVisible={true}
+                  imageSource={icons.saveAnim}
+                  opacityStyles={'flex-row w-[100%] h-[100%]'}
+                  handlePress={save}
+                />
+              </View>
+            )}
+          </View>
+          <View
+            className="w-[90%] bg-notFullWhite rounded-xl shadow-sm shadow-inherit absolute z-10"
+            style={{ height: saveVisible ? '100%' : '90%' }}
+          >
+
           </View>
         </View>
-      </Container>
-    </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
+    </Container>
+
   )
 }
 

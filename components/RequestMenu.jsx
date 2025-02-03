@@ -55,25 +55,13 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
     
 
     return (
-        <View className="absolute w-[70%]  bg-notFullWhite right-0 top-12 bottom-[110px] rounded-l-lg">
-            <View className="w-[120%] h-[70px] right-0 absolute bg-notFullWhite items-start justify-center rounded-l-lg">
-                <TouchableOpacity
-                    onPress={onPress}
-                    className="items-center justify-center left"
-                >
-                    <Image
-                        source={icons.back}
-                        className="w-10 h-10"
-                        resizeMode="contain"
-                    />
-                </TouchableOpacity>
-            </View>
+        <View className="absolute w-[70%]  bg-notFullWhite right-0 top-12 bottom-[110px] rounded-l-lg border">
             <TouchableOpacity
                 onPress={toggleUpper}
             >
                 <Animated.View
 
-                    className="w-[100%] border flex-row items-center"
+                    className="w-[100%] border flex-row items-center rounded-t-md"
                 >
                     <Animated.Image
                         style={{ transform: [{ rotate: rotateInterpolateUpper }] }}
