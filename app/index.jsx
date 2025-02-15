@@ -34,7 +34,7 @@ export default function App() {
                 handlePress={() => router.push('/sign-up')}
                 useAnimatedIcon={false}
                 imageSource={images.leaf}
-                imageStyles={"mb-5"}
+                imageStyles={"mb-5 w-[120] h-[120]"}
                 textContainerStyles={'absolute'}
               />
               <View className="m-2"></View>
@@ -42,7 +42,7 @@ export default function App() {
                 title="Login"
                 handlePress={() => router.push('/login')}
                 imageSource={images.leafLogin}
-                imageStyles={"mt-5"}
+                imageStyles={"mt-5 w-[120] h-[120]"}
                 textContainerStyles={'absolute'}
               />
             </View>

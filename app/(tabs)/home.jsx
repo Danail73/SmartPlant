@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View, Image, Animated, TouchableOpacity } from 'react-native'
+import { FlatList, StyleSheet, Text, View, Image, Animated, TouchableOpacity, Dimensions } from 'react-native'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { icons, images } from '../../constants'
@@ -16,7 +16,7 @@ import { usePlantsContext } from '../../context/PlantsProvider'
 const Home = () => {
   const { user } = useGlobalContext();
   const [activeItem, setActiveItem] = useState(null);
-  const {plants, setPlants} = usePlantsContext();
+  const { plants, setPlants, setActivePlant } = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
   const translateY = useRef(new Animated.Value(400)).current;
   const scale = useRef(new Animated.Value(0)).current;
@@ -69,6 +69,7 @@ const Home = () => {
   const viewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
       setActiveItem(viewableItems[0].item);
+      setActivePlant(viewableItems[0].item)
     }
   }, []);
 
@@ -77,32 +78,26 @@ const Home = () => {
   };
 
   const handlePlantUpdated = (response) => {
-    console.log(response.payload)
-    const eventType = response.event;
-    console.log(eventType)
+    const eventType = response.events;
     const updatedItem = response.payload
-    if (eventType.includes('delete')) {
+    if (eventType.some((item) => item.includes('delete'))) {
       setPlants((previous) => previous.filter((item) => item.$id != updatedItem.$id))
     }
-    else if (eventType.includes('create')) {
+    else if (eventType.some((item) => item.includes('create'))) {
       setPlants((previous) => [...previous, updatedItem])
     }
-    else {
-      setPlants((previous) => previous.filter(
+    else if (eventType.some((item) => item.includes('update'))) {
+      setPlants((previous) => previous.map(
         (item) => item.$id == updatedItem.$id ? updatedItem : item
       ))
     }
   }
 
-  /*useEffect(() => {
+  useEffect(() => {
     const unsubscribePlants = subscribeToPlants(user.$id, handlePlantUpdated)
 
-    return () => unsubscribePlants
+    return () => unsubscribePlants()
   }, [])
-
-  useEffect(() => {
-    fetchPlants()
-  })*/
 
   return (
     <PaperProvider>
@@ -162,11 +157,14 @@ const Home = () => {
                 renderItem={({ item }) => (
                   <PlantBoardComponent item={item} />
                 )}
+                style={{ paddingLeft: (plants && plants.length == 1) ? 30 : 0 }}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 onViewableItemsChanged={viewableItemsChanged}
                 viewabilityConfig={viewConfig}
                 decelerationRate="fast"
+                pagingEnabled={true}
+                snapToAlignment='center'
               />
             ) : (
               <View>

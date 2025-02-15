@@ -180,7 +180,7 @@ const Profile = () => {
         <View className="w-[120%] h-[50%] absolute top-[-29%] left-[-10%] shadow-md shadow-black" style={{ elevation: 5 }}>
           <View className="rounded-full w-full h-full items-center justify-end z-10 bg-[#3A5332]">
             <Text className="font-psemibold text-2xl text-[#f2f9f1] mb-2">{user.username}</Text>
-            <View className="border-2 rounded-full w-[15%] h-[18%] bottom-[-5%] z-20 bg-[#3A5332]">
+            <View className="border-2 rounded-full w-[15%] h-[17%] bottom-[-5%] z-20 bg-[#3A5332]">
               <View className="w-full h-full">
                 <TouchableOpacity
                   className="w-full h-full items-center justify-center"

@@ -31,7 +31,7 @@ const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
         setIsLoading(false)
     }
     return (
-        <View className="border-2 max-h-[70%] top-20 right-5 left-5 absolute bg-notFullWhite rounded-lg">
+        <View className="border-2 min-h-[20%] max-h-[70%] top-20 right-5 left-5 absolute bg-notFullWhite rounded-lg">
             {isLoading && (
                 <View className="absolute inset-0 justify-center items-center bg-black bg-opacity-25">
                     <ActivityIndicator size="large" color="#ffffff" />
@@ -66,17 +66,17 @@ const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
                 )}
                 <View className="bg-black h-[1px] w-[90%] my-3"></View>
             </View>
-            <View className="flex-row min-h-[10%] max-h-[35%] items-center justify-between px-12">
+            <View className="flex-row min-h-[20%] max-h-[35%] items-center justify-between px-12">
                 <CustomButton
                     title='Cancel'
                     handlePress={() => cancel()}
-                    containerStyles={'border rounded-lg w-[40%] h-[45%]'}
+                    containerStyles={'border rounded-lg w-[40%] h-[70%]'}
                     textStyles={'font-pmedium text-lg'}
                 />
                 <CustomButton
                     title='Remove'
                     handlePress={handleRemoveFriends}
-                    containerStyles={'border rounded-lg w-[40%] h-[45%]'}
+                    containerStyles={'border rounded-lg w-[40%] h-[70%]'}
                     textStyles={'font-pmedium text-lg'}
                     disabled={(friendsToRemove && friendsToRemove.length>0) ? false : true}
                 />

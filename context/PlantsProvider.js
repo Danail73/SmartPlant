@@ -8,6 +8,7 @@ export const usePlantsContext = () => useContext(PlantsContext);
 const PlantsProvider = ({ children }) => {
     const { user } = useGlobalContext()
     const [plants, setPlants] = useState([]);
+    const [activePlant, setActivePlant] = useState(null)
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchPlants = async () => {
@@ -40,7 +41,9 @@ const PlantsProvider = ({ children }) => {
         <PlantsContext.Provider
             value={{
                 setPlants,
-                plants
+                plants,
+                setActivePlant,
+                activePlant
             }}
         >
             {children}

@@ -1,24 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FlatList, Image, Text, View, Button } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlatList, Image, Text, View, Button, TouchableOpacity, TextInput } from 'react-native';
 import { icons } from '../constants';
-import { TouchableOpacity } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import axios from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
-import SwitchButton from '../components/SwitchButton'
 import StatusCard from '../components/StatusCard';
-import { signOut } from '../lib/appwrite';
 import { useGlobalContext } from '../context/GlobalProvider';
-import { LinearGradient } from 'expo-linear-gradient';
 import BackButton from '../components/BackButton';
 import Container from '../components/Container';
 import { fetchTemp, fetchLampState, fetchLightInfo, fetchWaterLevel, turnLampOff, turnLampOn } from '../api/plantControl';
-
+import { usePlantsContext } from '../context/PlantsProvider';
+import CustomButton from '../components/CustomButton';
+import FormField from '../components/FormField';
+import { updatePlant, subscribeToPlants } from '../lib/appwrite';
 
 
 const Device = () => {
-  const { user, setUser, setIsLoggedIn } = useGlobalContext();
+  const { user } = useGlobalContext()
+  const { activePlant, setActivePlant, setPlants, plants } = usePlantsContext()
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [temperature, setTemperature] = useState('');
@@ -26,17 +23,53 @@ const Device = () => {
   const [lightInfo, setLightInfo] = useState('');
   const [waterLevel, setWaterLevel] = useState('');
   const [motorOn, setMotorOn] = useState(false);
+  const [edit, setEdit] = useState(false)
+  const [form, setForm] = useState({
+    plantId: '',
+    plantName: ''
+  })
 
-  const { plantId } = useLocalSearchParams();
+  const plantId = activePlant.plantId;
 
-  const logout = async () => {
+  const handleBack = () => {
+    router.back()
+  }
+
+  const handleUpdatePlant = async (id, name) => {
     try {
-      await signOut()
-      setUser(null)
-      setIsLoggedIn(false)
+      const response = await updatePlant(activePlant.$id, id, name)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
-      router.replace('/login')
-    } catch (error) { console.log(error)}
+  const handlePlantUpdated = (response) => {
+    const eventType = response.events;
+    const updatedItem = response.payload
+    if (eventType.some((item) => item.includes('delete'))) {
+      handleBack()
+    }
+    else if (eventType.some((item) => item.includes('update'))) {
+      setActivePlant(updatedItem)
+      setPlants((previous) => previous.map(
+        (item) => item.$id === updatedItem.$id ? updatedItem : item
+      ))
+    }
+  }
+
+  const handleEdit = () => {
+    if (edit) {
+      if (form.plantId != plantId || form.plantName != activePlant.name) {
+        handleUpdatePlant(form.plantId, form.plantName)
+      }
+    }
+    else {
+      setForm({ plantId: plantId, plantName: activePlant.name })
+    }
+    const timeout = setTimeout(() => {
+      setEdit(!edit)
+    }, 600)
+    return () => clearTimeout(timeout)
   }
 
   const toggleSwitch = async () => {
@@ -131,6 +164,8 @@ const Device = () => {
       }
     }, 5000);
 
+
+
     return () => clearInterval(interval);
   }, []);
 
@@ -146,37 +181,88 @@ const Device = () => {
       } finally {
         setLoading(false);
       }
+
     }, 1000);
 
     return () => clearInterval(interval);
   }, [isEnabled, isTurnedOn]);
 
+  useEffect(() => {
+    const unsubscribePlants = subscribeToPlants(user.$id, handlePlantUpdated)
 
+    return () => unsubscribePlants()
+  }, [])
 
   return (
     <Container
       colors={['#4ec09c', '#a8d981']}
+      areaStyles={'items-center'}
     >
       <View
-        className="w-full h-20 justify-center items-center flex-row pt-10"
+        className="w-full h-20 justify-center items-center flex-row mt-[2%]"
       >
-        <BackButton
-          positionStyles={'absolute left-7 pt-10'}
-        />
-
-        <Text className="text-notFullWhite font-bold text-2xl">SMART PLANT</Text>
-        <TouchableOpacity
-          className="absolute right-7 pt-10"
-          onPress={logout}
-        >
-          <Image
-            source={icons.logout}
-            className="w-8 h-8"
-            style={{ tintColor: '#f2f9f1' }}
-            resizeMethod='contain'
+        <View className="absolute left-[5%]">
+          <CustomButton
+            useAnimatedIcon={true}
+            imageSource={icons.backAnimated}
+            iVisible={true}
+            width={35}
+            height={35}
+            textContainerStyles={'h-0 w-0'}
+            containerStyles={''}
+            handlePress={handleBack}
           />
-        </TouchableOpacity>
+        </View>
+
+        {!edit ? (
+          <View className="items-center justify-center w-[60%]">
+            <Text className="text-notFullWhite font-pregular text-2xl">{activePlant.name}</Text>
+            <Text className="text-notFullWhite font-plight text-sm">{activePlant.plantId}</Text>
+          </View>
+        ) : (
+          <View style={{ marginLeft: (form.plantId != plantId || form.plantName != activePlant.name) ? '7%' : 0, width: '60%' }}>
+            <TextInput
+              value={form.plantName}
+              placeholder={'Keep it simple'}
+              className={'pl-[2%] bg-transparent font-pregular text-notFullWhite text-2xl'}
+              onChangeText={(e) => setForm({ ...form, plantName: e })}
+            />
+            <TextInput
+              value={form.plantId}
+              placeholder={'Keep it simple'}
+              className={'pl-[2%] w-[100%] bg-transparent font-plight text-notFullWhite text-sm items-center justify-center mt-[-10%]'}
+              onChangeText={(e) => setForm({ ...form, plantId: e })}
+            />
+          </View>
+        )}
+        <View className="items-center justify-center ml-2 flex-row">
+          <CustomButton
+            useAnimatedIcon={true}
+            iVisible={true}
+            imageSource={edit ? icons.saveAnim : icons.editAnimated}
+            width={edit ? 32 : 40}
+            height={edit ? 32 : 40}
+            textContainerStyles={'w-0 h-0'}
+            handlePress={handleEdit}
+          //bonusImageStyles={{tintColor: 'white'}}
+          />
+          {edit && (form.plantId != plantId || form.plantName != activePlant.name) && (
+            <View className="ml-2">
+              <CustomButton
+                useAnimatedIcon={false}
+                imageSource={icons.close}
+                imageStyles={'w-8 h-8'}
+                textContainerStyles={'w-0 h-0'}
+                handlePress={() => {
+                  setForm({ plantId: plantId, plantName: activePlant.name })
+                  setEdit(!edit)
+                }}
+              />
+            </View>
+          )}
+        </View>
       </View>
+      <View className="h-[0.1rem] bg-black w-[80%]"></View>
       <View className="items-center justify-center top-10">
         <View className="flex-row items-center justify-center">
           <StatusCard

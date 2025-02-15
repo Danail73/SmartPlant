@@ -13,6 +13,7 @@ import AnimatedIcon from '../../components/AnimatedIcon';
 import { useFriendsContext } from '../../context/FriendsProvider';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { TouchableWithoutFeedback } from 'react-native';
+import CustomButton from '../../components/CustomButton';
 
 
 
@@ -99,7 +100,7 @@ const Friends = () => {
       transform: [{ rotate: `${rotation.value}deg` }],
     };
   });
-  
+
 
   const handleUpdated = (request) => {
     fetchData()
@@ -123,20 +124,22 @@ const Friends = () => {
       >
         <View className="px-10 mt-3 flex-row items-center justify-between">
           <Text className="text-notFullWhite font-pmedium text-3xl">Friends</Text>
-          <TouchableOpacity
-            onPress={openRequestMenu}
-          >
-            <Image
-              source={icons.menu1}
-              className="w-8 h-8"
-              style={{ tintColor: '#4d4752' }}
+          <View>
+            <CustomButton
+              useAnimatedIcon={true}
+              imageSource={icons.menuAnimated}
+              iVisible={true}
+              width={32}
+              height={32}
+              textContainerStyles={'h-0 w-0'}
+              handlePress={openRequestMenu}
             />
             {requestFriends && requestFriends.length > 0 && (
               <View className="rounded-full border w-6 h-6 items-center justify-center bg-red-600 ml-1 absolute right-[-7] top-[-5]">
                 <Text className="text-white text-xs">{requestFriends.length > 99 ? '99+' : requestFriends.length}</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </View>
         </View>
         <View className="items-center justify-center my-3">
           {!upperSearchVisible && (

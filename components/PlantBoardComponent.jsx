@@ -62,11 +62,7 @@ const PlantBoardComponent = ({ item }) => {
                     <Text className="text-gray-700 font-psemibold text-sm mx-2">86 ml</Text>
                 </View>
             </View>
-
-            {/*onPress={() => {
-                    router.push(`/device?plantId=${plantId}`);
-                }}*/}
-
+            
             <PlantBoardMenu
                 buttonStyles={'absolute right-1 justify-center'}
                 colors={['#000']}

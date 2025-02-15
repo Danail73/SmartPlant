@@ -7,7 +7,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    //"package":"com.jsm.tutorial",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
@@ -28,7 +27,9 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-asset",
+      "expo-localization"
     ]
   }
 }

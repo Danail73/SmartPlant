@@ -61,12 +61,12 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
             >
                 <Animated.View
 
-                    className="w-[100%] border flex-row items-center rounded-t-md"
+                    className="w-[100%] border flex-row items-center rounded-tl-md"
                 >
                     <Animated.Image
                         style={{ transform: [{ rotate: rotateInterpolateUpper }] }}
-                        source={icons.arrow}
-                        className="w-8 h-8"
+                        source={icons.leftArrow}
+                        className="w-5 h-5 m-2"
                     />
                     <Text className="font-pmedium">Incoming Requests</Text>
                     {requestFriends.length > 0 && (
@@ -107,8 +107,8 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
                 >
                     <Animated.Image
                         style={{ transform: [{ rotate: rotateInterpolateBottom }] }}
-                        source={icons.arrow}
-                        className="w-8 h-8"
+                        source={icons.leftArrow}
+                        className="w-5 h-5 m-2"
                     />
                     <Text className="font-pmedium">Pending Invites</Text>
                     {invitedFriends.length > 0 && (

@@ -4,7 +4,7 @@ import { images } from '../constants'
 import AnimatedIcon from './AnimatedIcon'
 
 const CustomButton = ({ title, handlePress, containerStyles,
-  textStyles, isLoading, useAnimatedIcon, imageSource, imageStyles, width, height, iVisible, disabled, imageContainerStyles, textContainerStyles, opacityStyles }) => {
+  textStyles, isLoading, useAnimatedIcon, imageSource, imageStyles, bonusImageStyles, width, height, iVisible, disabled, imageContainerStyles, textContainerStyles, opacityStyles }) => {
   const [iconVisible, setIconVisible] = useState(false)
 
   const handlePressIn = () => {
@@ -39,7 +39,8 @@ const CustomButton = ({ title, handlePress, containerStyles,
           ) : (
             <Image
               source={imageSource}
-              className={`w-[120] h-[120] ${imageStyles}`}
+              className={`${imageStyles}`}
+              style={bonusImageStyles}
             />
           )}
         </View>

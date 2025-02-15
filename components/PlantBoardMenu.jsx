@@ -1,54 +1,34 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, Pressable, Animated, Image, Text } from 'react-native';
+import { View, StyleSheet, Pressable, Image, Text } from 'react-native';
 import { Menu, Divider, IconButton, Provider as PaperProvider } from 'react-native-paper';
 import { icons } from '../constants';
 import { router } from 'expo-router';
 import { deletePlant, updatePlant } from '../lib/appwrite';
 import FormField from './FormField';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 
-const PlantBoardMenu = ({ colors, item }) => {
+const PlantBoardMenu = ({ item }) => {
+  const menuTranslateY = useSharedValue(0)
+  const menuScale = useSharedValue(0)
+  const rotation = useSharedValue(0);
   const [visible, setVisible] = useState(false);
-  const rotation = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0)).current;
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState({
     plantId: item.plantId,
     name: item.name
   })
 
-  const expand = (value) => {
-    Animated.timing(scale, {
-      toValue: value,
-      duration: 100,
-      useNativeDriver: true,
-    }).start();
+  const openMenu = () => {
+    setVisible(true);
+    menuScale.value = withTiming(1, { duration: 300 })
+    rotation.value = withTiming(90, { duration: 300 })
   }
 
-  const openMenu = async () => {
-    setVisible(true);
-
-    Animated.parallel([
-      Animated.timing(rotation, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 1, duration: 300, useNativeDriver: true }),
-    ]).start();
-  };
-
-  const closeMenu = async () => {
-    Animated.parallel([
-      Animated.timing(scale, {
-        toValue: 0,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setVisible(false);
-
-      Animated.timing(rotation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+  const closeMenu = () => {
+    menuScale.value = withTiming(0, { duration: 100 }, () => {
+      runOnJS(setVisible)(false)
     })
+    rotation.value = withTiming(0, { duration: 300 })
   }
 
   const openEdit = () => {
@@ -56,7 +36,7 @@ const PlantBoardMenu = ({ colors, item }) => {
   }
 
   const navigateToDevice = () => {
-    router.push(`/device?plantId=${item.plantId}`);
+    router.push(`/device`);
   }
 
   const handleEditPlant = async () => {
@@ -74,28 +54,31 @@ const PlantBoardMenu = ({ colors, item }) => {
       console.error(Error, error)
     }
   }
-
-  const rotateInterpolate = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '90deg'],
+  const menuAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: menuTranslateY.value }, { scale: menuScale.value }],
+    };
   });
+
+  const rotationStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotation.value}deg` }]
+    }
+  })
 
   return (
 
     <View style={styles.container}>
       <Menu
         visible={visible}
-        style={{ transform: [{ translateY: -65 }, { translateX: -20 }], }}
-        onDismiss={async () => {
-          setEdit(false);
-          await closeMenu()
-        }}
+        style={[menuAnimatedStyle, {transform: [{translateX:-20}, {translateY: -65}]}]}
+        onDismiss={closeMenu}
         anchor={
-          <Pressable onPress={async () => await openMenu()}>
-            <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
+          <Pressable onPress={openMenu}>
+            <Animated.View style={rotationStyle}>
               <IconButton
                 icon={icons.menu}
-                color={colors[0]}
+                iconColor='black'
                 size={30}
               />
             </Animated.View>
@@ -105,7 +88,7 @@ const PlantBoardMenu = ({ colors, item }) => {
       >
         {edit && (
           <View
-            style={{position: 'absolute', transform:[{translateX:-40}, {translateY:-100}]}}
+            style={{ position: 'absolute', transform: [{ translateX: -40 }, { translateY: -100 }] }}
           >
             <FormField
               title='name'
@@ -125,7 +108,7 @@ const PlantBoardMenu = ({ colors, item }) => {
               closeMenu();
             }
             else {
-              //openEdit();
+              closeMenu();
               navigateToDevice();
             }
           }}

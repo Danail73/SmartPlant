@@ -48,6 +48,7 @@ const FormField = ({ title, value, placeholder,
           <TextInput
             className={`border w-[230px] mt-1 bg-white rounded-lg pl-[15%] ${inputStyles}`}
             placeholder={placeholder}
+            placeholderTextColor={''}
             value={value}
             onChangeText={handleChangeText}
           />

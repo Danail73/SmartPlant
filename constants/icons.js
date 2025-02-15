@@ -5,10 +5,12 @@ import profile from "../assets/icons/userIcon.png";
 import back from "../assets/icons/back.png";
 import menu from "../assets/icons/menu.png";
 import menu1 from "../assets/icons/menu1.png";
+import menuAnimated from "../assets/icons/menu.json";
 import search from "../assets/icons/search.png";
 import upload from "../assets/icons/upload.png";
 import rightArrow from "../assets/icons/right-arrow.png";
 import rightArrow1 from "../assets/icons/right-arrow1.png";
+import leftArrow from "../assets/icons/left-arrow.png";
 import logout from "../assets/icons/logout.png";
 import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
@@ -23,6 +25,7 @@ import wlevel from "../assets/icons/wlevel.png";
 import clock from "../assets/icons/clock.png";
 import drop from "../assets/icons/drop.png";
 import edit from "../assets/icons/edit.png";
+import editAnimated from "../assets/icons/edit.json";
 import del from "../assets/icons/delete.png";
 import friends from "../assets/icons/friends.png";
 import friendsFilled from "../assets/icons/friendsFilled.png";
@@ -38,6 +41,7 @@ import saveAnim from "../assets/icons/saveAnimated.json";
 import cancelAnim from "../assets/icons/cancelAnimated.json";
 import logoutAnim from "../assets/icons/logoutAnimated.json";
 import plantsFilled from "../assets/icons/plantsFilled.png";
+import backAnimated from "../assets/icons/backAnimated.json";
 
 export default {
   play,
@@ -80,4 +84,8 @@ export default {
   plantsFilled,
   logoutAnim,
   rightArrow1,
+  leftArrow,
+  menuAnimated,
+  backAnimated,
+  editAnimated,
 };
