@@ -14,7 +14,7 @@ import { useFriendsContext } from '../../context/FriendsProvider';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { TouchableWithoutFeedback } from 'react-native';
 import CustomButton from '../../components/CustomButton';
-
+import { t } from '../../translations/i18n'
 
 
 const { width, height } = Dimensions.get('window');
@@ -123,7 +123,7 @@ const Friends = () => {
         statusBarStyle={'light'}
       >
         <View className="px-10 mt-3 flex-row items-center justify-between">
-          <Text className="text-notFullWhite font-pmedium text-3xl">Friends</Text>
+          <Text className="text-notFullWhite font-pmedium text-3xl">{t('Friends')}</Text>
           <View>
             <CustomButton
               useAnimatedIcon={true}
@@ -146,7 +146,7 @@ const Friends = () => {
             <View className="flex-row items-center justify-center">
               <View className="bg-notFullWhite h-[0.8px] w-[8%] mr-3"></View>
               <View className="flex-row justify-between w-[58%]">
-                <Text className="text-white font-pregular text-lg">Your friend list</Text>
+                <Text className="text-white font-pregular text-lg">{t('Your friend list')}</Text>
                 <View className="flex-row gap-5">
                   <TouchableOpacity
                     onPress={() => {
@@ -227,7 +227,7 @@ const Friends = () => {
                 resizeMode='contain'
                 style={{ tintColor: '#4d4752' }}
               />
-              <Text className="text-[#4d4752] font-pregular text-lg">No friends found</Text>
+              <Text className="text-[#4d4752] font-pregular text-lg">{t('No friends found')}</Text>
             </View>
           )}
         </View>
@@ -237,7 +237,7 @@ const Friends = () => {
             <View className="flex-row items-center justify-center">
               <View className="bg-notFullWhite h-[0.8px] w-[8%] mr-3"></View>
               <View className="flex-row justify-between w-[210px]">
-                <Text className="text-white font-pregular text-lg">Invite friends</Text>
+                <Text className="text-white font-pregular text-lg">{t('Invite friends')}</Text>
                 <TouchableOpacity
                   onPress={() => {
                     setBottomSearchVisible(true)
@@ -303,7 +303,7 @@ const Friends = () => {
                 resizeMode='contain'
                 style={{ tintColor: '#4d4752' }}
               />
-              <Text className="text-[#4d4752] font-pregular text-lg">Search for friends</Text>
+              <Text className="text-[#4d4752] font-pregular text-lg">{t('Search for friends')}</Text>
             </View>
           )}
         </View>

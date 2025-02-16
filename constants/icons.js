@@ -42,6 +42,9 @@ import cancelAnim from "../assets/icons/cancelAnimated.json";
 import logoutAnim from "../assets/icons/logoutAnimated.json";
 import plantsFilled from "../assets/icons/plantsFilled.png";
 import backAnimated from "../assets/icons/backAnimated.json";
+import languageAnimated from "../assets/icons/languageAnimated.json";
+import doubleCheck from "../assets/icons/double-check.png";
+import check from "../assets/icons/check.png";
 
 export default {
   play,
@@ -88,4 +91,7 @@ export default {
   menuAnimated,
   backAnimated,
   editAnimated,
+  languageAnimated,
+  doubleCheck,
+  check,
 };

@@ -4,6 +4,7 @@ import { icons } from '../constants'
 import { subscribeToFriendRequests, subscribeToUsers } from '../lib/appwrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 import FriendComponent from './FriendComponent'
+import { t } from '../translations/i18n'
 
 const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
     const { user } = useGlobalContext();
@@ -68,7 +69,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
                         source={icons.leftArrow}
                         className="w-5 h-5 m-2"
                     />
-                    <Text className="font-pmedium">Incoming Requests</Text>
+                    <Text className="font-pmedium">{t('Incoming Requests')}</Text>
                     {requestFriends.length > 0 && (
                         <View className="rounded-full border w-7 h-7 items-center justify-center bg-red-600 ml-1">
                             <Text className="text-white text-sm">{requestFriends.length > 99 ? '99+' : requestFriends.length}</Text>
@@ -110,7 +111,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
                         source={icons.leftArrow}
                         className="w-5 h-5 m-2"
                     />
-                    <Text className="font-pmedium">Pending Invites</Text>
+                    <Text className="font-pmedium">{t('Pending Invites')}</Text>
                     {invitedFriends.length > 0 && (
                         <View className="rounded-full border w-7 h-7 items-center justify-center bg-gray-500 ml-1">
                             <Text className="text-white text-sm">{invitedFriends.length > 99 ? '99+' : invitedFriends.length}</Text>

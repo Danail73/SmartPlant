@@ -13,6 +13,7 @@ module.exports = {
           100: "#FF9001",
           200: "#FF8E01",
         },
+        bonus: "#8F8F90",
         black: {
           DEFAULT: "#000",
           100: "#1E1E2D",
@@ -22,26 +23,6 @@ module.exports = {
           DEFAULT: "#001",
           100: "#CDCDE0",
           statusCard: '#98989a'
-        },
-        green: {
-          100: '#dce7d6',
-          200: '#c4dbb7',
-        },
-        blue: {
-          100: '#d6e4e6',
-          200: '#c3d5d9',
-        },
-        beige: {
-          100: '#e7e1d6',
-          200: '#cbbea6',
-        },
-        red: {
-          100: '#cba6b3',
-          200: '#af768a',
-        },
-        orange: {
-          100: '#fdb442',
-          200: '#f69f2c',
         },
         notFullWhite: '#f2f9f1',
         greend: "#15b182",

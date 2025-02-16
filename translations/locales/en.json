@@ -1,3 +1,13 @@
 {
-    "Daily Plants": "Daily Plants"
+    "Home": "Home",
+    "Friends": "Friends",
+    "Profile": "Profile",
+    "Daily Plants": "Daily Plants",
+    "Logout": "Logout",
+    "Your friend list": "Your friend list",
+    "Invite friends": "Invite friends",
+    "No friends found": "No friends found",
+    "Search for friends": "Search for friends",
+    "Incoming Requests": "Incoming Requests",
+    "Pending Invites": "Pending Invites"
 }

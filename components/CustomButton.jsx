@@ -45,7 +45,7 @@ const CustomButton = ({ title, handlePress, containerStyles,
           )}
         </View>
         <View className={`${textContainerStyles}`}>
-          <Text className={`font-black text-xl ${textStyles}`}>
+          <Text className={`font-black ${textStyles}`}>
             {title}
           </Text>
         </View>

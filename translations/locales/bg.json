@@ -1,3 +1,13 @@
 {
-    "Daily Plants": "Ежедневни растения"
+    "Home": "Начална страница",
+    "Friends": "Приятели",
+    "Profile": "Профил",
+    "Daily Plants": "Ежедневни растения",
+    "Logout": "Изход",
+    "Your friend list": "Списък с приятели",
+    "Invite friends": "Покани приятели",
+    "No friends found": "Не бяха намерени приятели",
+    "Search for friends": "Потърси приятели",
+    "Incoming Requests": "Идващи покани",
+    "Pending Invites": "Изпратени покани"
 }

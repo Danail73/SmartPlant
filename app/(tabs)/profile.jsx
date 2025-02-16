@@ -1,23 +1,24 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, KeyboardAvoidingView, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity, KeyboardAvoidingView, Dimensions, TouchableWithoutFeedback } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Container from '../../components/Container'
 import FormField from '../../components/FormField'
-import { getCurrentAccount, signOut, updateEmail, updatePassword, updateUser, updateUsername } from '../../lib/appwrite'
+import { signOut, updateEmail, updatePassword, updateUser, updateUsername } from '../../lib/appwrite'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { decryptPassword, encryptPassword } from '../../lib/crypto'
 import { BlurView } from 'expo-blur'
 import { icons } from '../../constants'
 import CustomButton from '../../components/CustomButton'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useFriendsContext } from '../../context/FriendsProvider'
 import { usePlantsContext } from '../../context/PlantsProvider'
 import { router } from 'expo-router'
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
+import LanguageMenu from '../../languageComponents/LanguageMenu'
+import { t, useLanguage } from '../../translations/i18n'
 
 const Profile = () => {
   const { friends } = useFriendsContext()
   const { plants } = usePlantsContext()
-  const [account, setAccount] = useState(null)
-  const { user, setUser, setIsLoggedIn } = useGlobalContext()
+  const { user, setUser, setIsLoggedIn, switchLanguage, language } = useGlobalContext()
   const [email, setEmail] = useState({
     previous: '',
     current: ''
@@ -36,15 +37,8 @@ const Profile = () => {
   })
   const [editPic, setEditPic] = useState(false)
   const [saveVisible, setSaveVisible] = useState(false)
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
-  const getAccount = async () => {
-    try {
-      const account = await getCurrentAccount();
-      setAccount(account)
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
   const getDecryptedPassword = async () => {
     if (user) {
@@ -140,7 +134,7 @@ const Profile = () => {
       }
       const updatedUser = await handleUpdateUser();
       setUser(updatedUser)
-    } catch (error) {}
+    } catch (error) { }
   }
 
   useEffect(() => {
@@ -167,7 +161,6 @@ const Profile = () => {
   }, [username, email, password])
 
   return (
-
     <Container
       colors={['#4ec09c', '#a8d981']}
       statusBarStyle={'light'}
@@ -177,7 +170,7 @@ const Profile = () => {
         behavior='padding'
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        <View className="w-[120%] h-[50%] absolute top-[-29%] left-[-10%] shadow-md shadow-black" style={{ elevation: 5 }}>
+        <View className="w-[120%] h-[50%] absolute top-[-29%] left-[-10%] shadow-md shadow-black z-10 overflow-visible" style={{ elevation: 5 }}>
           <View className="rounded-full w-full h-full items-center justify-end z-10 bg-[#3A5332]">
             <Text className="font-psemibold text-2xl text-[#f2f9f1] mb-2">{user.username}</Text>
             <View className="border-2 rounded-full w-[15%] h-[17%] bottom-[-5%] z-20 bg-[#3A5332]">
@@ -217,8 +210,27 @@ const Profile = () => {
             </View>
           </View>
         </View>
-        <View className="items-center justify-center mt-[55%] flex-row gap-4">
-          <View className="flex-row gap-1 items-center justify-center">
+        <View className="bg-transparent w-[100%] h-[15%] mt-[20%] justify-end z-5">
+          <LanguageMenu
+            langContainerStyles={'absolute left-[10%] bottom-[5%]'}
+            langMenuStyles={'bg-notFullWhite w-[18%] h-[14%] mt-[20%] ml-[6%] rounded-sm items-center justify-center'}
+          />
+          <CustomButton
+            containerStyles={'absolute right-[5%] items-center justify-center bg-notFullWhite rounded-md'}
+            useAnimatedIcon={true}
+            imageSource={icons.logoutAnim}
+            iVisible={true}
+            width={40}
+            height={40}
+            textContainerStyles={'items-center justify-center'}
+            title={t('Logout')}
+            textStyles={'font-pthin text-base'}
+            opacityStyles={'flex-row px-2'}
+            handlePress={logout}
+          />
+        </View>
+        <View className="items-center justify-center flex-row gap-4 h-[6%]">
+          <View className="flex-row gap-1 items-center">
             <Image
               source={icons.friendsFilled}
               className="w-8 h-8"
@@ -236,16 +248,7 @@ const Profile = () => {
             />
             <Text className="font-pmedium text-[#f2f9f1]">{plants.length}</Text>
           </View>
-          <CustomButton
-            containerStyles={'absolute right-[10%] items-center justify-center'}
-            useAnimatedIcon={true}
-            imageSource={icons.logoutAnim}
-            iVisible={true}
-            width={40}
-            height={40}
-            textContainerStyles={'h-0 w-0'}
-            handlePress={logout}
-          />
+
         </View>
         <View className="items-center mt-[10%] h-[40%]">
           <View className="w-[90%] h-full p-1 items-center z-20">
@@ -285,7 +288,7 @@ const Profile = () => {
                   containerStyles={'bg-white border w-[36%] rounded-md min-h-[80%] max-h-[90%] '}
                   title='Cancel'
                   textStyles={'text-black font-pthin'}
-                  textContainerStyles={' w-[70%] h-[100%] items-center justify-center border-l-2'}
+                  textContainerStyles={'w-[70%] h-[100%] items-center justify-center border-l-2'}
                   imageContainerStyles={'w-[30%] h-[100%] bg-red-700 rounded-l items-center justify-center'}
                   useAnimatedIcon={true}
                   width={30}

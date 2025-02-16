@@ -10,11 +10,12 @@ import FormField from '../../components/FormField'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { usePlantsContext } from '../../context/PlantsProvider'
+import { t } from '../../translations/i18n'
 
 
 
 const Home = () => {
-  const { user } = useGlobalContext();
+  const { user, language } = useGlobalContext();
   const [activeItem, setActiveItem] = useState(null);
   const { plants, setPlants, setActivePlant } = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
@@ -106,8 +107,8 @@ const Home = () => {
         statusBarStyle={'light'}
       >
         <View className="px-10">
-          <View className="h-20 items-center justify-between flex-row pl-4 pt-4">
-            <Text className="text-notFullWhite font-pmedium text-3xl">Home</Text>
+          <View className={`h-20 items-center justify-between flex-row ${language=='bg'? 'pl-0': 'pl-4'} pt-4`}>
+            <Text className={`text-notFullWhite font-pmedium ${language =='bg' ? 'text-2xl' : 'text-3xl'}`}>{t('Home')}</Text>
             <Text className="text-notFullWhite font-pmedium text-3xl">25 °C</Text>
           </View>
 
@@ -138,7 +139,7 @@ const Home = () => {
 
           <View style={{ overflow: 'visible' }}>
             <View className="justify-between flex-row px-4">
-              <Text className="text-notFullWhite font-pmedium text-lg ">Daily Plants</Text>
+              <Text className="text-notFullWhite font-pmedium text-lg ">{t('Daily Plants')}</Text>
               <TouchableOpacity
                 onPressOut={showModal}
               >
@@ -168,7 +169,7 @@ const Home = () => {
               />
             ) : (
               <View>
-                <Text>Looks like you don't have plants yet</Text>
+                <Text>{t('Изглежда все още нямате растения')}</Text>
               </View>
             )}
           </View>

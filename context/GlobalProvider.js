@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getCurrentUser } from '../lib/appwrite';
+import { useLanguage } from '../translations/i18n';
 
 const GlobalContext = createContext();
 export const useGlobalContext = () => useContext(GlobalContext);
@@ -8,6 +9,7 @@ const GlobalProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const {language, switchLanguage} = useLanguage();
 
     useEffect(() => {
         getCurrentUser()
@@ -37,7 +39,9 @@ const GlobalProvider = ({ children }) => {
                 setIsLoggedIn,
                 user,
                 setUser,
-                isLoading
+                isLoading,
+                language,
+                switchLanguage
             }}
         >
             {children}
