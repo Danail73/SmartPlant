@@ -2,32 +2,26 @@ import { View, Text, FlatList, TouchableOpacity } from 'react-native'
 import CustomButton from './CustomButton'
 import FriendComponent from './FriendComponent'
 import React, { useEffect, useState } from 'react'
-import DeleteMenuComponent from './DeleteMenuComponent'
+import ChooseMenuComponent from './ChooseMenuComponent'
 import { getAcceptedRequest, respondFriendRequest } from '../lib/appwrite'
 
-const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
-    const [friendsToRemove, setFriendsToRemove] = useState([])
+const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, fn }) => {
+    const [listFriends, setListFriends] = useState([])
     const [isLoading, setIsLoading] = useState(false)
 
-    const addItemToRemove = (item) => {
-        const users = friendsToRemove;
+    const addItem = (item) => {
+        const users = listFriends;
         users.push(item)
-        setFriendsToRemove(users)
+        setListFriends(users)
     }
-    const discardItemToRemove = (item) => {
-        const users = friendsToRemove.filter((u) => u.friend.$id != item.friend.$id);
-        setFriendsToRemove(users);
+    const discardItem = (item) => {
+        const users = listFriends.filter((u) => u.friend.$id != item.friend.$id);
+        setListFriends(users);
     }
 
-    const handleRemoveFriends = async () => {
+    const handlePress = async () => {
         setIsLoading(true)
-        friendsToRemove.forEach(async (item) => {
-            try {
-                const response = await respondFriendRequest(item.request.$id, 'declined')
-            } catch (error) {
-                console.log(error)
-            }
-        })
+        fn(listFriends)
         setIsLoading(false)
     }
     return (
@@ -39,7 +33,7 @@ const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
             )}
             <View className="items-center justify-center">
                 <View>
-                    <Text className="mt-5 font-pmedium text-lg">Choose friends to remove</Text>
+                    <Text className="mt-5 font-pmedium text-lg">{title}</Text>
                 </View>
                 <View className="bg-black h-[1px] w-[90%] my-3"></View>
                 {friends ? (
@@ -47,7 +41,7 @@ const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
                         data={friends || []}
                         keyExtractor={(item) => item.friend.$id || item.id.toString()}
                         renderItem={({ item }) => (
-                            <DeleteMenuComponent item={item} addItemToRemove={addItemToRemove} discardItemToRemove={discardItemToRemove} />
+                            <ChooseMenuComponent item={item} addItem={addItem} discardItem={discardItem} />
                         )}
                         className="my-2 max-h-[75%]"
                         contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
@@ -74,15 +68,15 @@ const DeleteFriendsMenu = ({ friends, cancel, currentUser }) => {
                     textStyles={'font-pmedium text-lg'}
                 />
                 <CustomButton
-                    title='Remove'
-                    handlePress={handleRemoveFriends}
+                    title={buttonTitle}
+                    handlePress={handlePress}
                     containerStyles={'border rounded-lg w-[40%] h-[70%]'}
                     textStyles={'font-pmedium text-lg'}
-                    disabled={(friendsToRemove && friendsToRemove.length>0) ? false : true}
+                    disabled={(listFriends && listFriends.length>0) ? false : true}
                 />
             </View>
         </View>
     )
 }
 
-export default DeleteFriendsMenu
+export default ChooseFriendsMenu

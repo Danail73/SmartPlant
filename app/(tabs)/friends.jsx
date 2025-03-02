@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Dimensions, FlatList, TouchableOpacity, Image, TextInput, Pressable, SafeAreaView, StyleSheet } from 'react-native';
 import Container from '../../components/Container';
 import { PaperProvider } from 'react-native-paper';
-import { subscribeToFriendRequests, subscribeToUsers } from '../../lib/appwrite';
+import { respondFriendRequest, subscribeToFriendRequests, subscribeToUsers } from '../../lib/appwrite';
 import FriendComponent from '../../components/FriendComponent';
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { icons, images } from '../../constants';
 import RequestMenu from '../../components/RequestMenu';
 import { BlurView } from 'expo-blur';
-import DeleteFriendsMenu from '../../components/DeleteFriendsMenu';
+import ChooseFriendsMenu from '../../components/ChooseFriendsMenu';
 import AnimatedIcon from '../../components/AnimatedIcon';
 import { useFriendsContext } from '../../context/FriendsProvider';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
@@ -347,10 +347,25 @@ const Friends = () => {
               intensity={100}
               tint='systemUltraThinMaterial'
             >
-              <DeleteFriendsMenu friends={friends} cancel={() => {
-                setDeleteMenuVisible(false)
-                setUpperIconsVisible(true)
-              }} currentUser={user} />
+              <ChooseFriendsMenu
+                friends={friends}
+                cancel={() => {
+                  setDeleteMenuVisible(false)
+                  setUpperIconsVisible(true)
+                }}
+                currentUser={user}
+                title={'Choose friends to remove'}
+                buttonTitle={'Remove'}
+                fn={(list) => {
+                  list.forEach(async (item) => {
+                    try {
+                      const response = await respondFriendRequest(item.request.$id, 'declined')
+                    } catch (error) {
+                      console.log(error)
+                    }
+                  })
+                }}
+              />
             </BlurView>
           </SafeAreaView>
         )}

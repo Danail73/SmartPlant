@@ -68,8 +68,8 @@ const LanguageMenu = ({ langContainerStyles, langMenuStyles }) => {
                             className={`${langMenuStyles}`}
                             style={[langAnimatedStyle, { transformOrigin: 'top' }]}
                         >
-                            <View className="h-[0.1rem] mt-[45%] w-[80%] bg-black"></View>
-                            <View className="w-[100%] mt-[2%] items-start justify-center flex-col gap-1 pt-1 pl-2">
+                            <View className="h-[0.1rem] w-[80%] bg-black " style={{marginTop:'40%'}}></View>
+                            <View className="w-[100%] items-start justify-center flex-col gap-1 pt-1 pl-2" style={{marginTop:'6%'}}>
                                 <LanguageOption
                                     title="BG"
                                     handlePress={() => changeLanguage('bg')}

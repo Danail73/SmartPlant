@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import FriendComponent from './FriendComponent'
 import { LinearGradient } from 'expo-linear-gradient'
 
-const DeleteMenuComponent = ({ item, addItemToRemove, discardItemToRemove }) => {
+const ChooseMenuComponent = ({ item, addItem, discardItem }) => {
     const [isSelected, setIsSelected] = useState(false)
 
     return (
@@ -12,9 +12,9 @@ const DeleteMenuComponent = ({ item, addItemToRemove, discardItemToRemove }) => 
             <TouchableOpacity
                 onPress={() => {
                     if (isSelected)
-                        discardItemToRemove(item)
+                        discardItem(item)
                     else
-                        addItemToRemove(item)
+                        addItem(item)
                     setIsSelected(!isSelected)
                 }}
             >
@@ -31,4 +31,4 @@ const DeleteMenuComponent = ({ item, addItemToRemove, discardItemToRemove }) => 
     )
 }
 
-export default DeleteMenuComponent
+export default ChooseMenuComponent

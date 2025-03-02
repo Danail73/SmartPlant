@@ -1,21 +1,23 @@
-import { FlatList, StyleSheet, Text, View, Image, Animated, TouchableOpacity, Dimensions } from 'react-native'
+import { FlatList, StyleSheet, Text, View, Image, Animated, TouchableOpacity, Dimensions, Alert } from 'react-native'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { icons, images } from '../../constants'
 import Container from '../../components/Container'
 import { PaperProvider } from 'react-native-paper'
-import { getAllPlants, createPlant, subscribeToPlants } from '../../lib/appwrite'
+import { getAllPlants, createPlant, subscribeToPlants, updatePlantSensors, plantIdExists } from '../../lib/appwrite'
 import { Modal } from 'react-native-paper'
 import FormField from '../../components/FormField'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { usePlantsContext } from '../../context/PlantsProvider'
 import { t } from '../../translations/i18n'
+import useMqttClient from '../../api/mqtt/mqtt'
 
 
 
 const Home = () => {
   const { user, language } = useGlobalContext();
+  const { client, temperature, waterLevel, status, humidity, brightness, isReceiving } = useMqttClient();
   const [activeItem, setActiveItem] = useState(null);
   const { plants, setPlants, setActivePlant } = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
@@ -36,13 +38,20 @@ const Home = () => {
       Alert.alert("You must fill all forms")
     }
     else {
-      try {
-        await createPlant(form.plantId, form.name, [user.$id]);
+      const exists = await plantIdExists(form.plantId)
+      if (exists) {
+        try {
+          await createPlant(form.plantId, form.name, [user.$id]);
+        }
+        catch (error) {
+          console.log(error);
+        }
+        finally {
+          clearForm();
+        }
       }
-      catch (error) {
-        console.log(error);
-      }
-      finally {
+      else {
+        Alert.alert("Invalid plantId")
         clearForm();
       }
     }
@@ -100,6 +109,30 @@ const Home = () => {
     return () => unsubscribePlants()
   }, [])
 
+  const updateSensors = async () => {
+    try {
+      const sensorValues = [
+        parseFloat(temperature),
+        parseFloat(humidity),
+        parseFloat(brightness),
+        parseFloat(waterLevel),
+        parseFloat(status.statusCode)
+      ];
+      const response = await updatePlantSensors(activeItem.$id, sensorValues);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateSensors();
+    }, 300000)
+
+    return () => clearInterval(interval)
+  }, [activeItem])
+
+
   return (
     <PaperProvider>
       <Container
@@ -107,9 +140,9 @@ const Home = () => {
         statusBarStyle={'light'}
       >
         <View className="px-10">
-          <View className={`h-20 items-center justify-between flex-row ${language=='bg'? 'pl-0': 'pl-4'} pt-4`}>
-            <Text className={`text-notFullWhite font-pmedium ${language =='bg' ? 'text-2xl' : 'text-3xl'}`}>{t('Home')}</Text>
-            <Text className="text-notFullWhite font-pmedium text-3xl">25 °C</Text>
+          <View className={`h-20 items-center justify-between flex-row ${language == 'bg' ? 'pl-0' : 'pl-4'} pt-4`}>
+            <Text className={`text-notFullWhite font-pmedium ${language == 'bg' ? 'text-2xl' : 'text-3xl'}`}>{t('Home')}</Text>
+            <Text className="text-notFullWhite font-pmedium text-3xl">{temperature}</Text>
           </View>
 
           {plants && plants.length > 0 && (
@@ -120,7 +153,7 @@ const Home = () => {
                 resizeMode='contain'
               />
               <View className="items-center justify-center pl-2">
-                <Text className="font-pmedium text-notFullWhite text-xl">Everything{'\n'}good here!</Text>
+                <Text className="font-pmedium text-notFullWhite text-xl">{status.statusMessage}</Text>
               </View>
             </View>
           )}
@@ -156,7 +189,7 @@ const Home = () => {
                 data={plants || []}
                 keyExtractor={(item) => item.$id || item.id.toString()}
                 renderItem={({ item }) => (
-                  <PlantBoardComponent item={item} />
+                  <PlantBoardComponent item={item} isReceiving={isReceiving} />
                 )}
                 style={{ paddingLeft: (plants && plants.length == 1) ? 30 : 0 }}
                 horizontal
@@ -169,7 +202,7 @@ const Home = () => {
               />
             ) : (
               <View>
-                <Text>{t('Изглежда все още нямате растения')}</Text>
+                <Text>{t('Looks like you still dont have any plants')}</Text>
               </View>
             )}
           </View>
@@ -193,26 +226,23 @@ const Home = () => {
             <FormField
               title="plantId"
               placeholder={"Enter plantId"}
-              textStyles={'pl-3'}
-              inputStyles={''}
+              textStyles={'pl-[5%]'}
+              inputStyles={'pl-[5%]'}
               handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
             />
             <FormField
               title="name"
               placeholder={"Enter name"}
-              textStyles={'pl-3'}
+              textStyles={'pl-[5%]'}
+              inputStyles={'pl-[5%]'}
               handleChangeText={(e) => { setForm({ ...form, name: e }) }}
             />
 
             <View>
               <TouchableOpacity
                 onPress={() => {
-                  if (menuVisible) {
-                    handleCreatePlant();
-                    hideModal();
-                  } else {
-                    showModal();
-                  }
+                  handleCreatePlant();
+                  hideModal();
                 }}
                 className="w-16 h-16 rounded-full"
               >

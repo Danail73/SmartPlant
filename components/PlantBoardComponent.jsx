@@ -7,7 +7,7 @@ import plantImages from '../constants/plantImages'
 import PlantBoardMenu from './PlantBoardMenu'
 import { PaperProvider } from 'react-native-paper'
 
-const PlantBoardComponent = ({ item }) => {
+const PlantBoardComponent = ({ item, isReceiving }) => {
     const plantImagesArray = [plantImages.plant1, plantImages.plant2, plantImages.plant3]
     const [image, setImage] = useState('');
     const [menuVisible, setMenuVisible] = useState(false);
@@ -60,6 +60,9 @@ const PlantBoardComponent = ({ item }) => {
                         style={{ tintColor: 'gray' }}
                     />
                     <Text className="text-gray-700 font-psemibold text-sm mx-2">86 ml</Text>
+                </View>
+                <View>
+                    <Text>{isReceiving ? "" : "Disconnected"}</Text>
                 </View>
             </View>
             

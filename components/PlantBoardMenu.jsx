@@ -3,11 +3,13 @@ import { View, StyleSheet, Pressable, Image, Text } from 'react-native';
 import { Menu, Divider, IconButton, Provider as PaperProvider } from 'react-native-paper';
 import { icons } from '../constants';
 import { router } from 'expo-router';
-import { deletePlant, updatePlant } from '../lib/appwrite';
+import { deletePlant, updatePlant, updatePlantUsers } from '../lib/appwrite';
 import FormField from './FormField';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
+import { useGlobalContext } from '../context/GlobalProvider';
 
 const PlantBoardMenu = ({ item }) => {
+  const { user } = useGlobalContext()
   const menuTranslateY = useSharedValue(0)
   const menuScale = useSharedValue(0)
   const rotation = useSharedValue(0);
@@ -49,7 +51,14 @@ const PlantBoardMenu = ({ item }) => {
 
   const handleDeletePlant = async () => {
     try {
-      const response = await deletePlant(item.$id);
+      if (item.users[0].$id == user.$id) {
+        const response = await deletePlant(item.$id);
+      }
+      else {
+        const users = item.users.filter((item) => item.$id != user.$id)
+        await updatePlantUsers(users)
+      }
+
     } catch (error) {
       console.error(Error, error)
     }
@@ -71,7 +80,7 @@ const PlantBoardMenu = ({ item }) => {
     <View style={styles.container}>
       <Menu
         visible={visible}
-        style={[menuAnimatedStyle, {transform: [{translateX:-20}, {translateY: -65}]}]}
+        style={[menuAnimatedStyle, { transform: [{ translateX: -20 }, { translateY: -65 }] }]}
         onDismiss={closeMenu}
         anchor={
           <Pressable onPress={openMenu}>

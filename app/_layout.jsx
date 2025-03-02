@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 
 import GlobalProvider from '../context/GlobalProvider'
 import FriendsProvider from '../context/FriendsProvider';
-import PlantsProvider from '../context/PlantsProvider'
+import PlantsProvider from '../context/PlantsProvider';
 
 SplashScreen.preventAutoHideAsync();
 

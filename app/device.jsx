@@ -1,28 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlatList, Image, Text, View, Button, TouchableOpacity, TextInput } from 'react-native';
 import { icons } from '../constants';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import StatusCard from '../components/StatusCard';
 import { useGlobalContext } from '../context/GlobalProvider';
-import BackButton from '../components/BackButton';
 import Container from '../components/Container';
-import { fetchTemp, fetchLampState, fetchLightInfo, fetchWaterLevel, turnLampOff, turnLampOn } from '../api/plantControl';
 import { usePlantsContext } from '../context/PlantsProvider';
 import CustomButton from '../components/CustomButton';
-import FormField from '../components/FormField';
 import { updatePlant, subscribeToPlants } from '../lib/appwrite';
+import useMqttClient from '../api/mqtt/mqtt';
+
 
 
 const Device = () => {
   const { user } = useGlobalContext()
   const { activePlant, setActivePlant, setPlants, plants } = usePlantsContext()
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [temperature, setTemperature] = useState('');
-  const [isTurnedOn, setIsTurnedOn] = useState(false);
-  const [lightInfo, setLightInfo] = useState('');
-  const [waterLevel, setWaterLevel] = useState('');
-  const [motorOn, setMotorOn] = useState(false);
+  const { client, temperature, brightness, waterLevel,
+     isEnabled, pump, pumpSwitch, lampSwitch, humidity} = useMqttClient();
   const [edit, setEdit] = useState(false)
   const [form, setForm] = useState({
     plantId: '',
@@ -30,6 +24,7 @@ const Device = () => {
   })
 
   const plantId = activePlant.plantId;
+
 
   const handleBack = () => {
     router.back()
@@ -72,126 +67,17 @@ const Device = () => {
     return () => clearTimeout(timeout)
   }
 
-  const toggleSwitch = async () => {
-    try {
-      if (!isEnabled) {
-        await handleTurnLampOn();
-      } else {
-        await handleTurnLampOff();
-      }
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const handleFetchTemperature = async (req, res) => {
-    try {
-      const response = await fetchTemp(plantId)
-      setTemperature(response);
-    }
-    catch (error) {
-      throw error;
-    }
-  }
-
-  const handleFetchLampInfo = async (req, res) => {
-    try {
-      const response = await fetchLampState(plantId);
-      setIsTurnedOn(response);
-    }
-    catch (error) {
-      throw error;
-    }
-  }
-
-  const handleTurnLampOn = async (req, res) => {
-    try {
-      const response = await turnLampOn(plantId);
-      if (response) {
-        setIsEnabled(true);
-        setIsTurnedOn(true);
-      }
-    }
-    catch (error) {
-      throw error;
-    }
-  }
-
-  const handleTurnLampOff = async (req, res) => {
-    try {
-      const response = await turnLampOff(plantId);
-      if (response) {
-        setIsEnabled(false);
-        setIsTurnedOn(false);
-      }
-    }
-    catch (error) {
-      throw error;
-    }
-  }
-
-  const handleFetchLightInfo = async (req, res) => {
-    try {
-      const response = await fetchLightInfo(plantId)
-      setLightInfo(response);
-    }
-    catch (error) {
-      throw error;
-    }
-  }
-
-  const handleFetchWaterLevel = async (req, res) => {
-    try {
-      const response = await fetchWaterLevel(plantId)
-      setWaterLevel(response);
-    }
-    catch (error) {
-      throw error;
-    }
-  }
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      setLoading(true);
-      try {
-        await handleFetchTemperature();
-        await handleFetchLightInfo();
-        await handleFetchWaterLevel();
-      } catch (error) {
-        //console.error(error)
-      } finally {
-        setLoading(false);
-      }
-    }, 5000);
-
-
-
-    return () => clearInterval(interval);
-  }, []);
-
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      setLoading(true);
-      try {
-        await handleFetchLampInfo();
-        setIsEnabled(isTurnedOn);
-      } catch (error) {
-        //console.error(error)
-      } finally {
-        setLoading(false);
-      }
-
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isEnabled, isTurnedOn]);
 
   useEffect(() => {
     const unsubscribePlants = subscribeToPlants(user.$id, handlePlantUpdated)
 
-    return () => unsubscribePlants()
+    return () => {
+      unsubscribePlants();
+      if(client) {client.disconnect()}
+    }
   }, [])
+
+  
 
   return (
     <Container
@@ -269,7 +155,7 @@ const Device = () => {
             label="LAMP"
             value=""
             showSwitch={true}
-            onSwitchChange={toggleSwitch}
+            onSwitchChange={lampSwitch}
             colorSwitch={isEnabled}
             isEnabled={isEnabled}
             iconSource={icons.lightbulb}
@@ -285,13 +171,13 @@ const Device = () => {
         <View className="flex-row items-center justify-center mt-2">
           <StatusCard
             label="HUMIDITY"
-            value="56%"
+            value={humidity}
             showSwitch={false}
             iconSource={icons.hmdty}
           />
           <StatusCard
             label="BRIGHTNESS"
-            value={lightInfo}
+            value={brightness}
             showSwitch={false}
             otherStyles={'ml-5'}
             iconSource={icons.brghtns}
@@ -299,12 +185,12 @@ const Device = () => {
         </View>
         <View className="flex-row items-center justify-center mt-2">
           <StatusCard
-            label="MOTOR"
+            label="PUMP"
             value=""
             showSwitch={true}
-            onSwitchChange={() => { setMotorOn(!motorOn) }}
+            onSwitchChange={pumpSwitch}
             colorSwitch={true}
-            isEnabled={motorOn}
+            isEnabled={pump}
             iconSource={icons.motor}
           />
           <StatusCard
@@ -320,7 +206,7 @@ const Device = () => {
             label="AUTO"
             value=""
             showSwitch={true}
-            onSwitchChange={() => { setIsEnabled(!isEnabled) }}
+            onSwitchChange={() => { }}
             isEnabled={isEnabled}
             otherStyles={`flex-row w-[303px] h-[75px]`}
             invert={true}

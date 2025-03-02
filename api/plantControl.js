@@ -1,6 +1,8 @@
 import axios from "axios";
 const baseUrl = 'http://192.168.3.20:3000/';
 
+  const url1 = 'http://192.168.3.134'
+
 //export let canselToken = false;
 
 export const fetchTemp = async (plantId) => {
@@ -100,4 +102,16 @@ const fetchData = async (plantId, url) => {
     }
 
 }
+
+export const fetchEverything = async () => {
+    try {
+      const response = await axios.get(url1 + '/text_sensor/sensor_data')
+      const {value} = response.data
+      const data = JSON.parse(value)
+      return {temp: data.temperature, humidity: data.humidity, bright: data.brightness,
+         distance: data.distance, lampStatus: data.lamp_status, status: data.plant_status};
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
 
