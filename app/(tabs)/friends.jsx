@@ -109,7 +109,7 @@ const Friends = () => {
   useEffect(() => {
     const unsubscribeRequests = subscribeToFriendRequests(user.$id, handleUpdated)
     const unsubscribeUsers = subscribeToUsers(handleUpdated)
-
+    
     return () => {
       unsubscribeRequests()
       unsubscribeUsers()
@@ -353,6 +353,7 @@ const Friends = () => {
                   setDeleteMenuVisible(false)
                   setUpperIconsVisible(true)
                 }}
+                withRequest={true}
                 currentUser={user}
                 title={'Choose friends to remove'}
                 buttonTitle={'Remove'}

@@ -25,8 +25,12 @@ const PlantsProvider = ({ children }) => {
             fetchPlants()
                 .then((response) => {
                     if (response) {
-                        setPlants(response)
+                        const currentPlants = response.filter((item) => item.users.some((u) => u.$id === user.$id))
+                        if (currentPlants) {
+                            setPlants(currentPlants)
+                        }
                     }
+
                 })
                 .catch((error) => {
                     console.log('error')

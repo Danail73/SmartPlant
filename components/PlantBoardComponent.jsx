@@ -7,7 +7,7 @@ import plantImages from '../constants/plantImages'
 import PlantBoardMenu from './PlantBoardMenu'
 import { PaperProvider } from 'react-native-paper'
 
-const PlantBoardComponent = ({ item, isReceiving }) => {
+const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback }) => {
     const plantImagesArray = [plantImages.plant1, plantImages.plant2, plantImages.plant3]
     const [image, setImage] = useState('');
     const [menuVisible, setMenuVisible] = useState(false);
@@ -27,7 +27,7 @@ const PlantBoardComponent = ({ item, isReceiving }) => {
 
     return (
         <View
-            className={`flex-row items-center justify-start w-[250px] h-[105px] bg-notFullWhite rounded-2xl my-2 shadow-sm shadow-gray-500 mx-2`}
+            className={`flex-row items-center justify-start w-[250px] h-[110px] my-2 bg-notFullWhite rounded-2xl shadow-sm shadow-gray-500 mx-2 overflow-visible`}
             style={styles.androidShadow}
         >
             <View className="px-2">
@@ -66,11 +66,7 @@ const PlantBoardComponent = ({ item, isReceiving }) => {
                 </View>
             </View>
             
-            <PlantBoardMenu
-                buttonStyles={'absolute right-1 justify-center'}
-                colors={['#000']}
-                item={item}
-            />
+            <PlantBoardMenu item={item} addCallback={addCallback} removeCallback={removeCallback}/>
         </View>
     )
 }

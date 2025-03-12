@@ -4,7 +4,7 @@ import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { icons, images } from '../../constants'
 import Container from '../../components/Container'
 import { PaperProvider } from 'react-native-paper'
-import { getAllPlants, createPlant, subscribeToPlants, updatePlantSensors, plantIdExists } from '../../lib/appwrite'
+import { getAllPlants, createPlant, subscribeToPlants, updatePlantSensors, plantIdExists, updatePlantUsers } from '../../lib/appwrite'
 import { Modal } from 'react-native-paper'
 import FormField from '../../components/FormField'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -12,18 +12,24 @@ import { useGlobalContext } from '../../context/GlobalProvider'
 import { usePlantsContext } from '../../context/PlantsProvider'
 import { t } from '../../translations/i18n'
 import useMqttClient from '../../api/mqtt/mqtt'
-
+import { useFriendsContext } from '../../context/FriendsProvider'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { BlurView } from 'expo-blur'
+import ChooseFriendsMenu from '../../components/ChooseFriendsMenu'
 
 
 const Home = () => {
   const { user, language } = useGlobalContext();
   const { client, temperature, waterLevel, status, humidity, brightness, isReceiving } = useMqttClient();
+  const { friends } = useFriendsContext();
   const [activeItem, setActiveItem] = useState(null);
-  const { plants, setPlants, setActivePlant } = usePlantsContext();
+  const { plants, setPlants, setActivePlant, activePlant } = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
   const translateY = useRef(new Animated.Value(400)).current;
   const scale = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const [addVisible, setAddVisible] = useState(false);
+  const [removeVisible, setRemoveVisible] = useState(false);
   const [form, setForm] = useState({
     plantId: '',
     name: '',
@@ -100,6 +106,10 @@ const Home = () => {
       setPlants((previous) => previous.map(
         (item) => item.$id == updatedItem.$id ? updatedItem : item
       ))
+      if(activePlant.$id === updatedItem.$id){
+        setActiveItem(updatedItem)
+        setActivePlant(updatedItem)
+      }
     }
   }
 
@@ -107,7 +117,7 @@ const Home = () => {
     const unsubscribePlants = subscribeToPlants(user.$id, handlePlantUpdated)
 
     return () => unsubscribePlants()
-  }, [])
+  }, [friends])
 
   const updateSensors = async () => {
     try {
@@ -185,21 +195,29 @@ const Home = () => {
               </TouchableOpacity>
             </View>
             {(plants && plants.length > 0) ? (
-              <FlatList
-                data={plants || []}
-                keyExtractor={(item) => item.$id || item.id.toString()}
-                renderItem={({ item }) => (
-                  <PlantBoardComponent item={item} isReceiving={isReceiving} />
-                )}
-                style={{ paddingLeft: (plants && plants.length == 1) ? 30 : 0 }}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                onViewableItemsChanged={viewableItemsChanged}
-                viewabilityConfig={viewConfig}
-                decelerationRate="fast"
-                pagingEnabled={true}
-                snapToAlignment='center'
-              />
+              <View style={{ overflow: 'visible' }}>
+                <FlatList
+                  data={plants || []}
+                  keyExtractor={(item) => item.$id}
+                  renderItem={({ item }) => (
+                    <PlantBoardComponent
+                      item={item}
+                      isReceiving={isReceiving}
+                      addCallback={() => setAddVisible(true)}
+                      removeCallback={() => setRemoveVisible(true)}
+                    />
+                  )}
+                  style={{ overflow: 'visible' }}
+                  contentContainerStyle={{ marginLeft: (plants && plants.length == 1) ? 40 : 0, overflow: 'visible' }}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  onViewableItemsChanged={viewableItemsChanged}
+                  viewabilityConfig={viewConfig}
+                  decelerationRate="fast"
+                  pagingEnabled={true}
+                  snapToAlignment='center'
+                />
+              </View>
             ) : (
               <View>
                 <Text>{t('Looks like you still dont have any plants')}</Text>
@@ -268,6 +286,66 @@ const Home = () => {
             </View>
           </Animated.View>
         </Modal>
+        {addVisible && (
+          <SafeAreaView className="flex-1 w-full h-full absolute">
+            <BlurView
+              className="h-[104%] w-[100%] items-center justify-center"
+              intensity={100}
+              tint='systemUltraThinMaterial'
+            >
+              <ChooseFriendsMenu
+                friends={friends
+                  .filter((item) => !activeItem.users.some((u) => u.$id === item.friend.$id))
+                  .map((item) => item.friend)}
+                cancel={() => {
+                  setAddVisible(false)
+                }}
+                withRequest={false}
+                currentUser={user}
+                title={'Choose friends to add'}
+                buttonTitle={'Add'}
+                fn={async (list) => {
+                  const newUsers = [...activeItem.users];
+                  list.forEach((item) => {
+                    newUsers.push(item)
+                  })
+                  const response = await updatePlantUsers(activeItem.$id, newUsers)
+                }}
+              />
+            </BlurView>
+          </SafeAreaView>
+        )}
+
+        {removeVisible && (
+          <SafeAreaView className="flex-1 w-full h-full absolute">
+            <BlurView
+              className="h-[104%] w-[100%] items-center justify-center"
+              intensity={100}
+              tint='systemUltraThinMaterial'
+            >
+              <ChooseFriendsMenu
+                friends={activeItem.users.filter((item) => item.$id != user.$id)}
+                cancel={() => {
+                  setRemoveVisible(false)
+                }}
+                currentUser={user}
+                withRequest={false}
+                title={'Choose friends to remove'}
+                buttonTitle={'Remove'}
+                fn={async (list) => {
+                  try {
+                    let newUsers = activeItem.users.filter(
+                      (u) => !list.some((item) => u.$id === item.$id)
+                    );
+                    const response = await updatePlantUsers(activeItem.$id, newUsers)
+                  } catch (error) {
+                    console.log(error)
+                  }
+                }}
+              />
+            </BlurView>
+          </SafeAreaView>
+        )}
       </Container>
     </PaperProvider>
   );

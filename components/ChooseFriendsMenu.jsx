@@ -5,18 +5,23 @@ import React, { useEffect, useState } from 'react'
 import ChooseMenuComponent from './ChooseMenuComponent'
 import { getAcceptedRequest, respondFriendRequest } from '../lib/appwrite'
 
-const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, fn }) => {
+const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, fn, withRequest }) => {
     const [listFriends, setListFriends] = useState([])
     const [isLoading, setIsLoading] = useState(false)
 
     const addItem = (item) => {
-        const users = listFriends;
+        const users = [...listFriends];
         users.push(item)
         setListFriends(users)
     }
     const discardItem = (item) => {
-        const users = listFriends.filter((u) => u.friend.$id != item.friend.$id);
-        setListFriends(users);
+        if (withRequest) {
+            const users = listFriends.filter((u) => u.friend.$id != item.friend.$id);
+            setListFriends(users);
+        } else {
+            const users = listFriends.filter((u) => u.$id != item.$id)
+            setListFriends(users);
+        }
     }
 
     const handlePress = async () => {
@@ -39,9 +44,9 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                 {friends ? (
                     <FlatList
                         data={friends || []}
-                        keyExtractor={(item) => item.friend.$id || item.id.toString()}
+                        keyExtractor={(item) => withRequest ? item.friend.$id : item.$id}
                         renderItem={({ item }) => (
-                            <ChooseMenuComponent item={item} addItem={addItem} discardItem={discardItem} />
+                            <ChooseMenuComponent item={item} addItem={addItem} discardItem={discardItem} withRequest={withRequest} />
                         )}
                         className="my-2 max-h-[75%]"
                         contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
@@ -60,7 +65,7 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                 )}
                 <View className="bg-black h-[1px] w-[90%] my-3"></View>
             </View>
-            <View className="flex-row min-h-[20%] max-h-[35%] items-center justify-between px-12">
+            <View className="flex-row min-h-[70px] h-[28%] max-h-[70px] items-center justify-between px-12">
                 <CustomButton
                     title='Cancel'
                     handlePress={() => cancel()}
@@ -72,7 +77,7 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                     handlePress={handlePress}
                     containerStyles={'border rounded-lg w-[40%] h-[70%]'}
                     textStyles={'font-pmedium text-lg'}
-                    disabled={(listFriends && listFriends.length>0) ? false : true}
+                //disabled={listFriends.length>0 ? false : true}
                 />
             </View>
         </View>

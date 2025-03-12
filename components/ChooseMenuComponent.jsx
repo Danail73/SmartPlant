@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react'
 import FriendComponent from './FriendComponent'
 import { LinearGradient } from 'expo-linear-gradient'
 
-const ChooseMenuComponent = ({ item, addItem, discardItem }) => {
+const ChooseMenuComponent = ({ item, addItem, discardItem, withRequest }) => {
     const [isSelected, setIsSelected] = useState(false)
 
     return (
         <View className="flex-row items-center gap-3">
-            <FriendComponent item={item.friend} otherStyles={'w-[270px]'} />
+            <FriendComponent item={withRequest ? item.friend : item} otherStyles={'w-[270px]'} />
             <TouchableOpacity
                 onPress={() => {
                     if (isSelected)
