@@ -6,6 +6,7 @@ import { StyleSheet } from 'react-native'
 import plantImages from '../constants/plantImages'
 import PlantBoardMenu from './PlantBoardMenu'
 import { PaperProvider } from 'react-native-paper'
+import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
 const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback }) => {
     const plantImagesArray = [plantImages.plant1, plantImages.plant2, plantImages.plant3]
@@ -27,46 +28,48 @@ const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback })
 
     return (
         <View
-            className={`flex-row items-center justify-start w-[250px] h-[110px] my-2 bg-notFullWhite rounded-2xl shadow-sm shadow-gray-500 mx-2 overflow-visible`}
-            style={styles.androidShadow}
+            className={`flex-row items-center justify-start my-2 bg-notFullWhite rounded-2xl shadow-sm shadow-gray-500 overflow-visible`}
+            style={[styles.androidShadow, { width: hp('27%'), height: hp('13%'), marginHorizontal: wp('1.5%') }]}
         >
             <View className="px-2">
                 <Image
                     source={image}
-                    className="w-20 h-20"
+                    style={{ width: wp('13%'), height: wp('13%') }}
                     resizeMode='contain'
                 />
             </View>
             <View
-                className="justify-center flex-col"
+                className="justify-center flex-col" 
             >
-                <Text className="text-gray-700 font-psemibold text-sm">
+                <Text className="text-gray-700 font-psemibold" style={{ fontSize: hp('1.6%') }}>
                     {item.name}
                 </Text>
 
-                <View className="flex-row items-start mt-2">
+                <View className="flex-row items-start" style={{marginTop: hp('0.6%')}}>
                     <Image
                         source={icons.clock}
-                        className="w-5 h-5"
-                        style={{ tintColor: 'gray' }}
+                        style={{ tintColor: 'gray', width: hp('2%'), height: hp('2%') }}
                     />
-                    <Text className="text-gray-700 font-psemibold text-sm mx-2">23-12-2025</Text>
+                    <Text className="text-gray-700 font-psemibold mx-2" style={{ fontSize: hp('1.5%') }}>23-12-2025</Text>
                 </View>
 
-                <View className="flex-row items-start mt-2">
+                <View className="flex-row items-start" style={{marginTop: hp('0.6%')}}>
                     <Image
                         source={icons.drop}
-                        className="w-5 h-5"
-                        style={{ tintColor: 'gray' }}
+                        style={{ tintColor: 'gray', width: hp('2%'), height: hp('2%') }}
                     />
-                    <Text className="text-gray-700 font-psemibold text-sm mx-2">86 ml</Text>
+                    <Text className="text-gray-700 font-psemibold mx-2" style={{ fontSize: hp('1.5%') }}>86 ml</Text>
                 </View>
                 <View>
-                    <Text>{isReceiving ? "" : "Disconnected"}</Text>
+                    <Text style={{fontSize: hp('1.5%'), marginTop: hp('0.6%')}}>{isReceiving ? "" : "Disconnected"}</Text>
                 </View>
             </View>
-            
-            <PlantBoardMenu item={item} addCallback={addCallback} removeCallback={removeCallback}/>
+
+            <PlantBoardMenu
+                item={item}
+                addCallback={addCallback}
+                removeCallback={removeCallback}
+                menuStyle={{width: hp('3.6%'), height: hp('3.6%')}} />
         </View>
     )
 }

@@ -2,29 +2,27 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Animated, Alert } from 'react-native';
 import { Tabs } from 'expo-router';
 import { icons } from '../../constants';
-import { LinearGradient } from 'expo-linear-gradient';
 import { PaperProvider, Modal } from 'react-native-paper';
-import FormField from '../../components/FormField';
-import { getCurrentUser } from '../../lib/appwrite';
-import { createPlant } from '../../lib/appwrite';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
     <View
-      className="items-center justify-center gap-1 min-w-[50px]
-      flex-col"
-      style={{ paddingTop: focused ? 1 : 11 }}
+      className="items-center justify-center gap-1
+      flex-col "
+      style={{marginTop: focused ? 0 : hp('0.5%'), width: wp('11%'), height: hp('6%')}}
     >
       <Image
         source={icon}
         resizeMode="contain"
         tintColor={color}
-        className="w-8 h-8"
+        style={{width: hp('3%'), height: hp('3%')}}
+        className=""
       />
       {!focused ? (
         <Text
-          className={`${focused ? 'font-psemibold' : 'font-pregular'} text-xs`}
-          style={{ color: color }}
+          className={`${focused ? 'font-psemibold' : 'font-pregular'}`}
+          style={{ color: color, fontSize: hp('1.2%') }}
         >
           {name}
         </Text>
@@ -44,13 +42,15 @@ const TabsLayout = () => {
           tabBarHideOnKeyboard:true,
           tabBarStyle: {
             position: 'absolute',
-            bottom: 30,
-            marginHorizontal: 38,
+            bottom: hp('4%'),
+            left:30,
+            right:30,
+            marginHorizontal: '9%',
             width: '80%',
             alignSelf: 'center',
             backgroundColor: '#f2f9f1',
             borderRadius: 40,
-            height: 70,
+            height: hp('7.5%'),
             flexDirection: 'row',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 5 },
@@ -60,12 +60,14 @@ const TabsLayout = () => {
             paddingHorizontal: 20,
             paddingTop: 12,
             zIndex: 30,
+            alignContent:'center',
+            justifyContent:'center'
           },
         }}
       >
         <Tabs.Screen
           name="home"
-          style={{ paddingTop: 20 }}
+          style={{ paddingTop:0 }}
           options={{
             title: 'Home',
             headerShown: false,
@@ -82,7 +84,7 @@ const TabsLayout = () => {
 
         <Tabs.Screen
           name="friends"
-          style={{ paddingTop: 20 }}
+          style={{  }}
           options={{
             title: 'Friends',
             headerShown: false,
@@ -100,7 +102,7 @@ const TabsLayout = () => {
 
         <Tabs.Screen
           name="profile"
-          style={{ paddingTop: 20 }}
+          style={{ paddingTop: 0 }}
           options={{
             title: 'Profile',
             headerShown: false,
@@ -118,37 +120,5 @@ const TabsLayout = () => {
     </PaperProvider>
   );
 };
-
-const styles = StyleSheet.create({
-  modal: {
-    justifyContent: 'flex-end',
-    margin: 0,
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  closeButton: {
-    color: '#2b65e3',
-    marginTop: 20,
-    fontSize: 16,
-  },
-  createMenu: {
-    position: 'absolute',
-    bottom: 100,
-    right: 60,
-    left: 60,
-    height: 250,
-    borderRadius: 20,
-  }
-});
 
 export default TabsLayout;

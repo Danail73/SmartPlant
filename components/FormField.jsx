@@ -3,17 +3,17 @@ import React, { useState } from 'react'
 import { icons } from '../constants';
 
 const FormField = ({ title, value, placeholder,
-  handleChangeText, textStyles, inputStyles, otherStyles, useIcon, iconSource, iconStyles, iconTint, hideText, ...props }) => {
+  handleChangeText, textStyles, bonusTextStyles, inputStyles, bonusInputStyles, otherStyles, containerStyles, useIcon, iconSource, iconStyles, iconTint, hideText, ...props }) => {
   const [showText, setShowText] = useState(false);
 
   return (
-    <View className={`bg-notFullWhite h-[100px] w-[250px] p-3 ${otherStyles}`}>
+    <View className={`bg-notFullWhite   p-3 ${otherStyles}`} style={containerStyles}>
       {title && (
-        <Text className={`font-pmedium text-gray-900 text-base ${textStyles}`}>{title}</Text>
+        <Text className={`font-pmedium text-gray-900 text-base ${textStyles}`} style={bonusTextStyles}>{title}</Text>
       )}
       <View
-        className="shadow-md shadow-black flex-row items-center"
-        style={{ elevation: 5 }}
+        className=" flex-row items-center"
+        
       >
         {useIcon && (
           <View className="items-center justify-center absolute z-20 pl-2">
@@ -29,6 +29,7 @@ const FormField = ({ title, value, placeholder,
           <>
             <TextInput
               className={`border w-[230px] mt-1 bg-white rounded-lg pl-[15%] ${inputStyles}`}
+              style={{bonusInputStyles}}
               placeholder={placeholder}
               value={value}
               onChangeText={handleChangeText}
@@ -47,6 +48,7 @@ const FormField = ({ title, value, placeholder,
         ) : (
           <TextInput
             className={`border w-[230px] mt-1 bg-white rounded-lg pl-[15%] ${inputStyles}`}
+            style={bonusInputStyles}
             placeholder={placeholder}
             placeholderTextColor={''}
             value={value}

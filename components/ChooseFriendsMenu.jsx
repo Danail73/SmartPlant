@@ -1,14 +1,16 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native'
 import CustomButton from './CustomButton'
 import FriendComponent from './FriendComponent'
 import React, { useEffect, useState } from 'react'
 import ChooseMenuComponent from './ChooseMenuComponent'
 import { getAcceptedRequest, respondFriendRequest } from '../lib/appwrite'
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { images } from '../constants'
 
 const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, fn, withRequest }) => {
     const [listFriends, setListFriends] = useState([])
     const [isLoading, setIsLoading] = useState(false)
-
+    const width = wp('100%');
     const addItem = (item) => {
         const users = [...listFriends];
         users.push(item)
@@ -30,7 +32,12 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
         setIsLoading(false)
     }
     return (
-        <View className="border-2 min-h-[20%] max-h-[70%] top-20 right-5 left-5 absolute bg-notFullWhite rounded-lg">
+        <View
+            className="border-2 bg-notFullWhite rounded-lg"
+            style={{
+                maxWidth: 600, minHeight: hp('20%'), maxHeight: hp('70%'), position: 'absolute', top: hp('10%'), 
+                right: (width>600) ? (width-600)/2 : wp('5%'), left: (width>600) ? (width-600)/2 : wp('5%')}}
+        >
             {isLoading && (
                 <View className="absolute inset-0 justify-center items-center bg-black bg-opacity-25">
                     <ActivityIndicator size="large" color="#ffffff" />
@@ -38,10 +45,10 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
             )}
             <View className="items-center justify-center">
                 <View>
-                    <Text className="mt-5 font-pmedium text-lg">{title}</Text>
+                    <Text className="mt-5 font-pmedium" style={{fontSize: hp('1.8%')}}>{title}</Text>
                 </View>
-                <View className="bg-black h-[1px] w-[90%] my-3"></View>
-                {friends ? (
+                <View className="bg-black h-[0.1rem] w-[90%] my-3"></View>
+                {friends && friends.length>0 ? (
                     <FlatList
                         data={friends || []}
                         keyExtractor={(item) => withRequest ? item.friend.$id : item.$id}
@@ -53,29 +60,29 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                         showsVerticalScrollIndicator={false}
                     />
                 ) : (
-                    <View className="items-center justify-center flex-col p-8 h-[300px]">
+                    <View className="items-center justify-center flex-col w-[80%]" style={{height: hp('20%')}}>
                         <Image
                             source={images.noResult}
-                            className="w-[100px] h-[100px] mb-3"
+                            className="mb-3"
                             resizeMode='contain'
-                            style={{ tintColor: '#4d4752' }}
+                            style={{ tintColor: '#4d4752', width: hp('10%'), height: hp('10%') }}
                         />
                         <Text className="text-[#4d4752] font-pregular text-lg">No friends found</Text>
                     </View>
                 )}
-                <View className="bg-black h-[1px] w-[90%] my-3"></View>
+                <View className="bg-black h-[0.1rem] w-[90%] my-3 mb-[70px]"></View>
             </View>
-            <View className="flex-row min-h-[70px] h-[28%] max-h-[70px] items-center justify-between px-12">
+            <View className="flex-row h-[70px] items-center justify-between px-[14%] absolute bottom-0 w-full">
                 <CustomButton
                     title='Cancel'
                     handlePress={() => cancel()}
-                    containerStyles={'border rounded-lg w-[40%] h-[70%]'}
+                    containerStyles={'border rounded-lg w-[40%] h-[70%] max-w-[130px]'}
                     textStyles={'font-pmedium text-lg'}
                 />
                 <CustomButton
                     title={buttonTitle}
                     handlePress={handlePress}
-                    containerStyles={'border rounded-lg w-[40%] h-[70%]'}
+                    containerStyles={'border rounded-lg w-[40%] h-[70%] max-w-[130px]'}
                     textStyles={'font-pmedium text-lg'}
                 //disabled={listFriends.length>0 ? false : true}
                 />

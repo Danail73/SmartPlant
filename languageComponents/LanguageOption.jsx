@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native'
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import { icons } from '../constants'
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated'
 import { useLanguage } from '../translations/i18n'
@@ -13,7 +13,7 @@ const LanguageOption = ({ title, handlePress, isVisible }) => {
         setCheckVisible(true)
         checkScale.value = withTiming(1, { duration: 200 });
     }
-    
+
     const closeCheck = () => {
         setCheckVisible(true)
         checkScale.value = withTiming(0, { duration: 200 }, () => {
@@ -29,10 +29,10 @@ const LanguageOption = ({ title, handlePress, isVisible }) => {
     });
 
     useEffect(() => {
-        if(isVisible) {
+        if (isVisible) {
             showCheck()
         }
-        else{
+        else {
             closeCheck()
         }
     }, [isVisible])
@@ -45,14 +45,16 @@ const LanguageOption = ({ title, handlePress, isVisible }) => {
                 handlePress();
             }}
         >
-            <Text className="text-lg font-psemibold">{title}</Text>
-            {checkVisible && (
-                <Animated.Image
-                    source={icons.check}
-                    className="w-[40%] h-[50%]"
-                    style={langOptionAnimatedStyle}
-                />
-            )}
+            <View className="flex-row items-center justify-center">
+                <Text className="text-lg font-psemibold">{title}</Text>
+                {checkVisible && (
+                    <Animated.Image
+                        source={icons.check}
+                        className="w-8 h-8 mb-1"
+                        style={langOptionAnimatedStyle}
+                    />
+                )}
+            </View>
         </TouchableOpacity>
     )
 }

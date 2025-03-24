@@ -213,7 +213,7 @@ const Profile = () => {
         <View className="bg-transparent w-[100%] h-[15%] mt-[20%] justify-end z-5">
           <LanguageMenu
             langContainerStyles={'absolute left-[10%] bottom-[5%]'}
-            langMenuStyles={'bg-notFullWhite w-[18%] h-[12%] mt-[24%] ml-[6%] rounded-md items-center'}
+            langMenuStyles={'bg-notFullWhite w-[90px] h-[110px] rounded-md items-center'}
           />
           <CustomButton
             containerStyles={'absolute right-[5%] items-center justify-center bg-notFullWhite rounded-md'}

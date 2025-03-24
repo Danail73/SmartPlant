@@ -7,8 +7,9 @@ import { deletePlant, updatePlant, updatePlantUsers } from '../lib/appwrite';
 import FormField from './FormField';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { useGlobalContext } from '../context/GlobalProvider';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
-const PlantBoardMenu = ({ item, addCallback, removeCallback }) => {
+const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
   const { user } = useGlobalContext()
   const iconRef = useRef(null);
   const menuScale = useSharedValue(0);
@@ -24,8 +25,8 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback }) => {
     setVisible(true);
     if (iconRef.current) {
       iconRef.current.measure((x, y, width, height, pageX, pageY) => {
-        menuTop.value = isCreator ? (pageY - height - 80) : (pageY - height - 40);
-        menuLeft.value = isCreator ? (pageX - 40) : (pageX - 10);
+        menuTop.value = isCreator ? (pageY - height - 120) : (pageY - height - 40);
+        menuLeft.value = isCreator ? (pageX - width - 30) : (pageX - 10);
         menuScale.value = withTiming(1, { duration: 200 });
         rotation.value = withTiming(90, { duration: 200 });
       });
@@ -73,12 +74,11 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback }) => {
 
   return (
     <>
-      <TouchableOpacity ref={iconRef} onPress={openMenu}>
-        <Animated.View style={[rotationStyle, { left: 10 }]}>
-          <IconButton
-            icon={icons.menu}
-            iconColor='black'
-            size={30}
+      <TouchableOpacity ref={iconRef} onPress={openMenu} className="items-center justify-center absolute right-3" style={menuStyle}>
+        <Animated.View className="" style={[rotationStyle]}>
+          <Image
+            source={icons.menu}
+            style={menuStyle}
           />
         </Animated.View>
       </TouchableOpacity>
@@ -91,11 +91,11 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback }) => {
               <Animated.View
                 style={
                   [menuAnimatedStyle,
-                   styles.menuContent, 
-                   {
-                    width: isCreator ? styles.menuContent.width : 100,
-                    height: isCreator ? styles.menuContent.height : 120
-                   }]}
+                    styles.menuContent,
+                    {
+                      width: isCreator ? styles.menuContent.width : 100,
+                      height: isCreator ? styles.menuContent.height : 120
+                    }]}
                 className="absolute border"
               >
                 <TouchableOpacity
@@ -132,7 +132,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback }) => {
                           style={{ tintColor: 'green' }}
                           resizeMode='contain'
                         />
-                        <Text className="font-pregular pl-1 text-lg" style={{ color: 'green' }}>Add Friend</Text>
+                        <Text className="font-pregular pl-1 text-lg" style={{ color: 'green' }}>Add</Text>
                       </View>
                     </TouchableOpacity>
 
@@ -150,7 +150,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback }) => {
                           style={{ tintColor: 'red' }}
                           resizeMode='contain'
                         />
-                        <Text className="font-pregular pl-1 text-lg" style={{ color: 'red' }}>Remove Friend</Text>
+                        <Text className="font-pregular pl-1 text-lg" style={{ color: 'red' }}>Remove</Text>
                       </View>
                     </TouchableOpacity>
                   </>
@@ -190,8 +190,8 @@ const styles = StyleSheet.create({
   menuContent: {
     backgroundColor: '#f2f9f1',
     borderRadius: 10,
-    width: 160,
-    height: 160,
+    width: hp('17%'),
+    height: hp('20%'),
     justifyContent: 'center',
     alignItems: 'center'
   },

@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View, Image, Animated, TouchableOpacity, Dimensions, Alert } from 'react-native'
+import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Alert } from 'react-native'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { icons, images } from '../../constants'
@@ -16,6 +16,8 @@ import { useFriendsContext } from '../../context/FriendsProvider'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import ChooseFriendsMenu from '../../components/ChooseFriendsMenu'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming, runOnJS } from 'react-native-reanimated'
+import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
 
 const Home = () => {
@@ -25,9 +27,9 @@ const Home = () => {
   const [activeItem, setActiveItem] = useState(null);
   const { plants, setPlants, setActivePlant, activePlant } = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
-  const translateY = useRef(new Animated.Value(400)).current;
-  const scale = useRef(new Animated.Value(0)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useSharedValue(0);
+  const scale = useSharedValue(0);
+  const opacity = useSharedValue(0);
   const [addVisible, setAddVisible] = useState(false);
   const [removeVisible, setRemoveVisible] = useState(false);
   const [form, setForm] = useState({
@@ -64,22 +66,18 @@ const Home = () => {
   }
 
   const showModal = () => {
-    setMenuVisible(true);
-    Animated.parallel([
-      Animated.timing(translateY, { toValue: 430, duration: 300, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-    ]).start();
+    setMenuVisible(true)
+    translateY.value = withTiming(0, { duration: 300 })
+    scale.value = withTiming(1, { duration: 300 })
+    opacity.value = withTiming(1, { duration: 300 })
   };
 
   const hideModal = () => {
-    Animated.parallel([
-      Animated.timing(translateY, { toValue: 600, duration: 300, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 0, duration: 300, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-    ]).start(() => {
-      setMenuVisible(false);
-    });
+    translateY.value = withTiming(600, { duration: 300 })
+    scale.value = withTiming(0, { duration: 300 }, () => {
+      runOnJS(setMenuVisible)(false)
+    })
+    opacity.value = withTiming(0, { duration: 300 })
   };
 
   const viewableItemsChanged = useCallback(({ viewableItems }) => {
@@ -106,12 +104,19 @@ const Home = () => {
       setPlants((previous) => previous.map(
         (item) => item.$id == updatedItem.$id ? updatedItem : item
       ))
-      if(activePlant.$id === updatedItem.$id){
+      if (activePlant && (activePlant.$id === updatedItem.$id)) {
         setActiveItem(updatedItem)
         setActivePlant(updatedItem)
       }
     }
   }
+
+  const createMenuAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value
+    };
+  })
 
   useEffect(() => {
     const unsubscribePlants = subscribeToPlants(user.$id, handlePlantUpdated)
@@ -136,11 +141,22 @@ const Home = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      updateSensors();
+      if (client) {
+        updateSensors();
+      }
     }, 300000)
 
     return () => clearInterval(interval)
   }, [activeItem])
+
+  /*useEffect(() => {
+    try {
+      const response = fetchAIResponse("tomato")
+
+    } catch (error) {
+      console.log(error);
+    }
+  })*/
 
 
   return (
@@ -149,48 +165,66 @@ const Home = () => {
         colors={['#4ec09c', '#a8d981']}
         statusBarStyle={'light'}
       >
-        <View className="px-10">
-          <View className={`h-20 items-center justify-between flex-row ${language == 'bg' ? 'pl-0' : 'pl-4'} pt-4`}>
-            <Text className={`text-notFullWhite font-pmedium ${language == 'bg' ? 'text-2xl' : 'text-3xl'}`}>{t('Home')}</Text>
-            <Text className="text-notFullWhite font-pmedium text-3xl">{temperature}</Text>
+        <View style={{ paddingHorizontal: wp('8%') }}>
+          <View
+            className={`items-center justify-between flex-row`}
+            style={{ height: hp('7%'), paddingLeft: language == 'bg' ? 0 : wp('1%'), paddingTop: hp('2%') }}
+          >
+            <Text className={`text-notFullWhite font-pmedium`} style={{fontSize: language == 'bg' ? hp('2%') : hp('3%')}}>{t('Home')}</Text>
+            <Text className="text-notFullWhite font-pmedium" style={{fontSize: hp('3%')}}>{temperature}</Text>
           </View>
 
           {plants && plants.length > 0 && (
-            <View className="flex-row items-center my-3">
+            <View
+              className="flex-row items-center"
+              style={{ marginVertical: hp('2%') }}
+            >
               <Image
                 source={images.good}
-                className="w-[170px] h-[170px]"
+                //className="border"
+                style={{ width: wp('46%'), height: hp('23%') }}
                 resizeMode='contain'
               />
-              <View className="items-center justify-center pl-2">
-                <Text className="font-pmedium text-notFullWhite text-xl">{status.statusMessage}</Text>
+              <View
+                className="items-center justify-center"
+                style={{ paddingLeft: wp('1%') }}
+              >
+                <Text className="font-pmedium text-notFullWhite" style={{fontSize: hp('2%')}}>{status.statusMessage}</Text>
               </View>
             </View>
           )}
           {!plants || plants.length == 0 && (
-            <View className="flex-row items-center my-3">
+            <View
+              className="flex-row items-center my-3"
+              style={{ marginVertical: hp('2%') }}
+            >
               <Image
                 source={images.noResult}
-                className="w-[170px] h-[170px]"
+                style={{ width: wp('46%'), height: hp('23%') }}
                 resizeMode='contain'
               />
-              <View className="items-center justify-center pl-2">
-                <Text className="font-pmedium text-notFullWhite text-xl">Looks like you{'\n'}don't have plants</Text>
+              <View
+                className="items-center justify-center pl-2"
+                style={{ paddingLeft: wp('1%') }}
+              >
+                <Text className="font-pmedium text-notFullWhite" style={{fontSize: hp('1%')}}>Looks like you{'\n'}don't have plants</Text>
               </View>
             </View>
           )}
 
           <View style={{ overflow: 'visible' }}>
-            <View className="justify-between flex-row px-4">
-              <Text className="text-notFullWhite font-pmedium text-lg ">{t('Daily Plants')}</Text>
+            <View
+              className="justify-between flex-row"
+              style={{ paddingHorizontal: wp('2%') }}
+            >
+              <Text className="text-notFullWhite font-pmedium" style={{fontSize: hp('1.8%')}}>{t('Daily Plants')}</Text>
               <TouchableOpacity
                 onPressOut={showModal}
               >
                 <Image
                   source={icons.plus}
-                  className="w-7 h-7"
                   resizeMode='contain'
-                  style={{ tintColor: 'white' }}
+                  style={{ tintColor: 'white', width: hp('2.5%'), height: hp('2.5%') }}
                 />
               </TouchableOpacity>
             </View>
@@ -207,7 +241,7 @@ const Home = () => {
                       removeCallback={() => setRemoveVisible(true)}
                     />
                   )}
-                  style={{ overflow: 'visible' }}
+                  style={{ overflow: 'visible'}}
                   contentContainerStyle={{ marginLeft: (plants && plants.length == 1) ? 40 : 0, overflow: 'visible' }}
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -225,10 +259,7 @@ const Home = () => {
             )}
           </View>
         </View>
-        <Modal
-          visible={menuVisible}
-          onDismiss={hideModal}
-        >
+        {menuVisible && (
           <Animated.View
             className={`bg-notFullWhite items-center justify-center`}
             style={[
@@ -244,15 +275,17 @@ const Home = () => {
             <FormField
               title="plantId"
               placeholder={"Enter plantId"}
-              textStyles={'pl-[5%]'}
-              inputStyles={'pl-[5%]'}
+              bonusTextStyles={{paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.3%')}}
+              containerStyles={{height: hp('11%')}}
+              bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'),paddingLeft: wp('2%') }}
               handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
             />
             <FormField
               title="name"
               placeholder={"Enter name"}
-              textStyles={'pl-[5%]'}
-              inputStyles={'pl-[5%]'}
+              bonusTextStyles={{paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.2%')}}
+              containerStyles={{marginBottom: hp('1%'), height: hp('11%')}}
+              bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
               handleChangeText={(e) => { setForm({ ...form, name: e }) }}
             />
 
@@ -262,7 +295,6 @@ const Home = () => {
                   handleCreatePlant();
                   hideModal();
                 }}
-                className="w-16 h-16 rounded-full"
               >
                 <LinearGradient
                   colors={['#fdb442', '#f69f2c']}
@@ -271,21 +303,25 @@ const Home = () => {
 
                   style={{
                     borderRadius: 35,
+                    width: hp('6%'),
+                    height: hp('6%'),
+                    justifyContent:'center',
+                    alignItems:'center'
                   }}
-                  className="items-center justify-center w-16 h-16"
+                  className="items-center justify-center"
                 >
                   <Image
                     source={icons.plus}
                     resizeMode="contain"
-                    className="w-8 h-8 rounded-full"
-                    style={{ tintColor: '#f2f9f1' }}
+                    className="rounded-full"
+                    style={{ tintColor: '#f2f9f1', width: hp('3%'),height: hp('3%') }}
                   />
 
                 </LinearGradient>
               </TouchableOpacity>
             </View>
           </Animated.View>
-        </Modal>
+        )}
         {addVisible && (
           <SafeAreaView className="flex-1 w-full h-full absolute">
             <BlurView
@@ -355,9 +391,9 @@ const styles = StyleSheet.create({
   createMenu: {
     position: 'absolute',
     bottom: 100,
-    right: 60,
-    left: 60,
-    height: 280,
+    right: wp('15%'),
+    left: wp('15%'),
+    height: hp('34%'),
     borderRadius: 20,
   }
 });

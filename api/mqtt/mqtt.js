@@ -3,6 +3,8 @@ import { Client, Message } from 'react-native-paho-mqtt';
 import { usePlantsContext } from '../../context/PlantsProvider';
 
 const useMqttClient = () => {
+    const username = 'musashi'
+    const password = 'dAnnI_73'
     const { activePlant, plants } = usePlantsContext();
     const [isEnabled, setIsEnabled] = useState(false);
     const [temperature, setTemperature] = useState('');
@@ -27,6 +29,7 @@ const useMqttClient = () => {
         setPump(false);
         setStatusMessage('');
         statusCode = 0;
+        setIsReceiving(false)
     }
 
     const pumpSwitch = () => {
@@ -70,8 +73,7 @@ const useMqttClient = () => {
         }
     };
 
-    const mqttFunc = () => {
-
+    const createClient = () => {
         const myStorage = {
             setItem: (key, item) => {
                 myStorage[key] = item;
@@ -81,12 +83,18 @@ const useMqttClient = () => {
                 delete myStorage[key];
             },
         };
-
+//78.130.186.241:9001
         const mqttClient = new Client({
-            uri: "ws://192.168.10.114:9001/mqtt",
+            uri: "ws://78.130.186.241:9001/mqtt",
             clientId: `react_native_client_${Date.now()}`,
             storage: myStorage
         });
+        return mqttClient;
+    }
+
+    const mqttFunc = () => {
+
+        const mqttClient = createClient();
 
         mqttClient.on('connectionLost', () => {
             reconnect();
@@ -94,9 +102,19 @@ const useMqttClient = () => {
 
         const reconnect = () => {
             console.log("Reconnecting MQTT client...");
-            //console.log(client)
-            if (mqttClient._client.connected) mqttClient.disconnect();
-            setTimeout(() => mqttClient.connect(), 3000);
+            if (mqttClient && mqttClient._client.connected) {
+                mqttClient.disconnect().then(() => {
+                    console.log("Disconnected, attempting to reconnect...");
+                    setTimeout(() => mqttClient.connect({userName: username, password: password}), 2000);
+                }).catch(err => {
+                    console.error("Error disconnecting:", err);
+                });
+            } else {
+                console.log("Client is not connected, connecting now...");
+                mqttClient.connect({userName:username, password:password}).catch(err => {
+                    console.error("Error connecting:", err);
+                });
+            }
         };
 
         mqttClient.on('messageReceived', (message) => {
@@ -137,7 +155,7 @@ const useMqttClient = () => {
             }, 5000);
         };
 
-        mqttClient.connect({ userName: "musashi", password: "dAnnI_73" })
+        mqttClient.connect({ userName: username, password: password, keepAliveInterval:60, reconnect:true, cleanSession:true })
             .then(() => {
                 console.log('Connected to MQTT');
                 const topics = [
