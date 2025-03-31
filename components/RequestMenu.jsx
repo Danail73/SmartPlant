@@ -5,7 +5,7 @@ import { subscribeToFriendRequests, subscribeToUsers } from '../lib/appwrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 import FriendComponent from './FriendComponent'
 import { t } from '../translations/i18n'
-import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
 
 const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
     const { user } = useGlobalContext();
@@ -91,9 +91,9 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                         renderItem={({ item }) => (
                             <FriendComponent
                                 item={item.friend}
-                                titleStyles={'text-sm mb-[0.3]'}
-                                iconStyles={'w-9 h-9'}
-                                otherStyles={'w-[99%]'}
+                                titleStyles={{fontSize: hp('1.7%')}}
+                                iconStyles={{width: hp('5%'), height: hp('5%')}}
+                                containerStyles={{width: '99%'}}
                                 requestId={item.request.$id}
                                 isPending={true}
                                 forInvite={false}
@@ -134,9 +134,9 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                         renderItem={({ item }) => (
                             <FriendComponent
                                 item={item.friend}
-                                titleStyles={'text-sm mb-[0.3]'}
-                                iconStyles={'w-9 h-9'}
-                                otherStyles={'w-[99%]'}
+                                titleStyles={{fontSize: hp('1.7%') > 15 ? 15 :  hp('1.7%')}}
+                                iconStyles={{width: hp('4.5%'), height: hp('4.5%')}}
+                                containerStyles={{width: '88%'}}
                                 requestId={item.request.$id}
                                 forInvite={false}
                             />

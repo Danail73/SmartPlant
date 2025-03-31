@@ -170,7 +170,7 @@ const Device = () => {
           />
           <StatusCard
             label="TEMP"
-            value={temperature}
+            value={temperature+'°C'}
             showSwitch={false}
             iconSource={icons.temp}
             bonusIconStyles={{width: hp('6%'), maxWidth: 60, maxHeight: 60, height:  hp('6%'), marginBottom: hp('1%')}}
@@ -181,7 +181,7 @@ const Device = () => {
         <View className="flex-row items-center justify-center" style={{gap:hp('1%')}}>
           <StatusCard
             label="HUMIDITY"
-            value={humidity}
+            value={humidity+'%'}
             showSwitch={false}
             iconSource={icons.hmdty}
             bonusIconStyles={{width: hp('6%'), maxWidth: 60, maxHeight: 60, height:  hp('6%'), marginBottom: hp('1%')}}
@@ -190,7 +190,7 @@ const Device = () => {
           />
           <StatusCard
             label="BRIGHTNESS"
-            value={brightness}
+            value={brightness+'%'}
             showSwitch={false}
             iconSource={icons.brghtns}
             bonusIconStyles={{width: hp('6%'), maxWidth: 60, maxHeight: 60, height:  hp('6%'), marginBottom: hp('1%')}}
@@ -214,7 +214,7 @@ const Device = () => {
           />
           <StatusCard
             label="WATER LEVEL"
-            value={waterLevel}
+            value={waterLevel+'ml'}
             showSwitch={false}
             iconSource={icons.wlevel}
             bonusIconStyles={{width: hp('6%'), maxWidth: 60, maxHeight: 60, height:  hp('6%'), marginBottom: hp('1%')}}

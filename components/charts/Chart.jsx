@@ -77,11 +77,11 @@ const Chart = ({ data, width, height, containerStyles }) => {
                     {tooltip && (
                         <View style={{
                             position: 'absolute',
-                            left: tooltip.x - 50,
+                            left: tooltip.x - 58,
                             top: tooltip.y - 60,
                             backgroundColor: 'rgba(0,0,0,0.8)',
                             padding: 6,
-                            borderRadius: 6,
+                            borderRadius: 7,
                             alignItems: 'center'
                         }}>
                             <Text style={{ color: 'white', fontSize: 12 }}>{tooltip.label}</Text>

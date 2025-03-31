@@ -214,7 +214,7 @@ const Friends = () => {
               data={friendsSearchUpper() || []}
               keyExtractor={(item) => item.friend.$id}
               renderItem={({ item }) => (
-                <FriendComponent item={item.friend} otherStyles={'w-[330px]'} />
+                <FriendComponent item={item.friend} containerStyles={{width: wp('80%')}} />
               )}
               className="my-2"
               style={{height: hp('30%')}}
@@ -290,7 +290,7 @@ const Friends = () => {
               data={friendsSearchBottom() || []}
               keyExtractor={(item) => item.$id || item.id.toString()}
               renderItem={({ item }) => (
-                <FriendComponent item={item} forInvite={true} fromUser={user} otherStyles={'w-[330px]'} />
+                <FriendComponent item={item} forInvite={true} fromUser={user} containerStyles={{width: wp('80%')}}  />
               )}
               className="my-2"
               style={{height: hp('30%')}}

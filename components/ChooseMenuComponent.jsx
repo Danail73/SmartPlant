@@ -8,7 +8,7 @@ const ChooseMenuComponent = ({ item, addItem, discardItem, withRequest }) => {
 
     return (
         <View className="flex-row items-center gap-3">
-            <FriendComponent item={withRequest ? item.friend : item} otherStyles={'w-[270px]'} />
+            <FriendComponent item={withRequest ? item.friend : item} containerStyles={{width: 270}} />
             <TouchableOpacity
                 onPress={() => {
                     if (isSelected)

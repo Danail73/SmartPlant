@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { icons } from '../constants';
 import { respondFriendRequest, sendFriendRequest } from '../lib/appwrite';
 
-const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, iconStyles, titleStyles, subtitleStyles, requestId }) => {
+const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, iconStyles, titleStyles, subtitleStyles, requestId, containerStyles }) => {
 
     const handleSendRequest = async () => {
         try {
@@ -23,15 +23,16 @@ const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, ic
     }
 
     return (
-        <View className={`bg-notFullWhite rounded-xl max-w-[330px] p-3 border flex-row mb-1 items-center ${otherStyles}`}>
+        <View className={`bg-notFullWhite rounded-xl max-w-[450px] p-3 border flex-row mb-1 items-center`} style={containerStyles}>
             <Image
                 source={{ uri: item.avatar }}
-                className={`w-14 h-14 rounded-full mr-2 ${iconStyles}`}
+                className={`w-14 h-14 rounded-full mr-2`}
                 resizeMode='contain'
+                style={iconStyles}
             />
             <View>
-                <Text className={`font-psemibold text-base mb-1 ${titleStyles}`}>{item.username}</Text>
-                <Text className={`font-plight text-sm ${subtitleStyles}`}>{item.email}</Text>
+                <Text className={`font-psemibold text-base mb-1`} style={titleStyles}>{item.username}</Text>
+                <Text className={`font-plight text-sm`} style={subtitleStyles}>{item.email}</Text>
             </View>
             {forInvite && (
                 <View className="absolute right-3">

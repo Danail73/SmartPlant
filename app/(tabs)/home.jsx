@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback, Alert } from 'react-native'
+import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback, Alert, Keyboard } from 'react-native'
 import React, { useCallback, useEffect, useState, useRef, act } from 'react'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { icons, images } from '../../constants'
@@ -48,7 +48,22 @@ const Home = () => {
     water: activePlant ? activePlant.water : [],
   })
 
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
+      setKeyboardHeight(event.endCoordinates.height - 30);
+    });
+
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const clearForm = () => {
     setForm({ plantId: '', name: '' })
@@ -80,15 +95,15 @@ const Home = () => {
 
   const showModal = () => {
     setMenuVisible(true)
-    scale.value = withTiming(1, { duration: 300 })
-    opacity.value = withTiming(1, { duration: 300 })
+    scale.value = withTiming(1, { duration: 200 })
+    opacity.value = withTiming(1, { duration: 200 })
   };
 
   const hideModal = () => {
-    scale.value = withTiming(0, { duration: 300 }, () => {
+    scale.value = withTiming(0, { duration: 200 }, () => {
       runOnJS(setMenuVisible)(false)
     })
-    opacity.value = withTiming(0, { duration: 300 })
+    opacity.value = withTiming(0, { duration: 200 })
   };
 
   const viewableItemsChanged = useCallback(({ viewableItems }) => {
@@ -151,9 +166,16 @@ const Home = () => {
   }, [friends])
 
   const getCurrentTime = () => {
-    const now = new Date();
-    const formattedDateTime = now.toISOString().slice(0, 19).replace("T", " ");
-    return formattedDateTime;
+    const now = new Date().toLocaleString("en-GB", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    }).replace(/\//g, "-").replace(", ", " ");
+    return now;
   }
 
   const updateSensors = async (temp, hum, bri, wat, stat) => {
@@ -208,6 +230,7 @@ const Home = () => {
     }
   }, [activePlant])
 
+
   return (
     <PaperProvider>
       <Container
@@ -220,7 +243,7 @@ const Home = () => {
             style={{ height: hp('7%'), paddingLeft: language == 'bg' ? 0 : wp('1%'), paddingTop: hp('2%') }}
           >
             <Text className={`text-notFullWhite font-pmedium`} style={{ fontSize: language == 'bg' ? hp('2%') : hp('3%') }}>{t('Home')}</Text>
-            <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{temperature}</Text>
+            <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{temperature}°C</Text>
           </View>
 
           {plants && plants.length > 0 && (
@@ -313,61 +336,68 @@ const Home = () => {
         {menuVisible && (
           <TouchableWithoutFeedback onPress={hideModal}>
             <View style={{ width: wp('100%'), height: hp('100%'), position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
-              <Animated.View
-                className={`bg-notFullWhite items-center justify-center`}
-                style={[
-                  styles.createMenu, createMenuAnimatedStyle, { bottom: hp('1%') < 10 ? hp('1%') : 130 }
-                ]}
+              <BlurView
+                className="items-center justify-center"
+                style={{width: wp('100%'), height: hp('100%'),...StyleSheet.absoluteFillObject}}
+                intensity={40}
+                tint='dark'
               >
-                <FormField
-                  title="plantId"
-                  placeholder={"Enter plantId"}
-                  bonusTextStyles={{ paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.3%') }}
-                  containerStyles={{ height: hp('11%') }}
-                  bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
-                  handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
-                />
-                <FormField
-                  title="name"
-                  placeholder={"Enter name"}
-                  bonusTextStyles={{ paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.2%') }}
-                  containerStyles={{ marginBottom: hp('1%'), height: hp('11%') }}
-                  bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
-                  handleChangeText={(e) => { setForm({ ...form, name: e }) }}
-                />
+                <Animated.View
+                  className={`bg-notFullWhite items-center justify-center`}
+                  style={[
+                    styles.createMenu, createMenuAnimatedStyle, { bottom: hp('1%') < 10 ? hp('1%') + keyboardHeight : 130 + keyboardHeight }
+                  ]}
+                >
+                  <FormField
+                    title="plantId"
+                    placeholder={"Enter plantId"}
+                    bonusTextStyles={{ paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.3%') }}
+                    containerStyles={{ height: hp('11%') }}
+                    bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
+                    handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
+                  />
+                  <FormField
+                    title="name"
+                    placeholder={"Enter name"}
+                    bonusTextStyles={{ paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.2%') }}
+                    containerStyles={{ marginBottom: hp('1%'), height: hp('11%') }}
+                    bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
+                    handleChangeText={(e) => { setForm({ ...form, name: e }) }}
+                  />
 
-                <View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      handleCreatePlant();
-                      hideModal();
-                    }}
-                  >
-                    <LinearGradient
-                      colors={['#fdb442', '#f69f2c']}
-                      start={[0, 0]}
-                      end={[1, 1]}
-
-                      style={{
-                        borderRadius: 35,
-                        width: hp('6%'),
-                        height: hp('6%'),
-                        justifyContent: 'center',
-                        alignItems: 'center'
+                  <View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleCreatePlant();
+                        hideModal();
                       }}
-                      className="items-center justify-center"
                     >
-                      <Image
-                        source={icons.plus}
-                        resizeMode="contain"
-                        className="rounded-full"
-                        style={{ tintColor: '#f2f9f1', width: hp('3%'), height: hp('3%') }}
-                      />
+                      <LinearGradient
+                        colors={['#fdb442', '#f69f2c']}
+                        start={[0, 0]}
+                        end={[1, 1]}
 
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </View>
-              </Animated.View>
+                        style={{
+                          borderRadius: 35,
+                          width: hp('6%'),
+                          height: hp('6%'),
+                          justifyContent: 'center',
+                          alignItems: 'center'
+                        }}
+                        className="items-center justify-center"
+                      >
+                        <Image
+                          source={icons.plus}
+                          resizeMode="contain"
+                          className="rounded-full"
+                          style={{ tintColor: '#f2f9f1', width: hp('3%'), height: hp('3%') }}
+                        />
+
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+              </BlurView>
             </View>
           </TouchableWithoutFeedback>
         )}

@@ -1,15 +1,17 @@
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 
-const Container = ({ children ,colors, statusBarStyle, areaStyles }) => {
+const Container = ({ children, colors, statusBarStyle, areaStyles }) => {
 
   useEffect(() => {
-    NavigationBar.setBehaviorAsync('overlay-swipe')
-    NavigationBar.setVisibilityAsync('hidden')
+    if (Platform.OS == 'android') {
+      NavigationBar.setBehaviorAsync('overlay-swipe')
+      NavigationBar.setVisibilityAsync('hidden')
+    }
   })
 
   return (
@@ -22,7 +24,8 @@ const Container = ({ children ,colors, statusBarStyle, areaStyles }) => {
       <StatusBar style={statusBarStyle} />
       <SafeAreaView style={styles.area} className={`${areaStyles}`}>{children}</SafeAreaView>
     </LinearGradient>
-  )};
+  )
+};
 
 const styles = StyleSheet.create({
   gradient: {
