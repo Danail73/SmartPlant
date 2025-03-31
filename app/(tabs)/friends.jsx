@@ -15,6 +15,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 
 import { TouchableWithoutFeedback } from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import { t } from '../../translations/i18n'
+import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
 
 const { width, height } = Dimensions.get('window');
@@ -109,7 +110,7 @@ const Friends = () => {
   useEffect(() => {
     const unsubscribeRequests = subscribeToFriendRequests(user.$id, handleUpdated)
     const unsubscribeUsers = subscribeToUsers(handleUpdated)
-    
+
     return () => {
       unsubscribeRequests()
       unsubscribeUsers()
@@ -122,15 +123,15 @@ const Friends = () => {
         colors={['#4ec09c', '#a8d981']}
         statusBarStyle={'light'}
       >
-        <View className="px-10 mt-3 flex-row items-center justify-between">
-          <Text className="text-notFullWhite font-pmedium text-3xl">{t('Friends')}</Text>
+        <View className="flex-row items-center justify-between" style={{ paddingHorizontal: wp('8%'), marginTop: hp('1.5%') }}>
+          <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{t('Friends')}</Text>
           <View>
             <CustomButton
               useAnimatedIcon={true}
               imageSource={icons.menuAnimated}
               iVisible={true}
-              width={32}
-              height={32}
+              width={hp('3.5%')}
+              height={hp('3.5%')}
               textContainerStyles={'h-0 w-0'}
               handlePress={openRequestMenu}
             />
@@ -141,13 +142,13 @@ const Friends = () => {
             )}
           </View>
         </View>
-        <View className="items-center justify-center my-3">
+        <View className="items-center justify-center" style={{ marginTop: hp('1.3%') }}>
           {!upperSearchVisible && (
             <View className="flex-row items-center justify-center">
-              <View className="bg-notFullWhite h-[0.8px] w-[8%] mr-3"></View>
-              <View className="flex-row justify-between w-[58%]">
-                <Text className="text-white font-pregular text-lg">{t('Your friend list')}</Text>
-                <View className="flex-row gap-5">
+              <View className="bg-notFullWhite h-[0.1rem]" style={{ marginRight: wp('2.5%'), width: wp('8%') }}></View>
+              <View className="flex-row justify-between" style={{ width: wp('58%') }}>
+                <Text className="text-white font-pregular items-center justify-center" style={{ fontSize: hp('2%') }}>{t('Your friend list')}</Text>
+                <View className="flex-row " style={{ gap: wp('2%'), marginRight: wp('2.5%') }}>
                   <TouchableOpacity
                     onPress={() => {
                       setUpperSearchVisible(true)
@@ -159,8 +160,8 @@ const Friends = () => {
                     <AnimatedIcon
                       iconSource={icons.searchAnim}
                       isVisible={upperIconsVisible}
-                      width={35}
-                      height={35}
+                      width={hp('4%')}
+                      height={hp('4%')}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -172,26 +173,26 @@ const Friends = () => {
                     <AnimatedIcon
                       iconSource={icons.bin}
                       isVisible={upperIconsVisible}
-                      width={33}
-                      height={33}
+                      width={hp('4%')}
+                      height={hp('4%')}
                     />
                   </TouchableOpacity>
                 </View>
               </View>
-              <View className="bg-notFullWhite h-[0.8px] w-[10%] ml-3"></View>
+              <View className="bg-notFullWhite h-[0.1rem]" style={{ marginRight: wp('2.5%'), width: wp('8%') }}></View>
             </View>
           )}
           {upperSearchVisible && (
-            <View className={`flex-row items-center bg-[#eee8f4] rounded-full h-[56px] w-[90%] px-4`}>
+            <View className={`flex-row items-center bg-[#eee8f4] rounded-full`} style={{ paddingHorizontal: wp('2%'), width: wp('90%'), height: hp('7%'), maxHeight: 70 }}>
               <AnimatedIcon
                 iconSource={icons.searchAnim}
-                isVisible={upperSearchVisible}
-                width={35}
-                height={35}
+                isVisible={upperIconsVisible}
+                width={hp('4%')}
+                height={hp('4%')}
               />
               <TextInput
-                style={{ textAlignVertical: 'center' }}
-                className={`w-[75%] mx-4 text-lg font-pregular text-[#4d4752] justify-center items-center `}
+                style={{ textAlignVertical: 'center', marginLeft: wp('3%'), fontSize: hp('1.7%') }}
+                className={`w-[75%] font-pregular text-[#4d4752] justify-center items-center `}
                 placeholder='Search for friends'
                 value={upperSearchQuery}
                 onChangeText={handleChangeTextUpper}
@@ -202,9 +203,8 @@ const Friends = () => {
               >
                 <Image
                   source={icons.close}
-                  className="w-7 h-7"
                   resizeMode='contain'
-                  style={{ tintColor: '#4d4752' }}
+                  style={{ tintColor: '#4d4752', width: hp('3%'), height: hp('3%') }}
                 />
               </TouchableOpacity>
             </View>
@@ -216,16 +216,17 @@ const Friends = () => {
               renderItem={({ item }) => (
                 <FriendComponent item={item.friend} otherStyles={'w-[330px]'} />
               )}
-              className="my-2 h-[300px]"
+              className="my-2"
+              style={{height: hp('30%')}}
               showsVerticalScrollIndicator={false}
             />
           ) : (
             <View className="items-center justify-center flex-col p-8 h-[300px]">
               <Image
                 source={images.noResult}
-                className="w-[100px] h-[100px] mb-3"
+                className="mb-3"
                 resizeMode='contain'
-                style={{ tintColor: '#4d4752' }}
+                style={{ tintColor: '#4d4752', width: hp('13%'), height: hp('13%') }}
               />
               <Text className="text-[#4d4752] font-pregular text-lg">{t('No friends found')}</Text>
             </View>
@@ -235,9 +236,9 @@ const Friends = () => {
         <View className="items-center justify-center my-3">
           {!bottomSearchVisible && (
             <View className="flex-row items-center justify-center">
-              <View className="bg-notFullWhite h-[0.8px] w-[8%] mr-3"></View>
-              <View className="flex-row justify-between w-[210px]">
-                <Text className="text-white font-pregular text-lg">{t('Invite friends')}</Text>
+              <View className="bg-notFullWhite h-[0.1rem]" style={{ marginRight: wp('2.5%'), width: wp('8%') }}></View>
+              <View className="flex-row justify-between" style={{ width: wp('53%') }}>
+                <Text className="text-white font-pregular " style={{ fontSize: hp('2%') }}>{t('Invite friends')}</Text>
                 <TouchableOpacity
                   onPress={() => {
                     setBottomSearchVisible(true)
@@ -249,25 +250,25 @@ const Friends = () => {
                   <AnimatedIcon
                     iconSource={icons.searchAnim}
                     isVisible={bottomIconsVisible}
-                    width={35}
-                    height={35}
+                    width={hp('4%')}
+                    height={hp('4%')}
                   />
                 </TouchableOpacity>
               </View>
-              <View className="bg-notFullWhite h-[0.8px] w-[13%] ml-3"></View>
+              <View className="bg-notFullWhite h-[0.1rem]" style={{ marginRight: wp('2.5%'), width: wp('13%') }}></View>
             </View>
           )}
           {bottomSearchVisible && (
-            <View className={`flex-row items-center bg-[#eee8f4] rounded-full h-[56px] w-[90%] px-4`}>
+            <View className={`flex-row items-center bg-[#eee8f4] rounded-full`} style={{ paddingHorizontal: wp('2%'), width: wp('90%'), height: hp('7%'), maxHeight: 70 }}>
               <AnimatedIcon
                 iconSource={icons.searchAnim}
                 isVisible={bottomSearchVisible}
-                width={35}
-                height={35}
+                width={hp('4%')}
+                height={hp('4%')}
               />
               <TextInput
-                style={{ textAlignVertical: 'center' }}
-                className={`w-[75%] mx-4 text-lg font-pregular text-[#4d4752] justify-center items-center `}
+                style={{ textAlignVertical: 'center',  marginLeft: wp('3%'), fontSize: hp('1.7%')  }}
+                className={`w-[75%]  font-pregular text-[#4d4752] justify-center items-center `}
                 placeholder='Search for friends'
                 value={bottomSearchQuery}
                 onChangeText={handleChangeTextBottom}
@@ -278,9 +279,8 @@ const Friends = () => {
               >
                 <Image
                   source={icons.close}
-                  className="w-7 h-7"
                   resizeMode='contain'
-                  style={{ tintColor: '#4d4752' }}
+                  style={{ tintColor: '#4d4752', width: hp('3%'), height: hp('3%') }}
                 />
               </TouchableOpacity>
             </View>
@@ -292,18 +292,19 @@ const Friends = () => {
               renderItem={({ item }) => (
                 <FriendComponent item={item} forInvite={true} fromUser={user} otherStyles={'w-[330px]'} />
               )}
-              className="my-2 h-[30%]"
+              className="my-2"
+              style={{height: hp('30%')}}
               showsVerticalScrollIndicator={false}
             />
           ) : (
-            <View className="items-center justify-center flex-col mt-2 p-8 h-[250px]">
+            <View className="items-center justify-center flex-col mt-2 p-8">
               <Image
                 source={images.findFriends}
-                className="w-[100px] h-[100px] mb-3"
+                className="mb-3"
                 resizeMode='contain'
-                style={{ tintColor: '#4d4752' }}
+                style={{ tintColor: '#4d4752', width: hp('13%'), height: hp('13%') }}
               />
-              <Text className="text-[#4d4752] font-pregular text-lg">{t('Search for friends')}</Text>
+              <Text className="text-[#4d4752] font-pregular" style={{fontSize: hp('2%')}}>{t('Search for friends')}</Text>
             </View>
           )}
         </View>
@@ -312,22 +313,23 @@ const Friends = () => {
             <View className="flex-1 w-full h-full absolute ">
               <BlurView
                 className="h-[104%]"
+                style={{height: hp('110%')}}
                 intensity={40}
                 tint='dark'
               >
                 <Animated.View
-                  style={[menuAnimatedStyle]}
-                  className="w-[87%] h-[6%] top-[40%] right-0 absolute bg-notFullWhite items-start justify-center rounded-l-lg border "
+                  style={[menuAnimatedStyle, {width: wp('87%'), maxWidth: 670, height: hp('7%'), top: hp('45%')}]}
+                  className="right-0 absolute bg-notFullWhite items-start justify-center rounded-l-lg border "
                 >
                   <TouchableOpacity
                     onPress={closeRequestMenu}
                     className="items-center ml-[4%]"
+                    style={{marginLeft: wp('3%')}}
                   >
                     <Animated.Image
                       source={icons.rightArrow1}
-                      className="w-9 h-9"
                       resizeMode="contain"
-                      style={[rotateAnimatedStyle]}
+                      style={[rotateAnimatedStyle, {width:hp('4%'), height: hp('4%')}]}
                     />
                   </TouchableOpacity>
                 </Animated.View>
@@ -381,10 +383,6 @@ const styles = StyleSheet.create({
     right: 0,
     width: '100%',
     height: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5
   }
 })
 

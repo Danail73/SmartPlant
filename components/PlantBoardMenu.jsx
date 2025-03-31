@@ -25,8 +25,8 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
     setVisible(true);
     if (iconRef.current) {
       iconRef.current.measure((x, y, width, height, pageX, pageY) => {
-        menuTop.value = isCreator ? (pageY - height - 120) : (pageY - height - 40);
-        menuLeft.value = isCreator ? (pageX - width - 30) : (pageX - 10);
+        menuTop.value = isCreator ? (pageY - height - (hp('14.5%') > 135 ? 135 : hp('14.5%'))) : (pageY - height - 40);
+        menuLeft.value = isCreator ? (pageX - width - (wp('6%') > 25 ? 25 : wp('6%'))) : (pageX - 10);
         menuScale.value = withTiming(1, { duration: 200 });
         rotation.value = withTiming(90, { duration: 200 });
       });
@@ -94,7 +94,9 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                     styles.menuContent,
                     {
                       width: isCreator ? styles.menuContent.width : 100,
-                      height: isCreator ? styles.menuContent.height : 120
+                      height: isCreator ? styles.menuContent.height : 120,
+                      gap: hp('1%')
+                      
                     }]}
                 className="absolute border"
               >
@@ -105,14 +107,13 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                     navigateToDevice();
                   }}
                 >
-                  <View className="flex-row my-2">
+                  <View className="flex-row">
                     <Image
                       source={icons.edit}
-                      className="w-6 h-6"
-                      style={{ tintColor: 'blue' }}
+                      style={{ tintColor: 'blue', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26 }}
                       resizeMode='contain'
                     />
-                    <Text className="font-pregular pl-1 text-lg" style={{ color: 'blue' }}>Edit</Text>
+                    <Text className="font-pregular pl-1 " style={{ color: 'blue', fontSize: hp('2.2%') > 20 ? 20 : hp('2.2%') }}>Edit</Text>
                   </View>
                 </TouchableOpacity>
 
@@ -125,14 +126,13 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                         addCallback();
                       }}
                     >
-                      <View className="flex-row my-2">
+                      <View className="flex-row">
                         <Image
                           source={icons.addFriend}
-                          className="w-7 h-7"
-                          style={{ tintColor: 'green' }}
+                          style={{ tintColor: 'green', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26  }}
                           resizeMode='contain'
                         />
-                        <Text className="font-pregular pl-1 text-lg" style={{ color: 'green' }}>Add</Text>
+                        <Text className="font-pregular pl-1 " style={{ color: 'green', fontSize: hp('2.2%') > 20 ? 20 : hp('2.2%') }}>Add</Text>
                       </View>
                     </TouchableOpacity>
 
@@ -143,14 +143,13 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                         removeCallback();
                       }}
                     >
-                      <View className="flex-row my-2">
+                      <View className="flex-row">
                         <Image
                           source={icons.addFriend}
-                          className="w-7 h-7"
-                          style={{ tintColor: 'red' }}
+                          style={{ tintColor: 'red', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26  }}
                           resizeMode='contain'
                         />
-                        <Text className="font-pregular pl-1 text-lg" style={{ color: 'red' }}>Remove</Text>
+                        <Text className="font-pregular pl-1 " style={{ color: 'red', fontSize: hp('2.2%') > 20 ? 20 : hp('2.2%') }}>Remove</Text>
                       </View>
                     </TouchableOpacity>
                   </>
@@ -163,14 +162,13 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                     handleDeletePlant();
                   }}
                 >
-                  <View className="flex-row my-2">
+                  <View className="flex-row ">
                     <Image
                       source={icons.del}
-                      className="w-7 h-7"
-                      style={{ tintColor: 'red' }}
+                      style={{ tintColor: 'red', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26  }}
                       resizeMode='contain'
                     />
-                    <Text className="font-pregular pl-1 text-lg" style={{ color: 'red' }}>Delete</Text>
+                    <Text className="font-pregular pl-1" style={{ color: 'red', fontSize: hp('2.2%') > 20 ? 20 : hp('2.2%') }}>Delete</Text>
                   </View>
                 </TouchableOpacity>
               </Animated.View>
@@ -193,7 +191,9 @@ const styles = StyleSheet.create({
     width: hp('17%'),
     height: hp('20%'),
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    maxHeight: 200,
+    maxWidth: 170
   },
 });
 

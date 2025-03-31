@@ -5,8 +5,9 @@ import { subscribeToFriendRequests, subscribeToUsers } from '../lib/appwrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 import FriendComponent from './FriendComponent'
 import { t } from '../translations/i18n'
+import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
-const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
+const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
     const { user } = useGlobalContext();
     const [upperVisible, setUpperVisible] = useState(false)
     const [bottomVisible, setBottomVisible] = useState(false)
@@ -53,26 +54,30 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
         outputRange: ['0deg', '90deg'],
     });
 
-    
+
 
     return (
-        <View className="absolute w-[70%]  bg-notFullWhite right-0 top-12 bottom-[110px] rounded-l-lg border">
+        <View
+            className="absolute bg-notFullWhite right-0 rounded-l-lg border-l border-t border-b"
+            style={{ width: wp('70%'), top: hp('7%'), height: hp('80%'), minHeight: 730, borderWidth: hp('0.1rem') }}
+        >
             <TouchableOpacity
                 onPress={toggleUpper}
             >
                 <Animated.View
-
-                    className="w-[100%] border flex-row items-center rounded-tl-md"
+                    className="w-[100%]  flex-row items-center "
                 >
                     <Animated.Image
-                        style={{ transform: [{ rotate: rotateInterpolateUpper }] }}
+                        style={{ transform: [{ rotate: rotateInterpolateUpper }], width: hp('2%'), height: hp('2%'), margin: hp('1%') }}
                         source={icons.leftArrow}
-                        className="w-5 h-5 m-2"
                     />
-                    <Text className="font-pmedium">{t('Incoming Requests')}</Text>
+                    <Text className="font-pmedium" style={{ fontSize: hp('1.7%') }}>{t('Incoming Requests')}</Text>
                     {requestFriends.length > 0 && (
-                        <View className="rounded-full border w-7 h-7 items-center justify-center bg-red-600 ml-1">
-                            <Text className="text-white text-sm">{requestFriends.length > 99 ? '99+' : requestFriends.length}</Text>
+                        <View
+                            className="rounded-full border items-center justify-center bg-red-600 ml-[2%]"
+                            style={{ width: hp('3%'), height: hp('3%') }}
+                        >
+                            <Text className="text-white" style={{ fontSize: hp('1.6%') }}>{requestFriends.length > 99 ? '99+' : requestFriends.length}</Text>
                         </View>
                     )}
                 </Animated.View>
@@ -104,17 +109,19 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends}) => {
                 onPress={toggleBottom}
             >
                 <Animated.View
-                    className="w-[100%] border flex-row items-center"
+                    className="w-[100%] border-t border-b  flex-row items-center"
                 >
                     <Animated.Image
-                        style={{ transform: [{ rotate: rotateInterpolateBottom }] }}
+                        style={{ transform: [{ rotate: rotateInterpolateBottom }], width: hp('2%'), height: hp('2%'), margin: hp('1%') }}
                         source={icons.leftArrow}
-                        className="w-5 h-5 m-2"
                     />
-                    <Text className="font-pmedium">{t('Pending Invites')}</Text>
+                    <Text className="font-pmedium" style={{ fontSize: hp('1.7%') }}>{t('Pending Invites')}</Text>
                     {invitedFriends.length > 0 && (
-                        <View className="rounded-full border w-7 h-7 items-center justify-center bg-gray-500 ml-1">
-                            <Text className="text-white text-sm">{invitedFriends.length > 99 ? '99+' : invitedFriends.length}</Text>
+                        <View
+                            className="rounded-full border items-center justify-center bg-gray-500 ml-[2%]"
+                            style={{ width: hp('3%'), height: hp('3%') }}
+                        >
+                            <Text className="text-white" style={{ fontSize: hp('1.6%') }}>{invitedFriends.length > 99 ? '99+' : invitedFriends.length}</Text>
                         </View>
                     )}
                 </Animated.View>

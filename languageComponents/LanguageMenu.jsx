@@ -6,8 +6,9 @@ import { icons } from '../constants';
 import { useLanguage } from '../translations/i18n';
 import LanguageOption from './LanguageOption';
 import { useGlobalContext } from '../context/GlobalProvider';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
-const LanguageMenu = ({ langContainerStyles, langMenuStyles }) => {
+const LanguageMenu = ({ langContainerStyles, bonusLandContainerStyles, langMenuStyles, bonusLangMenuStyles }) => {
     const { language, switchLanguage } = useGlobalContext();
     const iconRef = useRef(null);
 
@@ -22,8 +23,8 @@ const LanguageMenu = ({ langContainerStyles, langMenuStyles }) => {
         setVisible(true);
         if (iconRef.current) {
             iconRef.current.measure((x, y, width, height, pageX, pageY) => {
-                menuTop.value = y + 10;
-                menuLeft.value = x - 23;
+                menuTop.value = y + hp('2%');
+                menuLeft.value = x - (hp('2.7%') > 30 ? 29 : hp('2.7%'));
                 langScale.value = withTiming(1, { duration: 200 });
             });
         }
@@ -55,15 +56,15 @@ const LanguageMenu = ({ langContainerStyles, langMenuStyles }) => {
             <View
                 ref={iconRef}
                 className={`${langContainerStyles}`}
-                style={{ zIndex: 36 }}
+                style={[{ zIndex: 36 }, bonusLandContainerStyles]}
             >
                 <CustomButton
                     containerStyles={'bg-notFullWhite rounded-full items-center justify-center'}
                     useAnimatedIcon={true}
                     imageSource={icons.languageAnimated}
                     iVisible={true}
-                    width={40}
-                    height={40}
+                    width={hp('5%')}
+                    height={hp('5%')}
                     textContainerStyles={'h-0 w-0'}
                     handlePress={() => {
                         if (!visible) {
@@ -80,19 +81,23 @@ const LanguageMenu = ({ langContainerStyles, langMenuStyles }) => {
                     <View style={{ width: screenWidth, height: screenHeight, position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
                         <Animated.View
                             className={`${langMenuStyles}`}
-                            style={[menuAnimatedStyle, { transformOrigin: 'top'}]}
+                            style={[menuAnimatedStyle, bonusLangMenuStyles, { transformOrigin: 'top'}]}
                         >
-                            <View className="h-[0.1rem] w-[80%] bg-black " style={{ marginTop: '40%' }}></View>
-                            <View className="w-[100%] items-start justify-center flex-col gap-1 pt-1 pl-2" style={{ marginTop: '6%' }}>
+                            <View className="h-[0.1rem] w-[80%] bg-black " style={{ marginTop: hp('4%')}}></View>
+                            <View className="w-[100%] items-start justify-center flex-col" style={{height: '60%', paddingLeft: hp('1.5%'), paddingTop: hp('0.2%')}}>
                                 <LanguageOption
                                     title="BG"
                                     handlePress={() => changeLanguage('bg')}
                                     isVisible={language == 'bg'}
+                                    textStyles={{fontSize: hp('2%') < 20 ? hp('2%') : 20}}
+                                    containerStyles={{height: hp('3.4%')}}
                                 />
                                 <LanguageOption
                                     title="EN"
                                     handlePress={() => changeLanguage('en')}
                                     isVisible={language == 'en'}
+                                    textStyles={{fontSize: hp('2%') < 20 ? hp('2%') : 20}}
+                                    containerStyles={{height: hp('3.4%')}}
                                 />
                             </View>
                         </Animated.View>

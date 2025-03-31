@@ -7,10 +7,10 @@ const useMqttClient = () => {
     const password = 'dAnnI_73'
     const { activePlant, plants } = usePlantsContext();
     const [isEnabled, setIsEnabled] = useState(false);
-    const [temperature, setTemperature] = useState('');
-    const [brightness, setBrightness] = useState('');
-    const [waterLevel, setWaterLevel] = useState('');
-    const [humidity, setHumidity] = useState('');
+    const [temperature, setTemperature] = useState(null);
+    const [brightness, setBrightness] = useState(null);
+    const [waterLevel, setWaterLevel] = useState(null);
+    const [humidity, setHumidity] = useState(null);
     const [pump, setPump] = useState(false);
     const plantId = activePlant?.plantId;
     const [client, setClient] = useState(null);
@@ -19,6 +19,7 @@ const useMqttClient = () => {
     let lastMessageReceived = Date.now();
     let checkInterval = null;
     const [isReceiving, setIsReceiving] = useState(false);
+    const [isReady, setIsReady] = useState(false);
 
     const clearValues = () => {
         setTemperature('');
@@ -32,6 +33,15 @@ const useMqttClient = () => {
         setIsReceiving(false)
     }
 
+    const isNotRecieving = () => {
+        if (!temperature && !brightness && !waterLevel && !humidity) {
+            setIsReceiving(false)
+            return true;
+        }
+        setIsReceiving(true)
+        return false;
+    }
+
     const pumpSwitch = () => {
         if (!client || !client.isConnected()) {
             console.log("MQTT Client is not connected!");
@@ -42,7 +52,7 @@ const useMqttClient = () => {
 
         try {
             const mqttMessage = new Message(newState);
-            mqttMessage.destinationName = `${plantId}/switch/pump/command`;
+            mqttMessage.destinationName = `${plantId}/switch/pump/state`;
             client.send(mqttMessage);
 
             console.log("MQTT Pump Command Sent:", newState);
@@ -63,7 +73,7 @@ const useMqttClient = () => {
 
         try {
             const mqttMessage = new Message(message);
-            mqttMessage.destinationName = `${plantId}/light/lamp/command`;
+            mqttMessage.destinationName = `${plantId}/light/lamp/state`;
             client.send(mqttMessage);
 
             console.log("MQTT Lamp Command Sent:", message);
@@ -83,7 +93,7 @@ const useMqttClient = () => {
                 delete myStorage[key];
             },
         };
-//78.130.186.241:9001
+        //78.130.186.241:9001
         const mqttClient = new Client({
             uri: "ws://78.130.186.241:9001/mqtt",
             clientId: `react_native_client_${Date.now()}`,
@@ -101,20 +111,8 @@ const useMqttClient = () => {
         });
 
         const reconnect = () => {
-            console.log("Reconnecting MQTT client...");
-            if (mqttClient && mqttClient._client.connected) {
-                mqttClient.disconnect().then(() => {
-                    console.log("Disconnected, attempting to reconnect...");
-                    setTimeout(() => mqttClient.connect({userName: username, password: password}), 2000);
-                }).catch(err => {
-                    console.error("Error disconnecting:", err);
-                });
-            } else {
-                console.log("Client is not connected, connecting now...");
-                mqttClient.connect({userName:username, password:password}).catch(err => {
-                    console.error("Error connecting:", err);
-                });
-            }
+            isNotRecieving();
+            console.log('hi')
         };
 
         mqttClient.on('messageReceived', (message) => {
@@ -122,24 +120,32 @@ const useMqttClient = () => {
             const messageData = message.payloadString;
             lastMessageReceived = Date.now();
             setIsReceiving(true)
-            if (destination === `${plantId}/sensor/temp/state`) {
-                setTemperature(messageData + " °C");
-            } else if (destination === `${plantId}/sensor/lux/state`) {
-                setBrightness(messageData + "%");
-            } else if (destination === `${plantId}/sensor/ultrasonic_sensor/state`) {
-                setWaterLevel(messageData + " cm");
-            } else if (destination === `${plantId}/sensor/soil_moisture/state`) {
-                setHumidity(messageData + "%");
-            } else if (destination === `${plantId}/light/lamp/state`) {
-                const stateData = JSON.parse(messageData);
-                const lampState = stateData.state === "ON";
-                setIsEnabled(lampState);
-            } else if (destination === `${plantId}/switch/pump/state`) {
-                setPump(messageData === "ON");
-            } else if (destination === `${plantId}/sensor/plant_status/state`) {
-                setStatusMessage(messageData)
-                if (messageData === "Very well") {
-                    statusCode = 1;
+            if (messageData) {
+                if (destination === `${plantId}/sensor/temp/state`) {
+                    if (!isNaN(messageData) && messageData) {
+                        setTemperature(messageData);
+                    }
+                } else if (destination === `${plantId}/sensor/lux/state`) {
+                    if (!isNaN(messageData) && messageData) {
+                        setBrightness(messageData);
+                    }
+                } else if (destination === `${plantId}/sensor/ultrasonic_sensor/state`) {
+                    if (!isNaN(messageData) && messageData) {
+                        setWaterLevel(messageData);
+                    }
+                } else if (destination === `${plantId}/sensor/soil_moisture/state`) {
+                    setHumidity(messageData);
+                } else if (destination === `${plantId}/light/lamp/state`) {
+                    const stateData = JSON.parse(messageData);
+                    const lampState = stateData.state === "ON";
+                    setIsEnabled(lampState);
+                } else if (destination === `${plantId}/switch/pump/state`) {
+                    setPump(messageData === "ON");
+                } else if (destination === `${plantId}/sensor/plant_status/state`) {
+                    setStatusMessage(messageData)
+                    if (messageData === "Very well") {
+                        statusCode = 1;
+                    }
                 }
             }
         });
@@ -155,7 +161,7 @@ const useMqttClient = () => {
             }, 5000);
         };
 
-        mqttClient.connect({ userName: username, password: password, keepAliveInterval:60, reconnect:true, cleanSession:true })
+        mqttClient.connect({ userName: username, password: password, reconnect: true })
             .then(() => {
                 console.log('Connected to MQTT');
                 const topics = [
@@ -172,7 +178,7 @@ const useMqttClient = () => {
                         console.log('Failed to subscribe:', topic, error);
                     });
                 });
-                monitorMessages()
+                setIsReady(true);
             })
             .catch((error) => {
                 console.log('Connection failed:', error);
@@ -206,6 +212,7 @@ const useMqttClient = () => {
         if (plants && plants.length > 0) {
             const { clientDisconnect } = mqttFunc()
             return () => {
+                console.log('')
                 clearInterval(checkInterval);
                 clientDisconnect();
                 clearValues();

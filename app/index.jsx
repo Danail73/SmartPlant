@@ -8,10 +8,14 @@ import { PaperProvider } from 'react-native-paper'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useGlobalContext } from '../context/GlobalProvider';
 import Container from '../components/Container';
+import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function App() {
   const { isLoading, isLoggedIn } = useGlobalContext();
+
+
 
   if (!isLoading && isLoggedIn) return <Redirect href="/home" />
 
@@ -26,29 +30,29 @@ export default function App() {
               source={images.logo}
               //className="border"
               //className="w-[416px] h-[130px]"
-              style={{width: wp('70%'), height: hp('20%')}}
+              style={{ width: wp('70%'), height: hp('20%') }}
               resizeMode="contain"
             />
-            <View style={{marginTop:hp('2%')}}/>
+            <View style={{ marginTop: hp('2%') }} />
             <View className="items-center justify-center flex-row">
               <CustomButton
                 title="Sign-up"
-                bonusTextStyles={{fontSize: hp('2%')}}
+                bonusTextStyles={{ fontSize: hp('2%') }}
                 handlePress={() => router.push('/sign-up')}
                 useAnimatedIcon={false}
                 imageSource={images.leaf}
-                bonusImageStyles={{width: wp('30%'), maxWidth: 200, height: hp('17%'), maxHeight: 200, marginBottom: hp('2%')}}
+                bonusImageStyles={{ width: wp('30%'), maxWidth: 200, height: hp('17%'), maxHeight: 200, marginBottom: hp('2%') }}
                 //imageStyles={"border"}
                 textContainerStyles={'absolute'}
               />
               <View className="m-2"></View>
               <CustomButton
                 title="Login"
-                bonusTextStyles={{fontSize: hp('2%')}}
+                bonusTextStyles={{ fontSize: hp('2%') }}
                 handlePress={() => router.push('/login')}
                 imageSource={images.leafLogin}
                 useAnimatedIcon={false}
-                bonusImageStyles={{width: wp('30%'), maxWidth: 200, height: hp('17%'), maxHeight: 200, marginTop: hp('2%')}}
+                bonusImageStyles={{ width: wp('30%'), maxWidth: 200, height: hp('17%'), maxHeight: 200, marginTop: hp('2%') }}
                 //imageStyles={"border"}
                 textContainerStyles={'absolute'}
               />

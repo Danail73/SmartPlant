@@ -1,5 +1,5 @@
-import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Alert } from 'react-native'
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback, Alert } from 'react-native'
+import React, { useCallback, useEffect, useState, useRef, act } from 'react'
 import PlantBoardComponent from '../../components/PlantBoardComponent'
 import { icons, images } from '../../constants'
 import Container from '../../components/Container'
@@ -17,15 +17,18 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import ChooseFriendsMenu from '../../components/ChooseFriendsMenu'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, runOnJS } from 'react-native-reanimated'
-import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import Chart from '../../components/charts/Chart'
+import { useMqttContext } from '../../context/MqttProvider'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 const Home = () => {
   const { user, language } = useGlobalContext();
-  const { client, temperature, waterLevel, status, humidity, brightness, isReceiving } = useMqttClient();
+  const { temperature, waterLevel, status, humidity, brightness, isReceiving, client } = useMqttContext();
   const { friends } = useFriendsContext();
   const [activeItem, setActiveItem] = useState(null);
-  const { plants, setPlants, setActivePlant, activePlant } = usePlantsContext();
+  const { plants, setPlants, setActivePlant, activePlant, setActiveId, activeId } = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(0);
@@ -36,6 +39,16 @@ const Home = () => {
     plantId: '',
     name: '',
   });
+
+  const [data, setData] = useState({
+    time: activePlant ? activePlant.time : [],
+    temperature: activePlant ? activePlant.temperature : [],
+    humidity: activePlant ? activePlant.humidity : [],
+    brightness: activePlant ? activePlant.brightness : [],
+    water: activePlant ? activePlant.water : [],
+  })
+
+
 
   const clearForm = () => {
     setForm({ plantId: '', name: '' })
@@ -67,13 +80,11 @@ const Home = () => {
 
   const showModal = () => {
     setMenuVisible(true)
-    translateY.value = withTiming(0, { duration: 300 })
     scale.value = withTiming(1, { duration: 300 })
     opacity.value = withTiming(1, { duration: 300 })
   };
 
   const hideModal = () => {
-    translateY.value = withTiming(600, { duration: 300 })
     scale.value = withTiming(0, { duration: 300 }, () => {
       runOnJS(setMenuVisible)(false)
     })
@@ -84,6 +95,7 @@ const Home = () => {
     if (viewableItems.length > 0) {
       setActiveItem(viewableItems[0].item);
       setActivePlant(viewableItems[0].item)
+      setActiveId(viewableItems[0].item.$id);
     }
   }, []);
 
@@ -107,6 +119,8 @@ const Home = () => {
       if (activePlant && (activePlant.$id === updatedItem.$id)) {
         setActiveItem(updatedItem)
         setActivePlant(updatedItem)
+        setActiveId(updatedItem.$id)
+
       }
     }
   }
@@ -118,46 +132,81 @@ const Home = () => {
     };
   })
 
+
+
+  const getStorageItem = async (key) => {
+    try {
+      const item = await AsyncStorage.getItem(key);
+      return item;
+    } catch (error) {
+      activePlant.$id
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     const unsubscribePlants = subscribeToPlants(user.$id, handlePlantUpdated)
 
     return () => unsubscribePlants()
   }, [friends])
 
-  const updateSensors = async () => {
+  const getCurrentTime = () => {
+    const now = new Date();
+    const formattedDateTime = now.toISOString().slice(0, 19).replace("T", " ");
+    return formattedDateTime;
+  }
+
+  const updateSensors = async (temp, hum, bri, wat, stat) => {
     try {
-      const sensorValues = [
-        parseFloat(temperature),
-        parseFloat(humidity),
-        parseFloat(brightness),
-        parseFloat(waterLevel),
-        parseFloat(status.statusCode)
-      ];
-      const response = await updatePlantSensors(activeItem.$id, sensorValues);
+      const sensorValues = {
+        time: getCurrentTime(),
+        temperature: parseFloat(temp),
+        humidity: parseFloat(hum),
+        brightness: parseFloat(bri),
+        water: parseFloat(wat),
+        statusCode: parseFloat(stat)
+      };
+      const response = await updatePlantSensors(activePlant, sensorValues);
+      return response;
     } catch (error) {
       console.log(error)
     }
   }
+  const update = async () => {
+    try {
+      const temp = await getStorageItem("temperature");
+      const hum = await getStorageItem("humidity");
+      const bri = await getStorageItem("brightness");
+      const wat = await getStorageItem("water");
+      const stat = await getStorageItem("statusCode");
 
+      if (temp != 0 && hum != 0 && bri != 0 && wat != 0) {
+        const res = await updateSensors(temp, hum, bri, wat, stat);
+      }
+      return { temp, hum, bri, wat }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   useEffect(() => {
     const interval = setInterval(() => {
-      if (client) {
-        updateSensors();
-      }
+      update()
     }, 300000)
 
     return () => clearInterval(interval)
   }, [activeItem])
 
-  /*useEffect(() => {
-    try {
-      const response = fetchAIResponse("tomato")
-
-    } catch (error) {
-      console.log(error);
+  useEffect(() => {
+    if (activePlant) {
+      setData({
+        time: activePlant.time,
+        temperature: activePlant.temperature,
+        humidity: activePlant.humidity,
+        brightness: activePlant.brightness,
+        water: activePlant.water,
+      })
     }
-  })*/
-
+  }, [activePlant])
 
   return (
     <PaperProvider>
@@ -170,8 +219,8 @@ const Home = () => {
             className={`items-center justify-between flex-row`}
             style={{ height: hp('7%'), paddingLeft: language == 'bg' ? 0 : wp('1%'), paddingTop: hp('2%') }}
           >
-            <Text className={`text-notFullWhite font-pmedium`} style={{fontSize: language == 'bg' ? hp('2%') : hp('3%')}}>{t('Home')}</Text>
-            <Text className="text-notFullWhite font-pmedium" style={{fontSize: hp('3%')}}>{temperature}</Text>
+            <Text className={`text-notFullWhite font-pmedium`} style={{ fontSize: language == 'bg' ? hp('2%') : hp('3%') }}>{t('Home')}</Text>
+            <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{temperature}</Text>
           </View>
 
           {plants && plants.length > 0 && (
@@ -182,14 +231,14 @@ const Home = () => {
               <Image
                 source={images.good}
                 //className="border"
-                style={{ width: wp('46%'), height: hp('23%') }}
+                style={{ width: wp('46%'), height: hp('23%'), maxWidth: 260, height: 200 }}
                 resizeMode='contain'
               />
               <View
                 className="items-center justify-center"
                 style={{ paddingLeft: wp('1%') }}
               >
-                <Text className="font-pmedium text-notFullWhite" style={{fontSize: hp('2%')}}>{status.statusMessage}</Text>
+                <Text className="font-pmedium text-notFullWhite" style={{ fontSize: hp('2%') }}>{status.statusMessage}</Text>
               </View>
             </View>
           )}
@@ -207,7 +256,7 @@ const Home = () => {
                 className="items-center justify-center pl-2"
                 style={{ paddingLeft: wp('1%') }}
               >
-                <Text className="font-pmedium text-notFullWhite" style={{fontSize: hp('1%')}}>Looks like you{'\n'}don't have plants</Text>
+                <Text className="font-pmedium text-notFullWhite" style={{ fontSize: hp('1%') }}>Looks like you{'\n'}don't have plants</Text>
               </View>
             </View>
           )}
@@ -217,7 +266,7 @@ const Home = () => {
               className="justify-between flex-row"
               style={{ paddingHorizontal: wp('2%') }}
             >
-              <Text className="text-notFullWhite font-pmedium" style={{fontSize: hp('1.8%')}}>{t('Daily Plants')}</Text>
+              <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('1.8%') }}>{t('Daily Plants')}</Text>
               <TouchableOpacity
                 onPressOut={showModal}
               >
@@ -237,12 +286,13 @@ const Home = () => {
                     <PlantBoardComponent
                       item={item}
                       isReceiving={isReceiving}
+                      isActive={activeItem && activeItem.$id == item.$id}
                       addCallback={() => setAddVisible(true)}
                       removeCallback={() => setRemoveVisible(true)}
                     />
                   )}
-                  style={{ overflow: 'visible'}}
-                  contentContainerStyle={{ marginLeft: (plants && plants.length == 1) ? 40 : 0, overflow: 'visible' }}
+                  style={{ overflow: 'visible' }}
+                  contentContainerStyle={{ marginLeft: (plants && plants.length == 1) ? wp('14%') : 0, overflow: 'visible' }}
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   onViewableItemsChanged={viewableItemsChanged}
@@ -258,69 +308,68 @@ const Home = () => {
               </View>
             )}
           </View>
+          <Chart data={data} width={wp('100%')} height={hp('33%')} containerStyles={{ marginTop: hp('2%') }} />
         </View>
         {menuVisible && (
-          <Animated.View
-            className={`bg-notFullWhite items-center justify-center`}
-            style={[
-              styles.createMenu,
-              {
-                transform: [
-                  { translateY: translateY },
-                  { scale: scale }
-                ]
-              },
-            ]}
-          >
-            <FormField
-              title="plantId"
-              placeholder={"Enter plantId"}
-              bonusTextStyles={{paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.3%')}}
-              containerStyles={{height: hp('11%')}}
-              bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'),paddingLeft: wp('2%') }}
-              handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
-            />
-            <FormField
-              title="name"
-              placeholder={"Enter name"}
-              bonusTextStyles={{paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.2%')}}
-              containerStyles={{marginBottom: hp('1%'), height: hp('11%')}}
-              bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
-              handleChangeText={(e) => { setForm({ ...form, name: e }) }}
-            />
-
-            <View>
-              <TouchableOpacity
-                onPress={() => {
-                  handleCreatePlant();
-                  hideModal();
-                }}
+          <TouchableWithoutFeedback onPress={hideModal}>
+            <View style={{ width: wp('100%'), height: hp('100%'), position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
+              <Animated.View
+                className={`bg-notFullWhite items-center justify-center`}
+                style={[
+                  styles.createMenu, createMenuAnimatedStyle, { bottom: hp('1%') < 10 ? hp('1%') : 130 }
+                ]}
               >
-                <LinearGradient
-                  colors={['#fdb442', '#f69f2c']}
-                  start={[0, 0]}
-                  end={[1, 1]}
+                <FormField
+                  title="plantId"
+                  placeholder={"Enter plantId"}
+                  bonusTextStyles={{ paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.3%') }}
+                  containerStyles={{ height: hp('11%') }}
+                  bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
+                  handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
+                />
+                <FormField
+                  title="name"
+                  placeholder={"Enter name"}
+                  bonusTextStyles={{ paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.2%') }}
+                  containerStyles={{ marginBottom: hp('1%'), height: hp('11%') }}
+                  bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
+                  handleChangeText={(e) => { setForm({ ...form, name: e }) }}
+                />
 
-                  style={{
-                    borderRadius: 35,
-                    width: hp('6%'),
-                    height: hp('6%'),
-                    justifyContent:'center',
-                    alignItems:'center'
-                  }}
-                  className="items-center justify-center"
-                >
-                  <Image
-                    source={icons.plus}
-                    resizeMode="contain"
-                    className="rounded-full"
-                    style={{ tintColor: '#f2f9f1', width: hp('3%'),height: hp('3%') }}
-                  />
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleCreatePlant();
+                      hideModal();
+                    }}
+                  >
+                    <LinearGradient
+                      colors={['#fdb442', '#f69f2c']}
+                      start={[0, 0]}
+                      end={[1, 1]}
 
-                </LinearGradient>
-              </TouchableOpacity>
+                      style={{
+                        borderRadius: 35,
+                        width: hp('6%'),
+                        height: hp('6%'),
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                      }}
+                      className="items-center justify-center"
+                    >
+                      <Image
+                        source={icons.plus}
+                        resizeMode="contain"
+                        className="rounded-full"
+                        style={{ tintColor: '#f2f9f1', width: hp('3%'), height: hp('3%') }}
+                      />
+
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
             </View>
-          </Animated.View>
+          </TouchableWithoutFeedback>
         )}
         {addVisible && (
           <SafeAreaView className="flex-1 w-full h-full absolute">

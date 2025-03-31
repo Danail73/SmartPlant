@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { images } from '../constants'
 import AnimatedIcon from './AnimatedIcon'
 
-const CustomButton = ({ title, handlePress, containerStyles,
+const CustomButton = ({ title, handlePress, containerStyles, bonusContainerStyles, 
   textStyles, bonusTextStyles, isLoading, useAnimatedIcon, imageSource, imageStyles, bonusImageStyles, width, height, iVisible, disabled, imageContainerStyles, textContainerStyles, opacityStyles }) => {
   const [iconVisible, setIconVisible] = useState(false)
 
@@ -17,7 +17,7 @@ const CustomButton = ({ title, handlePress, containerStyles,
   }, [])
   return (
 
-    <View className={`items-center justify-center ${containerStyles}`}>
+    <View className={`items-center justify-center ${containerStyles}`} style={bonusContainerStyles}>
       <TouchableOpacity
         onPress={handlePress}
         className={`justify-center items-center ${isLoading ? 'opacity-50' : ''} ${opacityStyles}`}
@@ -45,7 +45,7 @@ const CustomButton = ({ title, handlePress, containerStyles,
           )}
         </View>
         <View className={`${textContainerStyles}`}>
-          <Text className={`font-black ${textStyles}`} style={bonusTextStyles}>
+          <Text className={`font-pbold ${textStyles}`} style={bonusTextStyles}>
             {title}
           </Text>
         </View>

@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import GlobalProvider from '../context/GlobalProvider'
 import FriendsProvider from '../context/FriendsProvider';
 import PlantsProvider from '../context/PlantsProvider';
+import MqttProvider from '../context/MqttProvider';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,12 +35,14 @@ const RootLayout = () => {
     <GlobalProvider>
       <FriendsProvider>
         <PlantsProvider>
-          <Stack screenOptions={{ headerTransparent: true }}>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="device" options={{ headerShown: false }} />
-          </Stack>
+          <MqttProvider>
+            <Stack screenOptions={{ headerTransparent: true }}>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="device" options={{ headerShown: false }} />
+            </Stack>
+          </MqttProvider>
         </PlantsProvider>
       </FriendsProvider>
     </GlobalProvider>

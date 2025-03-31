@@ -4,7 +4,7 @@ import { icons } from '../constants'
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated'
 import { useLanguage } from '../translations/i18n'
 
-const LanguageOption = ({ title, handlePress, isVisible }) => {
+const LanguageOption = ({ title, handlePress, isVisible, textStyles, containerStyles }) => {
     const { language } = useLanguage()
     const [checkVisible, setCheckVisible] = useState(false)
     const checkScale = useSharedValue(0);
@@ -45,8 +45,8 @@ const LanguageOption = ({ title, handlePress, isVisible }) => {
                 handlePress();
             }}
         >
-            <View className="flex-row items-center justify-center">
-                <Text className="text-lg font-psemibold">{title}</Text>
+            <View className="flex-row items-center justify-center" style={containerStyles}>
+                <Text className="font-psemibold" style={textStyles}>{title}</Text>
                 {checkVisible && (
                     <Animated.Image
                         source={icons.check}

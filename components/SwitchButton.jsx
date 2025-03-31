@@ -10,6 +10,7 @@ const SwitchButton = ({onSwitch, isEnabled}) => {
         ios_backgroundColor="#3e3e3e"
         onValueChange={onSwitch}
         value={isEnabled}
+        
         />
     </View>
   );

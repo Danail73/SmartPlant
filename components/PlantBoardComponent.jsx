@@ -8,7 +8,7 @@ import PlantBoardMenu from './PlantBoardMenu'
 import { PaperProvider } from 'react-native-paper'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
-const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback }) => {
+const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback, isActive }) => {
     const plantImagesArray = [plantImages.plant1, plantImages.plant2, plantImages.plant3]
     const [image, setImage] = useState('');
     const [menuVisible, setMenuVisible] = useState(false);
@@ -61,7 +61,7 @@ const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback })
                     <Text className="text-gray-700 font-psemibold mx-2" style={{ fontSize: hp('1.5%') }}>86 ml</Text>
                 </View>
                 <View>
-                    <Text style={{fontSize: hp('1.5%'), marginTop: hp('0.6%')}}>{isReceiving ? "" : "Disconnected"}</Text>
+                    <Text style={{fontSize: hp('1.5%'), marginTop: hp('0.6%')}}>{(isReceiving && isActive )? "Connected" : "Disconnected"}</Text>
                 </View>
             </View>
 
