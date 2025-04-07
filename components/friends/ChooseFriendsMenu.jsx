@@ -1,11 +1,9 @@
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native'
-import CustomButton from './CustomButton'
-import FriendComponent from './FriendComponent'
-import React, { useEffect, useState } from 'react'
+import { View, Text, FlatList, Image } from 'react-native'
+import CustomButton from '../CustomButton'
+import React, { useState } from 'react'
 import ChooseMenuComponent from './ChooseMenuComponent'
-import { getAcceptedRequest, respondFriendRequest } from '../lib/appwrite'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { images } from '../constants'
+import { images } from '../../constants'
 
 const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, fn, withRequest }) => {
     const [listFriends, setListFriends] = useState([])

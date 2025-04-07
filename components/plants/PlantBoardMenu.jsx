@@ -1,13 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Pressable, Image, Text, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
-import { Menu, Divider, IconButton, Provider as PaperProvider, Portal } from 'react-native-paper';
-import { icons } from '../constants';
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, Image, Text, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { Provider as PaperProvider, Portal } from 'react-native-paper';
+import { icons } from '../../constants';
 import { router } from 'expo-router';
-import { deletePlant, updatePlant, updatePlantUsers } from '../lib/appwrite';
-import FormField from './FormField';
+import { deletePlant, updatePlantUsers } from '../../lib/appwrite';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
-import { useGlobalContext } from '../context/GlobalProvider';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
+import { useGlobalContext } from '../../context/GlobalProvider';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
   const { user } = useGlobalContext()

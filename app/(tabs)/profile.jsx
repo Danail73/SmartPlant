@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, KeyboardAvoidingView, Dimensions, TouchableWithoutFeedback } from 'react-native'
+import { Text, View, Image, TouchableOpacity, KeyboardAvoidingView, Dimensions } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Container from '../../components/Container'
 import FormField from '../../components/FormField'
@@ -11,10 +11,9 @@ import CustomButton from '../../components/CustomButton'
 import { useFriendsContext } from '../../context/FriendsProvider'
 import { usePlantsContext } from '../../context/PlantsProvider'
 import { router } from 'expo-router'
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
-import LanguageMenu from '../../components/languageComponents/LanguageMenu'
-import { t, useLanguage } from '../../translations/i18n'
-import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
+import LanguageMenu from '../../components/language/LanguageMenu'
+import { t } from '../../translations/i18n'
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const Profile = () => {
   const { friends } = useFriendsContext()
@@ -178,14 +177,8 @@ const Profile = () => {
             <Text className="font-psemibold text-[#f2f9f1] mb-2" style={{fontSize: hp('2.5%')}}>{user.username}</Text>
             <View className="border-2 rounded-full bottom-[-5%] z-20 bg-[#3A5332]" style={{width: hp('10%'), height: hp('10%')}}>
               <View className="w-full h-full">
-                <TouchableOpacity
+                <View
                   className="w-full h-full items-center justify-center"
-                  onPress={() => {
-                    setEditPic(!editPic)
-                    if (!editPic) {
-                      //pickImage()
-                    }
-                  }}
                 >
                   <Image
                     source={profilePic.current ? { uri: profilePic.current } : ''}
@@ -208,7 +201,7 @@ const Profile = () => {
                       </BlurView>
                     </View>
                   )}
-                </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>

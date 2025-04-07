@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
 import FriendComponent from './FriendComponent'
 import { LinearGradient } from 'expo-linear-gradient'
 

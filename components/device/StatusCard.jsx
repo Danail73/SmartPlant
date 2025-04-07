@@ -1,6 +1,6 @@
 import { View, Text, Image } from 'react-native'
 import React from 'react'
-import SwitchButton from './SwitchButton'
+import SwitchButton from '../SwitchButton'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const StatusCard = ({ label, labelStyles, value, valueStyles,

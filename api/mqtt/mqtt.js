@@ -112,7 +112,6 @@ const useMqttClient = () => {
 
         const reconnect = () => {
             isNotRecieving();
-            console.log('hi')
         };
 
         mqttClient.on('messageReceived', (message) => {
@@ -122,17 +121,11 @@ const useMqttClient = () => {
             setIsReceiving(true)
             if (messageData) {
                 if (destination === `${plantId}/sensor/temp/state`) {
-                    if (!isNaN(messageData) && messageData) {
-                        setTemperature(messageData);
-                    }
+                    setTemperature(messageData);
                 } else if (destination === `${plantId}/sensor/lux/state`) {
-                    if (!isNaN(messageData) && messageData) {
-                        setBrightness(messageData);
-                    }
+                    setBrightness(messageData);
                 } else if (destination === `${plantId}/sensor/ultrasonic_sensor/state`) {
-                    if (!isNaN(messageData) && messageData) {
-                        setWaterLevel(messageData);
-                    }
+                    setWaterLevel(messageData);
                 } else if (destination === `${plantId}/sensor/soil_moisture/state`) {
                     setHumidity(messageData);
                 } else if (destination === `${plantId}/light/lamp/state`) {
@@ -212,7 +205,6 @@ const useMqttClient = () => {
         if (plants && plants.length > 0) {
             const { clientDisconnect } = mqttFunc()
             return () => {
-                console.log('')
                 clearInterval(checkInterval);
                 clientDisconnect();
                 clearValues();

@@ -1,10 +1,9 @@
 import { View, Text, Image, TouchableOpacity, Animated, FlatList } from 'react-native'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { icons } from '../constants'
-import { subscribeToFriendRequests, subscribeToUsers } from '../lib/appwrite'
-import { useGlobalContext } from '../context/GlobalProvider'
+import { icons } from '../../constants'
+import { useGlobalContext } from '../../context/GlobalProvider'
 import FriendComponent from './FriendComponent'
-import { t } from '../translations/i18n'
+import { t } from '../../translations/i18n'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
 
 const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {

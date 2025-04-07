@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FlatList, Image, Text, View, Button, TouchableOpacity, TextInput } from 'react-native';
+import { Text, View, TextInput } from 'react-native';
 import { icons } from '../constants';
 import { router } from 'expo-router';
-import StatusCard from '../components/StatusCard';
+import StatusCard from '../components/device/StatusCard';
 import { useGlobalContext } from '../context/GlobalProvider';
 import Container from '../components/Container';
 import { usePlantsContext } from '../context/PlantsProvider';
 import CustomButton from '../components/CustomButton';
 import { updatePlant, subscribeToPlants } from '../lib/appwrite';
 import useMqttClient from '../api/mqtt/mqtt';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 
 const Device = () => {

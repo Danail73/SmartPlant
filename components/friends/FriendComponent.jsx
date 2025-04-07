@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, Image, Touchable, TouchableOpacity } from 'react-native'
 import React, { useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
-import { icons } from '../constants';
-import { respondFriendRequest, sendFriendRequest } from '../lib/appwrite';
+import { icons } from '../../constants';
+import { respondFriendRequest, sendFriendRequest } from '../../lib/appwrite';
 
 const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, iconStyles, titleStyles, subtitleStyles, requestId, containerStyles }) => {
 

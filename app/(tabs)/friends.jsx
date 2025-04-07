@@ -3,12 +3,12 @@ import { View, Text, Dimensions, FlatList, TouchableOpacity, Image, TextInput, P
 import Container from '../../components/Container';
 import { PaperProvider } from 'react-native-paper';
 import { respondFriendRequest, subscribeToFriendRequests, subscribeToUsers } from '../../lib/appwrite';
-import FriendComponent from '../../components/FriendComponent';
+import FriendComponent from '../../components/friends/FriendComponent';
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { icons, images } from '../../constants';
-import RequestMenu from '../../components/RequestMenu';
+import RequestMenu from '../../components/friends/RequestMenu';
 import { BlurView } from 'expo-blur';
-import ChooseFriendsMenu from '../../components/ChooseFriendsMenu';
+import ChooseFriendsMenu from '../../components/friends/ChooseFriendsMenu';
 import AnimatedIcon from '../../components/AnimatedIcon';
 import { useFriendsContext } from '../../context/FriendsProvider';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';

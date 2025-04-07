@@ -1,12 +1,10 @@
-import { View, Text, TouchableOpacity, Image } from 'react-native'
+import { View, Text, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { router } from 'expo-router'
-import { icons, images } from '../constants'
+import { icons } from '../../constants'
 import { StyleSheet } from 'react-native'
-import plantImages from '../constants/plantImages'
+import plantImages from '../../constants/plantImages'
 import PlantBoardMenu from './PlantBoardMenu'
-import { PaperProvider } from 'react-native-paper'
-import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback, isActive }) => {
     const plantImagesArray = [plantImages.plant1, plantImages.plant2, plantImages.plant3]
