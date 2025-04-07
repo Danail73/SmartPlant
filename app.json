@@ -17,10 +17,13 @@
       "supportsTablet": true
     },
     "android": {
+      "compileSdkVersion": 34,
+      "targetSdkVersion": 34,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.musashi.smart_plant"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -30,6 +33,14 @@
       "expo-router",
       "expo-asset",
       "expo-localization"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "13016734-042e-4510-8093-55bcda5eacaa"
+      }
+    }
   }
 }
