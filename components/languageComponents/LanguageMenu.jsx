@@ -1,11 +1,10 @@
 import { View, Text, Dimensions, Image, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import Animated, { useSharedValue, withTiming, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
-import CustomButton from '../components/CustomButton';
-import { icons } from '../constants';
-import { useLanguage } from '../translations/i18n';
+import CustomButton from '../CustomButton';
+import { icons } from '../../constants';
 import LanguageOption from './LanguageOption';
-import { useGlobalContext } from '../context/GlobalProvider';
+import { useGlobalContext } from '../../context/GlobalProvider';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
 const LanguageMenu = ({ langContainerStyles, bonusLandContainerStyles, langMenuStyles, bonusLangMenuStyles }) => {

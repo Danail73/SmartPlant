@@ -12,7 +12,7 @@ import { useFriendsContext } from '../../context/FriendsProvider'
 import { usePlantsContext } from '../../context/PlantsProvider'
 import { router } from 'expo-router'
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
-import LanguageMenu from '../../languageComponents/LanguageMenu'
+import LanguageMenu from '../../components/languageComponents/LanguageMenu'
 import { t, useLanguage } from '../../translations/i18n'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 

@@ -25,7 +25,6 @@ const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback, i
         }
     }, [image])
 
-
     return (
         <View
             className={`flex-row items-center justify-start my-2 bg-notFullWhite rounded-2xl shadow-sm shadow-gray-500 overflow-visible`}
@@ -42,7 +41,7 @@ const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback, i
                 className="justify-center flex-col" 
             >
                 <Text className="text-gray-700 font-psemibold" style={{ fontSize: hp('1.6%') }}>
-                    {item.name}
+                    {item?.name}
                 </Text>
 
                 <View className="flex-row items-start" style={{marginTop: hp('0.6%')}}>
@@ -58,7 +57,9 @@ const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback, i
                         source={icons.drop}
                         style={{ tintColor: 'gray', width: hp('2%'), height: hp('2%') }}
                     />
-                    <Text className="text-gray-700 font-psemibold mx-2" style={{ fontSize: hp('1.5%') }}>86 ml</Text>
+                    <Text className="text-gray-700 font-psemibold mx-2" style={{ fontSize: hp('1.5%') }}>
+                        {item?.water[item?.water.length - 1]}
+                    </Text>
                 </View>
                 <View>
                     <Text style={{fontSize: hp('1.5%'), marginTop: hp('0.6%')}}>{(isReceiving && isActive )? "Connected" : "Disconnected"}</Text>

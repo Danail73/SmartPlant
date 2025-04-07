@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import { icons } from '../constants'
+import { icons } from '../../constants'
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated'
-import { useLanguage } from '../translations/i18n'
+import { useLanguage } from '../../translations/i18n'
 
 const LanguageOption = ({ title, handlePress, isVisible, textStyles, containerStyles }) => {
     const { language } = useLanguage()

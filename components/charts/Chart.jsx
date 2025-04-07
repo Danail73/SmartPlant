@@ -91,7 +91,7 @@ const Chart = ({ data, width, height, containerStyles }) => {
                     )}
                 </View>
             </TouchableWithoutFeedback>
-        </ScrollView >
+        </ScrollView >  
 
     );
 };
