@@ -17,13 +17,13 @@ import ChooseFriendsMenu from '../../components/friends/ChooseFriendsMenu'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, runOnJS } from 'react-native-reanimated'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Chart from '../../components/charts/Chart'
-import { useMqttContext } from '../../context/MqttProvider'
+import useMqttClient from '../../api/mqtt/mqtt'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 const Home = () => {
   const { user, language } = useGlobalContext();
-  const { temperature, waterLevel, status, humidity, brightness, isReceiving, client } = useMqttContext();
+  const { temperature, waterLevel, status, humidity, brightness, isReceiving, client } = useMqttClient();
   const { friends } = useFriendsContext();
   const [activeItem, setActiveItem] = useState(null);
   const { plants, setPlants, setActivePlant, activePlant, setActiveId, activeId } = usePlantsContext();
@@ -259,7 +259,7 @@ const Home = () => {
                 className="items-center justify-center"
                 style={{ paddingLeft: wp('1%') }}
               >
-                <Text className="font-pmedium text-notFullWhite" style={{ fontSize: hp('2%') }}>{status.statusMessage}</Text>
+                <Text className="font-pmedium text-notFullWhite" style={{ fontSize: hp('2%') }}>{status.message}</Text>
               </View>
             </View>
           )}

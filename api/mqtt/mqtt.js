@@ -1,46 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Client, Message } from 'react-native-paho-mqtt';
 import { usePlantsContext } from '../../context/PlantsProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const useMqttClient = () => {
-    const username = 'musashi'
-    const password = 'dAnnI_73'
+    const username = 'musashi';
+    const password = 'dAnnI_73';
     const { activePlant, plants } = usePlantsContext();
-    const [isEnabled, setIsEnabled] = useState(false);
+
     const [temperature, setTemperature] = useState(null);
     const [brightness, setBrightness] = useState(null);
     const [waterLevel, setWaterLevel] = useState(null);
     const [humidity, setHumidity] = useState(null);
     const [pump, setPump] = useState(false);
-    const plantId = activePlant?.plantId;
-    const [client, setClient] = useState(null);
-    const [statusMessage, setStatusMessage] = useState('')
-    let statusCode = 0;
-    let lastMessageReceived = Date.now();
-    let checkInterval = null;
+    const [isEnabled, setIsEnabled] = useState(false);
+    const [status, setStatus] = useState({ code: 0, message: '' });
     const [isReceiving, setIsReceiving] = useState(false);
-    const [isReady, setIsReady] = useState(false);
+    const [client, setClient] = useState(null);
+
+    const plantId = activePlant?.plantId;
+    const clientRef = useRef(null);
 
     const clearValues = () => {
-        setTemperature('');
-        setIsEnabled(false);
-        setBrightness('');
-        setWaterLevel('');
-        setHumidity('');
+        setTemperature(null);
+        setBrightness(null);
+        setWaterLevel(null);
+        setHumidity(null);
         setPump(false);
-        setStatusMessage('');
-        statusCode = 0;
-        setIsReceiving(false)
+        setIsEnabled(false);
+        setStatus({ code: 0, message: '' });
+        setIsReceiving(false);
+    };
+
+    const setStorageItem = async (key, value) => {
+        await AsyncStorage.setItem(key, value)
     }
 
-    const isNotRecieving = () => {
-        if (!temperature && !brightness && !waterLevel && !humidity) {
-            setIsReceiving(false)
-            return true;
-        }
-        setIsReceiving(true)
-        return false;
-    }
+    const createClient = () => {
+        const myStorage = {
+            setItem: (key, item) => { myStorage[key] = item; },
+            getItem: (key) => myStorage[key],
+            removeItem: (key) => { delete myStorage[key]; },
+        };
+
+        return new Client({
+            uri: "ws://78.130.186.241:9001/mqtt",
+            clientId: `react_native_client_${Date.now()}`,
+            storage: myStorage,
+        });
+    };
 
     const pumpSwitch = () => {
         if (!client || !client.isConnected()) {
@@ -49,12 +57,11 @@ const useMqttClient = () => {
         }
 
         const newState = !pump ? "ON" : "OFF";
+        const mqttMessage = new Message(newState);
+        mqttMessage.destinationName = `${plantId}/switch/pump/state`;
 
         try {
-            const mqttMessage = new Message(newState);
-            mqttMessage.destinationName = `${plantId}/switch/pump/state`;
             client.send(mqttMessage);
-
             console.log("MQTT Pump Command Sent:", newState);
             setPump(!pump);
         } catch (error) {
@@ -70,12 +77,11 @@ const useMqttClient = () => {
 
         const newState = !isEnabled ? "ON" : "OFF";
         const message = JSON.stringify({ state: newState });
+        const mqttMessage = new Message(message);
+        mqttMessage.destinationName = `${plantId}/light/lamp/state`;
 
         try {
-            const mqttMessage = new Message(message);
-            mqttMessage.destinationName = `${plantId}/light/lamp/state`;
             client.send(mqttMessage);
-
             console.log("MQTT Lamp Command Sent:", message);
             setIsEnabled(!isEnabled);
         } catch (error) {
@@ -83,76 +89,56 @@ const useMqttClient = () => {
         }
     };
 
-    const createClient = () => {
-        const myStorage = {
-            setItem: (key, item) => {
-                myStorage[key] = item;
-            },
-            getItem: (key) => myStorage[key],
-            removeItem: (key) => {
-                delete myStorage[key];
-            },
-        };
-        //78.130.186.241:9001
-        const mqttClient = new Client({
-            uri: "ws://78.130.186.241:9001/mqtt",
-            clientId: `react_native_client_${Date.now()}`,
-            storage: myStorage
-        });
-        return mqttClient;
-    }
-
-    const mqttFunc = () => {
+    useEffect(() => {
+        if (!plantId || !plants || plants.length === 0) return;
 
         const mqttClient = createClient();
+        clientRef.current = mqttClient;
 
         mqttClient.on('connectionLost', () => {
-            reconnect();
+            console.log("MQTT Connection lost. Reconnecting...");
+            setIsReceiving(false)
         });
-
-        const reconnect = () => {
-            isNotRecieving();
-        };
 
         mqttClient.on('messageReceived', (message) => {
             const destination = message.destinationName;
             const messageData = message.payloadString;
-            lastMessageReceived = Date.now();
-            setIsReceiving(true)
+            setIsReceiving(true);
+
             if (messageData) {
-                if (destination === `${plantId}/sensor/temp/state`) {
-                    setTemperature(messageData);
-                } else if (destination === `${plantId}/sensor/lux/state`) {
-                    setBrightness(messageData);
-                } else if (destination === `${plantId}/sensor/ultrasonic_sensor/state`) {
-                    setWaterLevel(messageData);
-                } else if (destination === `${plantId}/sensor/soil_moisture/state`) {
-                    setHumidity(messageData);
-                } else if (destination === `${plantId}/light/lamp/state`) {
-                    const stateData = JSON.parse(messageData);
-                    const lampState = stateData.state === "ON";
-                    setIsEnabled(lampState);
-                } else if (destination === `${plantId}/switch/pump/state`) {
-                    setPump(messageData === "ON");
-                } else if (destination === `${plantId}/sensor/plant_status/state`) {
-                    setStatusMessage(messageData)
-                    if (messageData === "Very well") {
-                        statusCode = 1;
-                    }
+                switch (destination) {
+                    case `${plantId}/sensor/temp/state`:
+                        setTemperature(() => messageData);
+                        setStorageItem("temperature", messageData)
+                        break;
+                    case `${plantId}/sensor/lux/state`:
+                        setBrightness(() => messageData);
+                        setStorageItem("brightness", messageData)
+                        break;
+                    case `${plantId}/sensor/ultrasonic_sensor/state`:
+                        setWaterLevel(() => messageData);
+                        setStorageItem("water", messageData)
+                        break;
+                    case `${plantId}/sensor/soil_moisture/state`:
+                        setHumidity(() => messageData);
+                        setStorageItem("humidity", messageData)
+                        break;
+                    case `${plantId}/light/lamp/state`:
+                        setIsEnabled(() => JSON.parse(messageData).state === "ON");
+                        break;
+                    case `${plantId}/switch/pump/state`:
+                        setPump(() => messageData === "ON");
+                        break;
+                    case `${plantId}/sensor/plant_status/state`:
+                        const statusCode = messageData === "Very well" ? 1 : 0
+                        setStatus({ code: statusCode, message: messageData });
+                        setStorageItem("statusCode", JSON.stringify(statusCode))
+                        break;
+                    default:
+                        console.log("Unknown topic:", destination);
                 }
             }
         });
-
-        const monitorMessages = () => {
-            checkInterval = setInterval(() => {
-                const now = Date.now();
-                if (now - lastMessageReceived > 30000) {
-                    console.log("No messages received for 30s. Reconnecting...");
-                    setIsReceiving(false);
-                    reconnect();
-                }
-            }, 5000);
-        };
 
         mqttClient.connect({ userName: username, password: password, reconnect: true })
             .then(() => {
@@ -164,56 +150,24 @@ const useMqttClient = () => {
                     `${plantId}/sensor/soil_moisture/state`,
                     `${plantId}/light/lamp/state`,
                     `${plantId}/switch/pump/state`,
-                    `${plantId}/sensor/plant_status/state`
+                    `${plantId}/sensor/plant_status/state`,
                 ];
-                topics.forEach(topic => {
-                    mqttClient.subscribe(topic, { qos: 1 }).catch(error => {
-                        console.log('Failed to subscribe:', topic, error);
-                    });
-                });
-                setIsReady(true);
+                topics.forEach(topic => mqttClient.subscribe(topic, { qos: 1 }).catch(console.error));
             })
-            .catch((error) => {
-                console.log('Connection failed:', error);
-            });
+            .catch(console.error);
 
         setClient(mqttClient);
 
-        const clientDisconnect = () => {
-            console.log('Disconnecting from MQTT');
-            if (mqttClient.isConnected()) {
-                const topics = [
-                    `${plantId}/sensor/temp/state`,
-                    `${plantId}/sensor/lux/state`,
-                    `${plantId}/sensor/ultrasonic_sensor/state`,
-                    `${plantId}/sensor/soil_moisture/state`,
-                    `${plantId}/light/lamp/state`,
-                    `${plantId}/switch/pump/state`,
-                    `${plantId}/sensor/plant_status/state`
-                ];
-
-                topics.forEach(topic => mqttClient.unsubscribe(topic));
-                mqttClient.disconnect();
+        return () => {
+            console.log('Disconnecting MQTT');
+            if (clientRef.current?.isConnected()) {
+                clientRef.current.disconnect();
             }
+            clearValues();
         };
-
-        return { clientDisconnect };
-
-    }
-
-    useEffect(() => {
-        if (plants && plants.length > 0) {
-            const { clientDisconnect } = mqttFunc()
-            return () => {
-                clearInterval(checkInterval);
-                clientDisconnect();
-                clearValues();
-            };
-        }
     }, [plantId]);
 
-
-    return { client, temperature, brightness, waterLevel, humidity, isEnabled, pump, pumpSwitch, lampSwitch, status: { statusCode, statusMessage }, isReceiving };
+    return { client, temperature, brightness, waterLevel, humidity, isEnabled, pump, pumpSwitch, lampSwitch, status, isReceiving };
 };
 
 export default useMqttClient;
