@@ -17,13 +17,13 @@ import ChooseFriendsMenu from '../../components/friends/ChooseFriendsMenu'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, runOnJS } from 'react-native-reanimated'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Chart from '../../components/charts/Chart'
-import useMqttClient from '../../api/mqtt/mqtt'
+import { useMqttContext } from '../../context/MqttProvider'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 const Home = () => {
   const { user, language } = useGlobalContext();
-  const { temperature, waterLevel, status, humidity, brightness, isReceiving, client } = useMqttClient();
+  const { temperature, waterLevel, status, humidity, brightness, isReceiving, client } = useMqttContext();
   const { friends } = useFriendsContext();
   const [activeItem, setActiveItem] = useState(null);
   const { plants, setPlants, setActivePlant, activePlant, setActiveId, activeId } = usePlantsContext();

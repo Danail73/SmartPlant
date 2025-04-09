@@ -8,7 +8,7 @@ import Container from '../components/Container';
 import { usePlantsContext } from '../context/PlantsProvider';
 import CustomButton from '../components/CustomButton';
 import { updatePlant, subscribeToPlants } from '../lib/appwrite';
-import useMqttClient from '../api/mqtt/mqtt';
+import { useMqttContext } from '../context/MqttProvider';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 
@@ -16,7 +16,7 @@ const Device = () => {
   const { user } = useGlobalContext()
   const { activePlant, setActivePlant, setPlants, plants } = usePlantsContext()
   const { client, temperature, brightness, waterLevel,
-     isEnabled, pump, pumpSwitch, lampSwitch, humidity} = useMqttClient();
+     isEnabled, pump, pumpSwitch, lampSwitch, humidity} = useMqttContext();
   const [edit, setEdit] = useState(false)
   const [form, setForm] = useState({
     plantId: '',
