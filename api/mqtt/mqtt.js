@@ -97,7 +97,7 @@ const useMqttClient = () => {
 
         mqttClient.on('connectionLost', () => {
             console.log("MQTT Connection lost. Reconnecting...");
-            setIsReceiving(false)
+            setIsReceiving
         });
 
         mqttClient.on('messageReceived', (message) => {
