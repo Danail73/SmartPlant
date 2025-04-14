@@ -39,6 +39,7 @@ const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, ic
                     <TouchableOpacity
                         className="w-14 h-14 rounded-full"
                         onPress={handleSendRequest}
+                        testID='invite-test'
                     >
                         <LinearGradient
                             colors={['#6666ff', '#3333ff']}

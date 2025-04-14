@@ -33,6 +33,7 @@ const FormField = ({ title, value, placeholder,
           value={value}
           onChangeText={handleChangeText}
           secureTextEntry={hideText ? !showText : false}
+          testID="passwordInput"
         />
         {hideText && (
           <TouchableOpacity
@@ -43,6 +44,7 @@ const FormField = ({ title, value, placeholder,
               source={!showText ? icons.eye : icons.eyeHide}
               style={hideTextIconStyles}
               resizeMode='contain'
+              testID="eyeIcon"
             />
           </TouchableOpacity>
         )}

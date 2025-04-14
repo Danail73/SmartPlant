@@ -11,7 +11,7 @@ import { usePlantsContext } from '../../context/PlantsProvider';
 
 const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
   const { user } = useGlobalContext()
-  const {setPlants, setActivePlant} = usePlantsContext();
+  const { setPlants, setActivePlant } = usePlantsContext();
   const iconRef = useRef(null);
   const menuScale = useSharedValue(0);
   const rotation = useSharedValue(0);
@@ -77,7 +77,13 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
 
   return (
     <>
-      <TouchableOpacity ref={iconRef} onPress={openMenu} className="items-center justify-center absolute right-3" style={menuStyle}>
+      <TouchableOpacity
+        ref={iconRef}
+        onPress={openMenu}
+        className="items-center justify-center absolute right-3"
+        style={menuStyle}
+        testID='menu-test'
+      >
         <Animated.View className="" style={[rotationStyle]}>
           <Image
             source={icons.menu}
@@ -87,7 +93,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
       </TouchableOpacity>
       {visible && (
         <Portal>
-          <TouchableWithoutFeedback onPress={closeMenu}>
+          <TouchableWithoutFeedback onPress={closeMenu} testID='background-test'>
             <View style={{ width: screenWidth, height: screenHeight, position: 'absolute', top: 0, left: 0, zIndex: 2000 }}
               className="items-center"
             >
@@ -99,7 +105,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                       width: isCreator ? styles.menuContent.width : 100,
                       height: isCreator ? styles.menuContent.height : 120,
                       gap: hp('1%')
-                      
+
                     }]}
                 className="absolute border"
               >
@@ -132,7 +138,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                       <View className="flex-row">
                         <Image
                           source={icons.addFriend}
-                          style={{ tintColor: 'green', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26  }}
+                          style={{ tintColor: 'green', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26 }}
                           resizeMode='contain'
                         />
                         <Text className="font-pregular pl-1 " style={{ color: 'green', fontSize: hp('2.2%') > 20 ? 20 : hp('2.2%') }}>Add</Text>
@@ -149,7 +155,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                       <View className="flex-row">
                         <Image
                           source={icons.addFriend}
-                          style={{ tintColor: 'red', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26  }}
+                          style={{ tintColor: 'red', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26 }}
                           resizeMode='contain'
                         />
                         <Text className="font-pregular pl-1 " style={{ color: 'red', fontSize: hp('2.2%') > 20 ? 20 : hp('2.2%') }}>Remove</Text>
@@ -168,7 +174,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                   <View className="flex-row ">
                     <Image
                       source={icons.del}
-                      style={{ tintColor: 'red', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26  }}
+                      style={{ tintColor: 'red', width: hp('2.6%'), height: hp('2.6%'), maxWidth: 26, maxHeight: 26 }}
                       resizeMode='contain'
                     />
                     <Text className="font-pregular pl-1" style={{ color: 'red', fontSize: hp('2.2%') > 20 ? 20 : hp('2.2%') }}>Delete</Text>

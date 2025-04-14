@@ -1,6 +1,5 @@
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, Switch } from 'react-native'
 import React from 'react'
-import SwitchButton from '../SwitchButton'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const StatusCard = ({ label, labelStyles, value, valueStyles,
@@ -14,6 +13,7 @@ const StatusCard = ({ label, labelStyles, value, valueStyles,
           className={`w-14 h-14 ${iconStyles}`}
           style={[{ tintColor: colorSwitch ? '#3bc492' : '#98989a' }, bonusIconStyles]}
           resizeMode="contain"
+          testID='image-test'
         />
       )}
       <View className=" items-center justify-center">
@@ -26,11 +26,13 @@ const StatusCard = ({ label, labelStyles, value, valueStyles,
         {showSwitch && (
           <View className="flex-row items-center ">
             <Text className="font-bold text-gray-statusCard" style={{ fontSize: hp('2%') > 18 ? 18 : hp('2%'), marginRight: hp('0.5%') }}>OFF</Text>
-            <SwitchButton
+            <Switch
+              trackColor={{ false: '#767577', true: '#bdf1e5' }}
+              thumbColor={isEnabled ? '#14c3b9' : '#f4f3f4'}
+              ios_backgroundColor="#3e3e3e"
               onValueChange={onSwitchChange}
-              trackColor={{ false: "#ccc", true: "#4FD1C5" }}
-              onSwitch={onSwitchChange}
-              isEnabled={isEnabled}
+              value={isEnabled}
+              testID='switch-toggle'
             />
             <Text className="font-bold text-gray-statusCard" style={{ fontSize: hp('2%') > 18 ? 18 : hp('2%'), marginLeft: hp('0.5%') }}>ON</Text>
           </View>
