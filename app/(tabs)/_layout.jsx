@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Animated, Alert } from 'react-native';
 import { Tabs } from 'expo-router';
 import { icons } from '../../constants';
-import { PaperProvider, Modal } from 'react-native-paper';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
 const TabIcon = ({ icon, color, name, focused }) => {
@@ -33,7 +32,6 @@ const TabIcon = ({ icon, color, name, focused }) => {
 
 const TabsLayout = () => {
   return (
-    <PaperProvider>
       <Tabs
         screenOptions={{
           tabBarShowLabel: false,
@@ -117,7 +115,6 @@ const TabsLayout = () => {
           }}
         />
       </Tabs>
-    </PaperProvider>
   );
 };
 

@@ -1,5 +1,5 @@
 import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback, Alert, Keyboard } from 'react-native'
-import React, { useCallback, useEffect, useState, useRef, act } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import PlantBoardComponent from '../../components/plants/PlantBoardComponent'
 import { icons, images } from '../../constants'
 import Container from '../../components/Container'
@@ -23,12 +23,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Home = () => {
   const { user, language } = useGlobalContext();
-  const { temperature, waterLevel, status, humidity, brightness, isReceiving, client } = useMqttContext();
+  const { temperature, waterLevel, status, humidity, brightness, isReceiving } = useMqttContext();
   const { friends } = useFriendsContext();
-  const [activeItem, setActiveItem] = useState(null);
-  const { plants, setPlants, setActivePlant, activePlant, setActiveId, activeId } = usePlantsContext();
+  const { plants, setPlants, setActivePlant, activePlant, setActiveId, fetchRealTime } = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
-  const translateY = useSharedValue(0);
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
   const [addVisible, setAddVisible] = useState(false);
@@ -106,7 +104,6 @@ const Home = () => {
 
   const viewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
-      setActiveItem(viewableItems[0].item);
       setActivePlant(viewableItems[0].item)
       setActiveId(viewableItems[0].item.$id);
     }
@@ -116,27 +113,33 @@ const Home = () => {
     viewAreaCoveragePercentThreshold: 50,
   };
 
-  const handlePlantUpdated = (response) => {
-    const eventType = response.events;
-    const updatedItem = response.payload
-    if (eventType.some((item) => item.includes('delete'))) {
-      setPlants((previous) => previous.filter((item) => item.$id != updatedItem.$id))
-    }
-    else if (eventType.some((item) => item.includes('create'))) {
-      setPlants((previous) => [...previous, updatedItem])
-    }
-    else if (eventType.some((item) => item.includes('update'))) {
-      setPlants((previous) => previous.map(
-        (item) => item.$id == updatedItem.$id ? updatedItem : item
-      ))
-      if (activePlant && (activePlant.$id === updatedItem.$id)) {
-        setActiveItem(updatedItem)
-        setActivePlant(updatedItem)
-        setActiveId(updatedItem.$id)
+  const handlePlantUpdated = useCallback((response) => {
+    try {
+      const eventType = response.events[0];
+      const updatedItem = response.payload;
 
+      if (eventType.includes('update')) {
+        const updatedPlant = plants.find((p) => p.$id == updatedItem.$id);
+        if (updatedPlant && (updatedPlant?.temperature.at(-1) != updatedItem.temperature.at(-1))) {
+          setPlants((previous) => previous.map(
+            (item) => item.$id == updatedItem.$id ? updatedItem : item
+          ));
+        } else {
+          fetchRealTime();
+        }
+      } else {
+        fetchRealTime();
       }
+
+      if (activePlant?.$id === updatedItem.$id) {
+        setActivePlant(updatedItem);
+        setActiveId(updatedItem.$id);
+      }
+    } catch (error) {
+      console.log(error);
     }
-  }
+  }, [plants, activePlant, setPlants, setActivePlant, setActiveId, fetchRealTime]);
+
 
   const createMenuAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -158,10 +161,9 @@ const Home = () => {
   }
 
   useEffect(() => {
-    const unsubscribePlants = subscribeToPlants(user.$id, handlePlantUpdated)
-
-    return () => unsubscribePlants()
-  }, [friends])
+    const unsubscribe = subscribeToPlants(user.$id, handlePlantUpdated);
+    return () => unsubscribe();
+  }, [handlePlantUpdated, user?.$id])
 
   const getCurrentTime = () => {
     const now = new Date().toLocaleString("en-GB", {
@@ -214,19 +216,28 @@ const Home = () => {
     }, 300000)
 
     return () => clearInterval(interval)
-  }, [activeItem])
+  }, [activePlant])
 
   useEffect(() => {
-    if (activePlant) {
+    if(activePlant){
       setData({
-        time: activePlant.time,
-        temperature: activePlant.temperature,
-        humidity: activePlant.humidity,
-        brightness: activePlant.brightness,
-        water: activePlant.water,
+        time: activePlant?.time,
+        temperature: activePlant?.temperature,
+        humidity:  activePlant?.humidity,
+        brightness: activePlant?.brightness,
+        water: activePlant?.water,
       })
     }
-  }, [activePlant])
+    else{
+      setData({
+        time: [],
+        temperature: [],
+        humidity:  [],
+        brightness: [],
+        water: [],
+      })
+    }
+  }, [activePlant, user])
 
 
   return (
@@ -241,7 +252,7 @@ const Home = () => {
             style={{ height: hp('7%'), paddingLeft: language == 'bg' ? 0 : wp('1%'), paddingTop: hp('2%') }}
           >
             <Text className={`text-notFullWhite font-pmedium`} style={{ fontSize: language == 'bg' ? hp('2%') : hp('3%') }}>{t('Home')}</Text>
-            <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{temperature}°C</Text>
+            <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{temperature ? temperature + '°C' : ''}</Text>
           </View>
 
           {plants && plants.length > 0 && (
@@ -251,7 +262,6 @@ const Home = () => {
             >
               <Image
                 source={images.good}
-                //className="border"
                 style={{ width: wp('46%'), height: hp('23%'), maxWidth: 260, height: 200 }}
                 resizeMode='contain'
               />
@@ -307,7 +317,7 @@ const Home = () => {
                     <PlantBoardComponent
                       item={item}
                       isReceiving={isReceiving}
-                      isActive={activeItem && activeItem.$id == item.$id}
+                      isActive={activePlant?.$id == item.$id}
                       addCallback={() => setAddVisible(true)}
                       removeCallback={() => setRemoveVisible(true)}
                     />
@@ -336,7 +346,7 @@ const Home = () => {
             <View style={{ width: wp('100%'), height: hp('100%'), position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
               <BlurView
                 className="items-center justify-center"
-                style={{width: wp('100%'), height: hp('100%'),...StyleSheet.absoluteFillObject}}
+                style={{ width: wp('100%'), height: hp('100%'), ...StyleSheet.absoluteFillObject }}
                 intensity={40}
                 tint='dark'
               >
@@ -408,7 +418,7 @@ const Home = () => {
             >
               <ChooseFriendsMenu
                 friends={friends
-                  .filter((item) => !activeItem.users.some((u) => u.$id === item.friend.$id))
+                  .filter((item) => !activePlant?.users.some((u) => u.$id === item.friend.$id))
                   .map((item) => item.friend)}
                 cancel={() => {
                   setAddVisible(false)
@@ -418,11 +428,13 @@ const Home = () => {
                 title={'Choose friends to add'}
                 buttonTitle={'Add'}
                 fn={async (list) => {
-                  const newUsers = [...activeItem.users];
-                  list.forEach((item) => {
-                    newUsers.push(item)
-                  })
-                  const response = await updatePlantUsers(activeItem.$id, newUsers)
+                  if (activePlant) {
+                    const newUsers = [...activePlant?.users];
+                    list.forEach((item) => {
+                      newUsers.push(item)
+                    })
+                    const response = await updatePlantUsers(activePlant?.$id, newUsers)
+                  }
                 }}
               />
             </BlurView>
@@ -437,7 +449,7 @@ const Home = () => {
               tint='systemUltraThinMaterial'
             >
               <ChooseFriendsMenu
-                friends={activeItem.users.filter((item) => item.$id != user.$id)}
+                friends={activePlant?.users.filter((item) => item.$id != user.$id)}
                 cancel={() => {
                   setRemoveVisible(false)
                 }}
@@ -446,13 +458,15 @@ const Home = () => {
                 title={'Choose friends to remove'}
                 buttonTitle={'Remove'}
                 fn={async (list) => {
-                  try {
-                    let newUsers = activeItem.users.filter(
-                      (u) => !list.some((item) => u.$id === item.$id)
-                    );
-                    const response = await updatePlantUsers(activeItem.$id, newUsers)
-                  } catch (error) {
-                    console.log(error)
+                  if (activePlant) {
+                    try {
+                      let newUsers = activePlant.users.filter(
+                        (u) => !list.some((item) => u.$id === item.$id)
+                      );
+                      const response = await updatePlantUsers(activePlant.$id, newUsers)
+                    } catch (error) {
+                      console.log(error)
+                    }
                   }
                 }}
               />

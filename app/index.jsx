@@ -4,7 +4,6 @@ import { Link, Redirect, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { images } from '../constants';
 import CustomButton from '../components/CustomButton';
-import { PaperProvider } from 'react-native-paper'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useGlobalContext } from '../context/GlobalProvider';
 import Container from '../components/Container';
@@ -20,7 +19,6 @@ export default function App() {
   if (!isLoading && isLoggedIn) return <Redirect href="/home" />
 
   return (
-    <PaperProvider>
       <Container
         colors={['#cccf9e', '#E7E8D1']}
       >
@@ -64,6 +62,5 @@ export default function App() {
         <StatusBar
           style='dark' />
       </Container>
-    </PaperProvider>
   );
 }

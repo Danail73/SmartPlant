@@ -7,9 +7,11 @@ import { deletePlant, updatePlantUsers } from '../../lib/appwrite';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { usePlantsContext } from '../../context/PlantsProvider';
 
 const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
   const { user } = useGlobalContext()
+  const {setPlants, setActivePlant} = usePlantsContext();
   const iconRef = useRef(null);
   const menuScale = useSharedValue(0);
   const rotation = useSharedValue(0);
@@ -50,11 +52,13 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
       }
       else {
         const users = item.users.filter((item) => item.$id != user.$id)
-        await updatePlantUsers(users)
+        await updatePlantUsers(item.$id, users)
+        setPlants(prev => prev.filter(p => p.$id !== item.$id))
+        setActivePlant(null);
       }
 
     } catch (error) {
-      console.error(Error, error)
+      console.log(Error, error)
     }
   }
   const menuAnimatedStyle = useAnimatedStyle(() => {

@@ -31,15 +31,27 @@ const PlantsProvider = ({ children }) => {
         }
     }
 
+    const fetchRealTime = async () => {
+        fetchPlants()
+            .then((response) => {
+                if (response) {
+                    const currentPlants = response.filter((item) => item.users.some((u) => u.$id === user.$id))
+                    setPlants(currentPlants)
+                }
+
+            })
+            .catch((error) => {
+                console.log('error')
+            })
+    }
+
     useEffect(() => {
         if (user?.$id) {
             fetchPlants()
                 .then((response) => {
                     if (response) {
                         const currentPlants = response.filter((item) => item.users.some((u) => u.$id === user.$id))
-                        if (currentPlants) {
-                            setPlants(currentPlants)
-                        }
+                        setPlants(currentPlants)
                     }
 
                 })
@@ -68,7 +80,9 @@ const PlantsProvider = ({ children }) => {
                 setActivePlant,
                 activePlant,
                 activeId,
-                setActiveId
+                setActiveId,
+                storeItem,
+                fetchRealTime
             }}
         >
             {children}

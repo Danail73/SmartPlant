@@ -17,7 +17,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 
 const Profile = () => {
   const { friends } = useFriendsContext()
-  const { plants } = usePlantsContext()
+  const { plants, setPlants, setActivePlant, storeItem } = usePlantsContext()
   const { user, setUser, setIsLoggedIn, switchLanguage, language } = useGlobalContext()
   const [email, setEmail] = useState({
     previous: '',
@@ -37,7 +37,6 @@ const Profile = () => {
   })
   const [editPic, setEditPic] = useState(false)
   const [saveVisible, setSaveVisible] = useState(false)
-  const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
 
   const getDecryptedPassword = async () => {
@@ -49,9 +48,17 @@ const Profile = () => {
 
   const logout = async () => {
     try {
+      storeItem("temperature", JSON.stringify(0));
+      storeItem("humidity", JSON.stringify(0));
+      storeItem("brightness", JSON.stringify(0));
+      storeItem("water", JSON.stringify(0));
+      storeItem("statusCode", JSON.stringify(0));
+      setPlants(null);
+      setActivePlant(null);
       await signOut()
       setUser(null)
       setIsLoggedIn(false)
+      
 
       router.replace('/login')
     } catch (error) { console.log(error) }
@@ -172,10 +179,10 @@ const Profile = () => {
       >
         <View
           className="absolute z-10 overflow-visible"
-          style={{width: wp('120%'), height: hp('80%'), top: hp('-56%'),  left: wp('-10%')}}>
+          style={{ width: wp('120%'), height: hp('80%'), top: hp('-56%'), left: wp('-10%') }}>
           <View className="rounded-full w-full h-full items-center justify-end z-10 bg-[#3A5332]">
-            <Text className="font-psemibold text-[#f2f9f1] mb-2" style={{fontSize: hp('2.5%')}}>{user.username}</Text>
-            <View className="border-2 rounded-full bottom-[-5%] z-20 bg-[#3A5332]" style={{width: hp('10%'), height: hp('10%')}}>
+            <Text className="font-psemibold text-[#f2f9f1] mb-2" style={{ fontSize: hp('2.5%') }}>{user?.username}</Text>
+            <View className="border-2 rounded-full bottom-[-5%] z-20 bg-[#3A5332]" style={{ width: hp('10%'), height: hp('10%') }}>
               <View className="w-full h-full">
                 <View
                   className="w-full h-full items-center justify-center"
@@ -206,16 +213,16 @@ const Profile = () => {
             </View>
           </View>
         </View>
-        <View className="bg-transparent justify-end z-5" style={{width: wp('100%'), height: hp('15%'), marginTop: hp('13%')}}>
+        <View className="bg-transparent justify-end z-5" style={{ width: wp('100%'), height: hp('15%'), marginTop: hp('13%') }}>
           <LanguageMenu
             langContainerStyles={'absolute left-[10%] bottom-[5%]'}
             langMenuStyles={'bg-notFullWhite rounded-md items-center'}
             bonusLandContainerStyles={{}}
-            bonusLangMenuStyles={{width: wp('21.5%'), maxWidth: 120, height: hp('13.5%'), maxHeight: 145}}
+            bonusLangMenuStyles={{ width: wp('21.5%'), maxWidth: 120, height: hp('13.5%'), maxHeight: 145 }}
           />
           <CustomButton
             containerStyles={'absolute right-[5%] items-center justify-center bg-notFullWhite rounded-md'}
-            bonusContainerStyles={{width: hp('13%'), height: hp('5%')}}
+            bonusContainerStyles={{ width: hp('13%'), height: hp('5%') }}
             useAnimatedIcon={true}
             imageSource={icons.logoutAnim}
             imageContainerStyles={''}
@@ -224,69 +231,69 @@ const Profile = () => {
             height={40}
             textContainerStyles={'items-center justify-center'}
             title={t('Logout')}
-            bonusTextStyles={{fontSize: hp('1.7%') < 17 ? hp('1.7%') : 17}}
+            bonusTextStyles={{ fontSize: hp('1.7%') < 17 ? hp('1.7%') : 17 }}
             opacityStyles={'flex-row px-2'}
             handlePress={logout}
           />
         </View>
         <View className="items-center justify-center flex-row gap-4 h-[6%]">
-          <View className="flex-row items-center" style={{gap: wp('1.4%')}}>
+          <View className="flex-row items-center" style={{ gap: wp('1.4%') }}>
             <Image
               source={icons.friendsFilled}
               style={{ tintColor: '#f2f9f1', width: hp('3%'), height: hp('3%') }}
               resizeMode='contain'
             />
-            <Text className="font-pmedium text-[#f2f9f1]" style={{fontSize: hp('1.6%')}}>{friends.length}</Text>
+            <Text className="font-pmedium text-[#f2f9f1]" style={{ fontSize: hp('1.6%') }}>{friends?.length}</Text>
           </View>
-          <View className="flex-row items-center justify-center" style={{gap: wp('0.6%')}}>
+          <View className="flex-row items-center justify-center" style={{ gap: wp('0.6%') }}>
             <Image
               source={icons.plantsFilled}
               style={{ tintColor: '#f2f9f1', width: hp('3.2%'), height: hp('3.2%') }}
               resizeMode='contain'
             />
-            <Text className="font-pmedium text-[#f2f9f1]" style={{fontSize: hp('1.6%')}}>{plants.length}</Text>
+            <Text className="font-pmedium text-[#f2f9f1]" style={{ fontSize: hp('1.6%') }}>{plants?.length}</Text>
           </View>
 
         </View>
-        <View className="items-center" style={{marginTop: hp('4%'), height: hp('40%'), width: wp('100%')}}>
+        <View className="items-center" style={{ marginTop: hp('4%'), height: hp('40%'), width: wp('100%') }}>
           <View className="w-[90%] h-full p-1 items-center z-20">
             <FormField
               value={username.current}
               otherStyles={'rounded-lg w-[96%]  mb-1 mt-3 h-[20%]  items-center justify-center'}
               inputStyles={'font-pregular border-gray-500 w-[95%] max-w-[550] justify-center'}
-              bonusInputStyles={{height: hp('6%'), marginBottom: hp('1%'), fontSize: hp('1.7%'), paddingLeft: '14%'}}
+              bonusInputStyles={{ height: hp('6%'), marginBottom: hp('1%'), fontSize: hp('1.7%'), paddingLeft: '14%' }}
               handleChangeText={(e) => setUsername({ ...username, current: e })}
               useIcon={true}
               iconSource={icons.username}
-              bonusIconStyles={{width: wp('8%'), height: wp('8%'), maxWidth: 43, maxHeight: 43}}
-              iconContainerStyles={{marginBottom: '3%', position: 'absolute', bottom: '25%', left: '2%'}}
+              bonusIconStyles={{ width: wp('8%'), height: wp('8%'), maxWidth: 43, maxHeight: 43 }}
+              iconContainerStyles={{ marginBottom: '3%', position: 'absolute', bottom: '25%', left: '2%' }}
             />
             <View className="h-[0.1rem] bg-black w-[88%]"></View>
             <FormField
               value={email.current}
               otherStyles={'rounded-lg w-[96%]  mb-1 mt-3 h-[20%]  items-center justify-center'}
               inputStyles={'font-pregular border-gray-500 w-[95%] max-w-[550] justify-center'}
-              bonusInputStyles={{height: hp('6%'), marginBottom: hp('1%'), fontSize: hp('1.7%'), paddingLeft: '14%'}}
+              bonusInputStyles={{ height: hp('6%'), marginBottom: hp('1%'), fontSize: hp('1.7%'), paddingLeft: '14%' }}
               handleChangeText={(e) => setEmail({ ...email, current: e })}
               useIcon={true}
               iconSource={icons.email}
-              bonusIconStyles={{width: wp('8%'), height: wp('8%'), maxWidth: 43, maxHeight: 43}}
-              iconContainerStyles={{marginBottom: '3%', position: 'absolute', bottom: '25%', left: '2%'}}
+              bonusIconStyles={{ width: wp('8%'), height: wp('8%'), maxWidth: 43, maxHeight: 43 }}
+              iconContainerStyles={{ marginBottom: '3%', position: 'absolute', bottom: '25%', left: '2%' }}
             />
             <View className="h-[0.1rem] bg-black w-[88%]"></View>
             <FormField
               value={password.current}
               otherStyles={'rounded-lg w-[96%]  mb-1 mt-3 h-[20%]  items-center justify-center'}
               inputStyles={'font-pregular border-gray-500 w-[95%] max-w-[550] justify-center'}
-              bonusInputStyles={{height: hp('6%'), marginBottom: hp('1%'), fontSize: hp('1.7%'), paddingHorizontal: '14%'}}
+              bonusInputStyles={{ height: hp('6%'), marginBottom: hp('1%'), fontSize: hp('1.7%'), paddingHorizontal: '14%' }}
               handleChangeText={(e) => setPassword({ ...password, current: e })}
               useIcon={true}
               iconSource={icons.password}
-              bonusIconStyles={{width: wp('8%'), height: wp('8%'), maxWidth: 43, maxHeight: 43}}
-              iconContainerStyles={{marginBottom: '3%', position: 'absolute', bottom: '25%', left: '2%'}}
+              bonusIconStyles={{ width: wp('8%'), height: wp('8%'), maxWidth: 43, maxHeight: 43 }}
+              iconContainerStyles={{ marginBottom: '3%', position: 'absolute', bottom: '25%', left: '2%' }}
               hideText={true}
-              hideTextIconStyles={{width: hp('3%'), height: hp('3%')}}
-              hideTextStyles={{position: 'absolute', right:'2%', bottom:'35%'}}
+              hideTextIconStyles={{ width: hp('3%'), height: hp('3%') }}
+              hideTextStyles={{ position: 'absolute', right: '2%', bottom: '35%' }}
             />
             {saveVisible && (
               <View className="flex-1 flex-row gap-5 mt-1">

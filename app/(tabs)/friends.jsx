@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Dimensions, FlatList, TouchableOpacity, Image, TextInput, Pressable, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, Dimensions, FlatList, TouchableOpacity, Image, TextInput, SafeAreaView, StyleSheet } from 'react-native';
 import Container from '../../components/Container';
 import { PaperProvider } from 'react-native-paper';
 import { respondFriendRequest, subscribeToFriendRequests, subscribeToUsers } from '../../lib/appwrite';
@@ -15,7 +15,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 
 import { TouchableWithoutFeedback } from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import { t } from '../../translations/i18n'
-import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 
 const { width, height } = Dimensions.get('window');
@@ -90,11 +90,6 @@ const Friends = () => {
       transform: [{ translateX: menuTranslateX.value }],
     };
   });
-  const backAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: menuTranslateX.value }, { translateY: menuTranslateY.value }]
-    }
-  })
 
   const rotateAnimatedStyle = useAnimatedStyle(() => {
     return {

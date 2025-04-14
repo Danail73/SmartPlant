@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getFriendRequests, getUsers } from '../lib/appwrite';
+import { getFriendRequests, getUsers} from '../lib/appwrite';
 import { useGlobalContext } from './GlobalProvider';
 
 const FriendsContext = createContext();
@@ -158,7 +158,7 @@ const FriendsProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        if(user?.$id) {
+        if (user?.$id) {
             fetchData()
         }
     }, [user])

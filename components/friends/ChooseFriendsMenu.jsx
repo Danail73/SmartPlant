@@ -26,7 +26,7 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
 
     const handlePress = async () => {
         setIsLoading(true)
-        fn(listFriends)
+        await fn(listFriends)
         setIsLoading(false)
     }
     return (
@@ -36,11 +36,7 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                 maxWidth: 600, minHeight: hp('20%'), maxHeight: hp('70%'), position: 'absolute', top: hp('10%'), 
                 right: (width>600) ? (width-600)/2 : wp('5%'), left: (width>600) ? (width-600)/2 : wp('5%')}}
         >
-            {isLoading && (
-                <View className="absolute inset-0 justify-center items-center bg-black bg-opacity-25">
-                    <ActivityIndicator size="large" color="#ffffff" />
-                </View>
-            )}
+            
             <View className="items-center justify-center">
                 <View>
                     <Text className="mt-5 font-pmedium" style={{fontSize: hp('1.8%')}}>{title}</Text>
