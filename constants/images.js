@@ -2,7 +2,7 @@ import profile from "../assets/images/profile.png";
 import thumbnail from "../assets/images/thumbnail.png";
 import cards from "../assets/images/cards.png";
 import path from "../assets/images/path.png";
-import logo from "../assets/images/g-logo-transparent.png";
+import logo from "../assets/images/GreenCare.png";
 import logoSmall from "../assets/images/logo-small.png";
 import empty from "../assets/images/empty.png";
 import leaf from "../assets/images/leaf-icon-signup.png";

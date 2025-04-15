@@ -23,12 +23,12 @@ export default function App() {
         colors={['#cccf9e', '#E7E8D1']}
       >
         <ScrollView contentContainerStyle={{ height: '100%' }}>
-          <View className="w-full justify-center items-center h-full px-4">
+          <View className="w-full items-center h-full px-4" style={{position:'absolute', top: hp('25%')}}>
             <Image
               source={images.logo}
               //className="border"
               //className="w-[416px] h-[130px]"
-              style={{ width: wp('70%'), height: hp('20%') }}
+              style={{ width: wp('75%'), height: hp('25%') }}
               resizeMode="contain"
             />
             <View style={{ marginTop: hp('2%') }} />

@@ -13,3 +13,6 @@ test('calls handlePress on press', () => {
   fireEvent.press(getByText('Click me'));
   expect(mockPress).toHaveBeenCalled();
 });
+
+
+
