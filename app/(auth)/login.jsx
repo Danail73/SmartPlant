@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { ImageBackground, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { images, icons } from '../../constants'
-import { getCurrentUser, signIn } from '../../lib/appwrite';
+import { getCurrentUser, signIn, getCurrentAccount } from '../../lib/appwrite';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useGlobalContext } from '../../context/GlobalProvider';
 
@@ -18,7 +18,7 @@ const LoginScreen = () => {
     password: ''
   })
 
-  const { setUser, setIsLoggedIn } = useGlobalContext();
+  const { setUser, setIsLoggedIn, setAccount } = useGlobalContext();
 
   const submit = async () => {
     if (form.email === "" || form.password === "") {
@@ -32,7 +32,10 @@ const LoginScreen = () => {
       const result = await getCurrentUser();
       setUser(result);
       setIsLoggedIn(true);
-
+      const acc = await getCurrentAccount();
+      if (acc) {
+        setAccount(acc);
+      }
       router.replace('/home')
     }
     catch (error) {

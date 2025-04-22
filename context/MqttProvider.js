@@ -114,17 +114,40 @@ const MqttProvider = ({ children }) => {
 
             if (messageData) {
                 switch (destination) {
-                    case `${plantId}/sensor/temp/state`: setTemperature(messageData); setStorageItem("temperature", messageData); break;
-                    case `${plantId}/sensor/lux/state`: setBrightness(messageData); setStorageItem("brightness", messageData); break;
-                    case `${plantId}/sensor/ultrasonic_sensor/state`: setWaterLevel(messageData); setStorageItem("water", messageData); break;
-                    case `${plantId}/sensor/soil_moisture/state`: setHumidity(messageData); setStorageItem("humidity", messageData); break;
-                    case `${plantId}/light/lamp/state`: setIsEnabled(JSON.parse(messageData).state === "ON"); break;
-                    case `${plantId}/switch/pump/state`: setPump(messageData === "ON"); break;
-                    case `${plantId}/sensor/plant_status/state`:
+                    case `${plantId}/sensor/temp/state`: {
+                        setTemperature(messageData);
+                        setStorageItem("temperature", messageData);
+                        break;
+                    }
+                    case `${plantId}/sensor/lux/state`: {
+                        setBrightness(messageData);
+                        setStorageItem("brightness", messageData);
+                        break;
+                    }
+                    case `${plantId}/sensor/ultrasonic_sensor/state`: {
+                        setWaterLevel(messageData);
+                        setStorageItem("water", messageData);
+                        break;
+                    }
+                    case `${plantId}/sensor/soil_moisture/state`: {
+                        setHumidity(messageData);
+                        setStorageItem("humidity", messageData);
+                        break;
+                    }
+                    case `${plantId}/light/lamp/state`: {
+                        setIsEnabled(JSON.parse(messageData).state === "ON");
+                        break;
+                    }
+                    case `${plantId}/switch/pump/state`: {
+                        setPump(messageData === "ON");
+                        break;
+                    }
+                    case `${plantId}/sensor/plant_status/state`:{
                         const statusCode = messageData === "Very well" ? 1 : 0;
                         setStatus({ code: statusCode, message: messageData });
                         setStorageItem("statusCode", JSON.stringify(statusCode));
                         break;
+                    }
                     default:
                         console.log("Unknown topic:", destination);
                 }

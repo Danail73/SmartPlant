@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getCurrentUser } from '../lib/appwrite';
+import { getCurrentAccount, getCurrentUser } from '../lib/appwrite';
 import { useLanguage } from '../translations/i18n';
 
 const GlobalContext = createContext();
@@ -9,27 +9,38 @@ const GlobalProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const {language, switchLanguage} = useLanguage();
+    const { language, switchLanguage } = useLanguage();
+    const [account, setAccount] = useState(null)
 
     useEffect(() => {
-        getCurrentUser()
-            .then((response) => {
-                if(response){
+        const fetchUserData = async () => {
+            try {
+                const response = await getCurrentUser();
+    
+                if (response) {
                     setIsLoggedIn(true);
-                    setUser(response)
-                    tempUser = response
-                }
-                else{
+                    setUser(response);
+    
+                    try {
+                        const acc = await getCurrentAccount();
+                        if (acc) {
+                            setAccount(acc);
+                        }
+                    } catch (err) {
+                        console.log('Error fetching account:', err);
+                    }
+                } else {
                     setIsLoggedIn(false);
-                    setUser(null)
+                    setUser(null);
                 }
-            })
-            .catch((error)=>{
-                console.log('error')
-            })
-            .finally(() => {
+            } catch (err) {
+                console.log('Error fetching user:', err);
+            } finally {
                 setIsLoading(false);
-            })
+            }
+        };
+    
+        fetchUserData();
     }, [])
 
     return (
@@ -41,7 +52,9 @@ const GlobalProvider = ({ children }) => {
                 setUser,
                 isLoading,
                 language,
-                switchLanguage
+                switchLanguage,
+                account,
+                setAccount
             }}
         >
             {children}

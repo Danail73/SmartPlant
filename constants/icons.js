@@ -45,6 +45,7 @@ import backAnimated from "../assets/icons/backAnimated.json";
 import languageAnimated from "../assets/icons/languageAnimated.json";
 import doubleCheck from "../assets/icons/double-check.png";
 import check from "../assets/icons/check.png";
+import plantAdmin from "../assets/icons/adminAdd.png";
 
 export default {
   play,
@@ -94,4 +95,5 @@ export default {
   languageAnimated,
   doubleCheck,
   check,
+  plantAdmin,
 };

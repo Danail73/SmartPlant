@@ -18,7 +18,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 const Profile = () => {
   const { friends } = useFriendsContext()
   const { plants, setPlants, setActivePlant, storeItem } = usePlantsContext()
-  const { user, setUser, setIsLoggedIn, switchLanguage, language } = useGlobalContext()
+  const { user, setUser, setIsLoggedIn, setAccount, switchLanguage, language } = useGlobalContext()
   const [email, setEmail] = useState({
     previous: '',
     current: ''
@@ -58,31 +58,12 @@ const Profile = () => {
       await signOut()
       setUser(null)
       setIsLoggedIn(false)
+      setAccount(false)
       
 
       router.replace('/login')
     } catch (error) { console.log(error) }
   }
-
-  /*const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'We need camera roll permissions to choose a profile picture.');
-      return;
-    }
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    console.log(result)
-
-    if (!result.canceled) {
-      setProfilePic({ ...profilePic, current: result.assets[0].uri });
-    }
-  };*/
 
   const cancel = () => {
     setUsername({ ...username, current: username.previous })

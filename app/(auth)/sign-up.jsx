@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-nat
 import { ImageBackground, SafeAreaView, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { images, icons } from '../../constants';
-import { createUser } from '../../lib/appwrite';
+import { createUser, getCurrentAccount } from '../../lib/appwrite';
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { decryptPassword, encryptPassword, generateRandomKey } from '../../lib/crypto';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -18,7 +18,7 @@ const SignUp = () => {
     password: ''
   })
 
-  const { setUser, setIsLoggedIn } = useGlobalContext();
+  const { setUser, setIsLoggedIn, setAccount } = useGlobalContext();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,11 +35,14 @@ const SignUp = () => {
       const result = await createUser(form.email, form.password, encryptedPassword, key, form.username)
       setUser(result);
       setIsLoggedIn(true);
-
+      const acc = await getCurrentAccount();
+      if (acc) {
+        setAccount(acc);
+      }
       router.replace('/home')
     }
     catch (error) {
-      console.log(error.message)
+      Alert.alert('Error', error);
     }
     finally {
       setIsSubmitting(false);

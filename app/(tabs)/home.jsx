@@ -4,7 +4,7 @@ import PlantBoardComponent from '../../components/plants/PlantBoardComponent'
 import { icons, images } from '../../constants'
 import Container from '../../components/Container'
 import { PaperProvider } from 'react-native-paper'
-import { createPlant, subscribeToPlants, updatePlantSensors, plantIdExists, updatePlantUsers } from '../../lib/appwrite'
+import { createPlant, subscribeToPlants, updatePlantSensors, plantIdExists, updatePlantUsers, createPlantAdmin } from '../../lib/appwrite'
 import FormField from '../../components/FormField'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useGlobalContext } from '../../context/GlobalProvider'
@@ -22,11 +22,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 const Home = () => {
-  const { user, language } = useGlobalContext();
+  const { user, language, account } = useGlobalContext();
   const { temperature, waterLevel, status, humidity, brightness, isReceiving } = useMqttContext();
   const { friends } = useFriendsContext();
   const { plants, setPlants, setActivePlant, activePlant, setActiveId, fetchRealTime } = usePlantsContext();
   const [menuVisible, setMenuVisible] = useState(false);
+  const [adminMenuVisible, setAdminMenuVisible] = useState(false);
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
   const [addVisible, setAddVisible] = useState(false);
@@ -89,15 +90,40 @@ const Home = () => {
     }
   }
 
-  const showModal = () => {
-    setMenuVisible(true)
+  const handleAdminCreate = async () => {
+    if (!form.plantId) {
+      Alert.alert("PlantId must have value")
+    }
+    else {
+      try {
+        await createPlantAdmin(form.plantId);
+      }
+      catch (error) {
+        console.log(error);
+      }
+      finally {
+        clearForm();
+      }
+    }
+  }
+
+  const showModal = (isAdminMenu) => {
+    if (!isAdminMenu) {
+      setMenuVisible(true)
+    } else {
+      setAdminMenuVisible(true);
+    }
     scale.value = withTiming(1, { duration: 200 })
     opacity.value = withTiming(1, { duration: 200 })
   };
 
-  const hideModal = () => {
+  const hideModal = (isAdminMenu) => {
     scale.value = withTiming(0, { duration: 200 }, () => {
-      runOnJS(setMenuVisible)(false)
+      if (!isAdminMenu) {
+        runOnJS(setMenuVisible)(false)
+      } else {
+        runOnJS(setAdminMenuVisible)(false)
+      }
     })
     opacity.value = withTiming(0, { duration: 200 })
   };
@@ -219,20 +245,26 @@ const Home = () => {
   }, [activePlant])
 
   useEffect(() => {
-    if(activePlant){
+    if (account) {
+      console.log(account.prefs.role)
+    }
+  }, [account])
+
+  useEffect(() => {
+    if (activePlant) {
       setData({
         time: activePlant?.time,
         temperature: activePlant?.temperature,
-        humidity:  activePlant?.humidity,
+        humidity: activePlant?.humidity,
         brightness: activePlant?.brightness,
         water: activePlant?.water,
       })
     }
-    else{
+    else {
       setData({
         time: [],
         temperature: [],
-        humidity:  [],
+        humidity: [],
         brightness: [],
         water: [],
       })
@@ -298,15 +330,30 @@ const Home = () => {
               style={{ paddingHorizontal: wp('2%') }}
             >
               <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('1.8%') }}>{t('Daily Plants')}</Text>
-              <TouchableOpacity
-                onPressOut={showModal}
+              <View
+                className="flex-row items-center justify-center gap-3"
               >
-                <Image
-                  source={icons.plus}
-                  resizeMode='contain'
-                  style={{ tintColor: 'white', width: hp('2.5%'), height: hp('2.5%') }}
-                />
-              </TouchableOpacity>
+                {(account && account.prefs.role === 'admin') && (
+                  <TouchableOpacity
+                    onPressOut={() => showModal(true)}
+                  >
+                    <Image
+                      source={icons.plantAdmin}
+                      resizeMode='contain'
+                      style={{ tintColor: 'white', width: hp('3%'), height: hp('3%') }}
+                    />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  onPressOut={() => showModal(false)}
+                >
+                  <Image
+                    source={icons.plus}
+                    resizeMode='contain'
+                    style={{ tintColor: 'white', width: hp('2.5%'), height: hp('2.5%') }}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
             {(plants && plants.length > 0) ? (
               <View style={{ overflow: 'visible' }}>
@@ -342,7 +389,7 @@ const Home = () => {
           <Chart data={data} width={wp('100%')} height={hp('33%')} containerStyles={{ marginTop: hp('2%') }} />
         </View>
         {menuVisible && (
-          <TouchableWithoutFeedback onPress={hideModal}>
+          <TouchableWithoutFeedback onPress={() => hideModal(false)}>
             <View style={{ width: wp('100%'), height: hp('100%'), position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
               <BlurView
                 className="items-center justify-center"
@@ -377,7 +424,66 @@ const Home = () => {
                     <TouchableOpacity
                       onPress={() => {
                         handleCreatePlant();
-                        hideModal();
+                        hideModal(false);
+                      }}
+                    >
+                      <LinearGradient
+                        colors={['#fdb442', '#f69f2c']}
+                        start={[0, 0]}
+                        end={[1, 1]}
+
+                        style={{
+                          borderRadius: 35,
+                          width: hp('6%'),
+                          height: hp('6%'),
+                          justifyContent: 'center',
+                          alignItems: 'center'
+                        }}
+                        className="items-center justify-center"
+                      >
+                        <Image
+                          source={icons.plus}
+                          resizeMode="contain"
+                          className="rounded-full"
+                          style={{ tintColor: '#f2f9f1', width: hp('3%'), height: hp('3%') }}
+                        />
+
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+              </BlurView>
+            </View>
+          </TouchableWithoutFeedback>
+        )}
+        {adminMenuVisible && (
+          <TouchableWithoutFeedback onPress={() => hideModal(true)}>
+            <View style={{ width: wp('100%'), height: hp('100%'), position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
+              <BlurView
+                className="items-center justify-center"
+                style={{ width: wp('100%'), height: hp('100%'), ...StyleSheet.absoluteFillObject }}
+                intensity={40}
+                tint='dark'
+              >
+                <Animated.View
+                  className={`bg-notFullWhite items-center justify-center`}
+                  style={[
+                    styles.adminCreateMenu, createMenuAnimatedStyle, { bottom: hp('1%') < 10 ? hp('1%') + keyboardHeight : 130 + keyboardHeight }
+                  ]}
+                >
+                  <FormField
+                    title="plantId"
+                    placeholder={"Enter plantId"}
+                    bonusTextStyles={{ paddingLeft: wp('1%'), fontSize: hp('1.7%'), marginBottom: hp('0.3%') }}
+                    containerStyles={{ height: hp('11%') }}
+                    bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
+                    handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
+                  />
+                  <View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleAdminCreate();
+                        hideModal(true);
                       }}
                     >
                       <LinearGradient
@@ -485,6 +591,14 @@ const styles = StyleSheet.create({
     right: wp('15%'),
     left: wp('15%'),
     height: hp('34%'),
+    borderRadius: 20,
+  },
+  adminCreateMenu: {
+    position: 'absolute',
+    bottom: 100,
+    right: wp('15%'),
+    left: wp('15%'),
+    height: hp('20%'),
     borderRadius: 20,
   }
 });
