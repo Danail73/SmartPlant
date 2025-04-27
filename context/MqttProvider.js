@@ -225,7 +225,7 @@ const MqttProvider = ({ children }) => {
         if (!client || !client.isConnected()) return console.log("MQTT not connected");
         const newState = !pump ? "ON" : "OFF";
         const msg = new Message(newState);
-        msg.destinationName = `${plantId}/switch/pump/state`;
+        msg.destinationName = `${plantId}/switch/pump/command`;
         client.send(msg);
         setPump(!pump);
     };
@@ -235,7 +235,7 @@ const MqttProvider = ({ children }) => {
         if (!client || !client.isConnected()) return console.log("MQTT not connected");
         const newState = !isEnabled ? "ON" : "OFF";
         const msg = new Message(JSON.stringify({ state: newState }));
-        msg.destinationName = `${plantId}/light/lamp/state`;
+        msg.destinationName = `${plantId}/light/lamp/command`;
         client.send(msg);
         setIsEnabled(!isEnabled);
     };
