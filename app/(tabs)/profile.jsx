@@ -1,11 +1,10 @@
-import { Text, View, Image, TouchableOpacity, KeyboardAvoidingView, Dimensions } from 'react-native'
+import { Text, View, Image, KeyboardAvoidingView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Container from '../../components/Container'
 import FormField from '../../components/FormField'
 import { signOut, updateEmail, updatePassword, updateUser, updateUsername } from '../../lib/appwrite'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { decryptPassword, encryptPassword } from '../../lib/crypto'
-import { BlurView } from 'expo-blur'
 import { icons } from '../../constants'
 import CustomButton from '../../components/CustomButton'
 import { useFriendsContext } from '../../context/FriendsProvider'
@@ -18,7 +17,9 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 const Profile = () => {
   const { friends } = useFriendsContext()
   const { plants, setPlants, setActivePlant, storeItem } = usePlantsContext()
-  const { user, setUser, setIsLoggedIn, setAccount, switchLanguage, language } = useGlobalContext()
+  const { user, setUser, setIsLoggedIn, setAccount } = useGlobalContext()
+
+  //setting up the forms for each credentials with current and previous values
   const [email, setEmail] = useState({
     previous: '',
     current: ''
@@ -35,10 +36,9 @@ const Profile = () => {
     previous: '',
     current: ''
   })
-  const [editPic, setEditPic] = useState(false)
   const [saveVisible, setSaveVisible] = useState(false)
 
-
+  //function to decrypt user's password from database
   const getDecryptedPassword = async () => {
     if (user) {
       const pass = await decryptPassword(user.password_key[0], user.password_key[1])
@@ -46,8 +46,10 @@ const Profile = () => {
     }
   }
 
+  //function for logging out
   const logout = async () => {
     try {
+      //clear all the sensor values to not show to the new user
       storeItem("temperature", JSON.stringify(0));
       storeItem("humidity", JSON.stringify(0));
       storeItem("brightness", JSON.stringify(0));
@@ -55,22 +57,26 @@ const Profile = () => {
       storeItem("statusCode", JSON.stringify(0));
       setPlants(null);
       setActivePlant(null);
+
+      //calling signOut function from appwrite 
       await signOut()
       setUser(null)
       setIsLoggedIn(false)
       setAccount(false)
       
-
-      router.replace('/login')
+      //redirecting to index
+      router.replace('/')
     } catch (error) { console.log(error) }
   }
 
+  //function to cancel changes to the credentials
   const cancel = () => {
     setUsername({ ...username, current: username.previous })
     setEmail({ ...email, current: email.previous })
     setPassword({ ...password, current: password.previous })
   }
 
+  //function to update current value of username
   const handleUpdateUsername = async () => {
     try {
       const response = await updateUsername(username.current)
@@ -80,6 +86,7 @@ const Profile = () => {
     }
   }
 
+  //function to update current value of email
   const handleUpdateEmail = async () => {
     try {
       const response = await updateEmail(email.current, password.current)
@@ -89,6 +96,7 @@ const Profile = () => {
     }
   }
 
+  //function to update current value of password
   const handleUpdatePassword = async () => {
     try {
       const response = await updatePassword(password.current, password.previous)
@@ -98,6 +106,7 @@ const Profile = () => {
     }
   }
 
+  //function to update the user
   const handleUpdateUser = async () => {
     try {
       const encryptedPassword = await encryptPassword(password.current, user.password_key[1])
@@ -109,6 +118,7 @@ const Profile = () => {
     }
   }
 
+  //function to save the changes to the credentials
   const save = async () => {
     try {
       if (username.current != username.previous) {
@@ -125,6 +135,7 @@ const Profile = () => {
     } catch (error) { }
   }
 
+  //set the user's information
   useEffect(() => {
     if (user && user?.$id) {
       getDecryptedPassword()
@@ -137,6 +148,7 @@ const Profile = () => {
     }
   }, [user])
 
+  //show Save and Cancel options when credentials change
   useEffect(() => {
     if (user) {
       if (username.previous != username.current || email.previous != email.current || password.current != password.previous) {
@@ -153,6 +165,7 @@ const Profile = () => {
       colors={['#4ec09c', '#a8d981']}
       statusBarStyle={'light'}
     >
+      {/* manage keyboard show/hide */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior='padding'
@@ -172,35 +185,21 @@ const Profile = () => {
                     source={profilePic.current ? { uri: profilePic.current } : ''}
                     className="w-full h-full rounded-full"
                   />
-                  {editPic && (
-                    <View className="w-full h-full rounded-full absolute overflow-hidden">
-                      <BlurView
-                        className="flex-1 items-center justify-center"
-                        style={{ borderRadius: 35 }}
-                        intensity={50}
-                        tint='systemChromeMaterialDark'
-                      >
-                        <Image
-                          source={icons.edit}
-                          className="w-7 h-7"
-                          style={{ tintColor: 'white' }}
-                          resizeMode='contain'
-                        />
-                      </BlurView>
-                    </View>
-                  )}
                 </View>
               </View>
             </View>
           </View>
         </View>
         <View className="bg-transparent justify-end z-5" style={{ width: wp('100%'), height: hp('15%'), marginTop: hp('13%') }}>
+
+          {/* showing language menu */}
           <LanguageMenu
             langContainerStyles={'absolute left-[10%] bottom-[5%]'}
             langMenuStyles={'bg-notFullWhite rounded-md items-center'}
             bonusLandContainerStyles={{}}
             bonusLangMenuStyles={{ width: wp('21.5%'), maxWidth: 120, height: hp('13.5%'), maxHeight: 145 }}
           />
+          {/* logout menu */}
           <CustomButton
             containerStyles={'absolute right-[5%] items-center justify-center bg-notFullWhite rounded-md'}
             bonusContainerStyles={{ width: hp('13%'), height: hp('5%') }}
@@ -217,6 +216,8 @@ const Profile = () => {
             handlePress={logout}
           />
         </View>
+
+        {/* showing basic information about number of friends and plants */}
         <View className="items-center justify-center flex-row gap-4 h-[6%]">
           <View className="flex-row items-center" style={{ gap: wp('1.4%') }}>
             <Image
@@ -238,6 +239,7 @@ const Profile = () => {
         </View>
         <View className="items-center" style={{ marginTop: hp('4%'), height: hp('40%'), width: wp('100%') }}>
           <View className="w-[90%] h-full p-1 items-center z-20">
+            {/* form for the username */}
             <FormField
               value={username.current}
               otherStyles={'rounded-lg w-[96%]  mb-1 mt-3 h-[20%]  items-center justify-center'}
@@ -250,6 +252,7 @@ const Profile = () => {
               iconContainerStyles={{ marginBottom: '3%', position: 'absolute', bottom: '25%', left: '2%' }}
             />
             <View className="h-[0.1rem] bg-black w-[88%]"></View>
+            {/* form for the email */}
             <FormField
               value={email.current}
               otherStyles={'rounded-lg w-[96%]  mb-1 mt-3 h-[20%]  items-center justify-center'}
@@ -262,6 +265,7 @@ const Profile = () => {
               iconContainerStyles={{ marginBottom: '3%', position: 'absolute', bottom: '25%', left: '2%' }}
             />
             <View className="h-[0.1rem] bg-black w-[88%]"></View>
+            {/* form for the password */}
             <FormField
               value={password.current}
               otherStyles={'rounded-lg w-[96%]  mb-1 mt-3 h-[20%]  items-center justify-center'}
@@ -276,8 +280,11 @@ const Profile = () => {
               hideTextIconStyles={{ width: hp('3%'), height: hp('3%') }}
               hideTextStyles={{ position: 'absolute', right: '2%', bottom: '35%' }}
             />
+
+            {/* showing Cancel and Save buttons when user changes credentials */}
             {saveVisible && (
               <View className="flex-1 flex-row gap-5 mt-1">
+                {/* cancel button */}
                 <CustomButton
                   containerStyles={'bg-white border w-[36%] max-w-[170] rounded-md h-[70%] max-h-[70]'}
                   title='Cancel'
@@ -292,6 +299,7 @@ const Profile = () => {
                   opacityStyles={'flex-row w-[100%] h-[100%]'}
                   handlePress={cancel}
                 />
+                {/* save button */}
                 <CustomButton
                   containerStyles={'bg-blue-500 w-[36%] max-w-[170] rounded-md h-[70%] max-h-[70] border'}
                   title='Save'

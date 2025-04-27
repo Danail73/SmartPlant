@@ -6,6 +6,7 @@ import { respondFriendRequest, sendFriendRequest } from '../../lib/appwrite';
 
 const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, iconStyles, titleStyles, subtitleStyles, requestId, containerStyles }) => {
 
+    //function to send request to the user
     const handleSendRequest = async () => {
         try {
             const response = await sendFriendRequest(fromUser.$id, item.$id)
@@ -14,6 +15,7 @@ const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, ic
         }
     }
 
+    //function to accept/decline request
     const updateRequest = async (status) => {
         try {
             const response = await respondFriendRequest(requestId, status)
@@ -34,6 +36,8 @@ const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, ic
                 <Text className={`font-psemibold text-base mb-1`} style={titleStyles}>{item.username}</Text>
                 <Text className={`font-plight text-sm`} style={subtitleStyles}>{item.email}</Text>
             </View>
+
+            {/* show button to invite if the component is in other users list in the friends page */}
             {forInvite && (
                 <View className="absolute right-3">
                     <TouchableOpacity
@@ -63,6 +67,7 @@ const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, ic
                 </View>
             )}
 
+            {/* show accept/decline buttons if incoming invite */}
             {isPending && (
                 <View className="flex-row gap-3 absolute right-3 top-2">
                     <TouchableOpacity

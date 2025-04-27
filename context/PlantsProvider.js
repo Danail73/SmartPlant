@@ -13,6 +13,7 @@ const PlantsProvider = ({ children }) => {
     const [activeId, setActiveId] = useState(null)
     const [isLoading, setIsLoading] = useState(true);
 
+    //fetch all plants 
     const fetchPlants = async () => {
         try {
             const plants = await getAllPlants();
@@ -22,6 +23,7 @@ const PlantsProvider = ({ children }) => {
         }
     }
 
+    //function to store item in AsyncStorage
     const storeItem = async (key, value) => {
         try {
             await AsyncStorage.setItem(key, value);
@@ -31,6 +33,7 @@ const PlantsProvider = ({ children }) => {
         }
     }
 
+    //function to set user's plants
     const fetchRealTime = async () => {
         fetchPlants()
             .then((response) => {
@@ -45,6 +48,7 @@ const PlantsProvider = ({ children }) => {
             })
     }
 
+    //set user's plants every time user changes
     useEffect(() => {
         if (user?.$id) {
             fetchPlants()
@@ -64,6 +68,7 @@ const PlantsProvider = ({ children }) => {
         }
     }, [user])
 
+    //restore sensor values every time activePlant changes
     useEffect(() => {
         storeItem("temperature", JSON.stringify(0));
         storeItem("humidity", JSON.stringify(0));

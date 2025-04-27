@@ -30,6 +30,7 @@ const MqttProvider = ({ children }) => {
     const reconnectIntervalRef = useRef(null);
     const plantId = activePlant?.plantId;
 
+    //function to clear sensor values
     const clearValues = () => {
         setTemperature(null);
         setBrightness(null);
@@ -41,6 +42,7 @@ const MqttProvider = ({ children }) => {
         setIsReceiving(false);
     };
 
+    //function to change item from the AsyncStorage
     const setStorageItem = async (key, value) => {
         try {
             await AsyncStorage.setItem(key, value);
@@ -49,6 +51,7 @@ const MqttProvider = ({ children }) => {
         }
     };
 
+    //function to get id of the client from the AsyncStorage
     const getPersistentClientId = async () => {
         let id = await AsyncStorage.getItem("mqtt_client_id");
         if (!id) {
@@ -58,15 +61,19 @@ const MqttProvider = ({ children }) => {
         return id;
     };
 
+    //function to create mqtt client
     const createClient = async () => {
+        //set storage
         const myStorage = {
             setItem: (key, item) => { myStorage[key] = item; },
             getItem: (key) => myStorage[key],
             removeItem: (key) => { delete myStorage[key]; },
         };
 
+        //get client id
         const clientId = await getPersistentClientId();
 
+        //create client
         return new Client({
             uri: "ws://78.130.186.241:9001/mqtt",
             clientId,
@@ -74,6 +81,7 @@ const MqttProvider = ({ children }) => {
         });
     };
 
+    //function to subscribe to all the needed topics
     const subscribeToTopics = async (client) => {
         if (!plantId) return;
         const topics = [
@@ -97,16 +105,20 @@ const MqttProvider = ({ children }) => {
         }
     };
 
+    //function to connect the client to the broker
     const connectClient = async () => {
+        //create client and set the reference
         const mqttClient = await createClient();
         clientRef.current = mqttClient;
 
+        //declaring function called every time the client looses connection with the broker
         mqttClient.on('connectionLost', (responseObject) => {
             console.log("MQTT connection lost:", responseObject?.errorMessage);
             setIsReceiving(false);
             startReconnectLoop();
         });
 
+        //function to manage incoming message from the broker
         mqttClient.on('messageReceived', (message) => {
             const destination = message.destinationName;
             const messageData = message.payloadString;
@@ -154,6 +166,7 @@ const MqttProvider = ({ children }) => {
             }
         });
 
+        //connect client and subscribe to the topics
         try {
             await mqttClient.connect({ userName: username, password: password, reconnect: false });
             await subscribeToTopics(mqttClient)
@@ -165,6 +178,7 @@ const MqttProvider = ({ children }) => {
         }
     };
 
+    //function for reconnecting loop when client looses connection with the broker
     const startReconnectLoop = () => {
         if (reconnectIntervalRef.current) return;
 
@@ -176,11 +190,13 @@ const MqttProvider = ({ children }) => {
         }, 10000); 
     };
 
+    //function to stop the reconnecting loop
     const stopReconnectLoop = () => {
         clearInterval(reconnectIntervalRef.current);
         reconnectIntervalRef.current = null;
     };
 
+    //function to reconnect client if network changes
     useEffect(() => {
         if (!plantId || !plants || plants.length === 0) return;
 
@@ -204,6 +220,7 @@ const MqttProvider = ({ children }) => {
         };
     }, [plantId,user]);
 
+    //function to turn water pump on/off
     const pumpSwitch = () => {
         if (!client || !client.isConnected()) return console.warn("MQTT not connected");
         const newState = !pump ? "ON" : "OFF";
@@ -213,6 +230,7 @@ const MqttProvider = ({ children }) => {
         setPump(!pump);
     };
 
+    //function to turn lamp on/off
     const lampSwitch = () => {
         if (!client || !client.isConnected()) return console.warn("MQTT not connected");
         const newState = !isEnabled ? "ON" : "OFF";

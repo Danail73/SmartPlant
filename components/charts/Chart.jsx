@@ -6,6 +6,8 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 
 const Chart = ({ data, width, height, containerStyles }) => {
     const [tooltip, setTooltip] = useState(null)
+
+    // show text message if data is empty
     if (!data || data.time.length === 0) {
         return (
             <View className="items-center justify-center" style={{ width: width * 0.85, height: height }}>
@@ -18,13 +20,15 @@ const Chart = ({ data, width, height, containerStyles }) => {
     const chartWidth = Math.max(wp('100%'), data.time.length * pointWidth);
 
     return (
-
         <ScrollView horizontal style={[containerStyles, { overflow: 'visible' }]} contentContainerStyle={{ width: chartWidth }} showsHorizontalScrollIndicator={false}>
             <TouchableWithoutFeedback onPress={() => setTooltip(null)} style={{ width: '100%', height: '100%' }}>
                 <View>
+                    {/* using LineChart for the chart */}
                     <LineChart
                         data={{
+                            // horizontally show time
                             labels: data.time,
+                            // show all the sensor data - temperature, humidity, brightness, water, in different colors
                             datasets: [
                                 {
                                     data: data.temperature,
@@ -48,7 +52,7 @@ const Chart = ({ data, width, height, containerStyles }) => {
                                 }
                             ],
                         }}
-                        style={{borderRadius:5}}
+                        style={{ borderRadius: 5 }}
                         width={chartWidth}
                         height={height}
                         chartConfig={{
@@ -61,11 +65,13 @@ const Chart = ({ data, width, height, containerStyles }) => {
                             propsForDots: { r: "4", strokeWidth: "2", stroke: "#007AFF" },
                         }}
                         bezier
+                        
+                        //show information about a clicked point from the chart
                         onDataPointClick={({ index, value, x, y }) => {
                             let unit = "";
                             if (data.humidity.includes(value)) {
                                 unit = "%";
-                            } 
+                            }
                             if (data.brightness.includes(value)) {
                                 unit = "%";
                             }
@@ -74,6 +80,8 @@ const Chart = ({ data, width, height, containerStyles }) => {
                         }}
                         formatXLabel={(value) => value.slice(11)}
                     />
+
+                    {/* information box shown when point is clickec */}
                     {tooltip && (
                         <View style={{
                             position: 'absolute',
@@ -91,8 +99,7 @@ const Chart = ({ data, width, height, containerStyles }) => {
                     )}
                 </View>
             </TouchableWithoutFeedback>
-        </ScrollView >  
-
+        </ScrollView >
     );
 };
 

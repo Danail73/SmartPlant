@@ -8,19 +8,19 @@ const BackButton = ({iconStyles, positionStyles}) => {
   const router = useRouter(); 
   const scale = useSharedValue(1);
 
-  // Define animated style
+  // useing useAnimatedStyle to change scale
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
-  // Handle button press
+  // function to handle button press
   const handlePress = () => {
     scale.value = withTiming(1.2, { duration: 100 }, () => {
       scale.value = withTiming(1, { duration: 100 });
     });
     setTimeout(() => {
       router.back();
-    }, 200); // Wait for animation to complete before going back
+    }, 200); // wait for animation to complete before going back
   };
 
   return (

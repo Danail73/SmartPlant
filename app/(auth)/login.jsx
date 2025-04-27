@@ -13,13 +13,16 @@ const LoginScreen = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  //defining a form for the credentials
   const [form, setForm] = useState({
     email: '',
     password: ''
   })
 
+  //getting the needed set functions from GlobalContext
   const { setUser, setIsLoggedIn, setAccount } = useGlobalContext();
 
+  //submit function for login
   const submit = async () => {
     if (form.email === "" || form.password === "") {
       Alert.alert('Error', 'Please fill in all the fields')
@@ -28,14 +31,19 @@ const LoginScreen = () => {
     setIsSubmitting(true);
 
     try {
+      //calling the signIn function from appwrite file
       await signIn(form.email, form.password);
       const result = await getCurrentUser();
+
+      //setting user and logging the user
       setUser(result);
       setIsLoggedIn(true);
+      //setting account
       const acc = await getCurrentAccount();
       if (acc) {
         setAccount(acc);
       }
+      //redirecting ro home
       router.replace('/home')
     }
     catch (error) {
@@ -48,6 +56,7 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView className="flex-1">
+      {/* setting background image */}
       <ImageBackground
         source={images.forestLogin}
         className="flex-1 w-full h-full"
@@ -55,6 +64,7 @@ const LoginScreen = () => {
         onLoadStart={() => setLoading(true)}
         onLoad={() => setLoading(false)}
       >
+        {/* showing indicator while loading */}
         {loading && (
           <View className="absolute inset-0 justify-center items-center bg-black bg-opacity-25">
             <ActivityIndicator size="large" color="#ffffff" />
@@ -62,7 +72,7 @@ const LoginScreen = () => {
         )}
 
 
-
+        {/* setting up the login form */}
         <View className="flex-1 justify-center items-center">
           <View
             className="bg-gray-200 rounded-lg opacity-85"
@@ -75,6 +85,7 @@ const LoginScreen = () => {
               Login
             </Text>
 
+            {/* input for email */}
             <TextInput
               className="border w-full rounded"
               style={{ padding: hp('1%'), height: hp('6%'), marginBottom: hp('1%'), fontSize: hp('1.7%') }}
@@ -90,6 +101,7 @@ const LoginScreen = () => {
               className="border border-black w-full rounded flex-row items-center"
               style={{ marginBottom: hp('1%') }}
             >
+              {/* input for password */}
               <TextInput
                 className="rounded"
                 style={{ padding: hp('1%'), height: hp('6%'), width: '88%', fontSize: hp('1.7%') }}
@@ -113,6 +125,7 @@ const LoginScreen = () => {
               </TouchableOpacity>
             </View>
 
+            {/* submit button */}
             <TouchableOpacity
               className="bg-blue-500 w-full rounded"
               style={{ paddingVertical: hp('1.5%') }}
@@ -126,6 +139,7 @@ const LoginScreen = () => {
               </Text>
             </TouchableOpacity>
 
+            {/* option if user does not have an account */}
             <View
               className="flex-row justify-center"
               style={{ marginTop: hp('1%') }}

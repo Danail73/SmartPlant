@@ -22,6 +22,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
   const isCreator = user.$id === item.users[0].$id
 
+  //function to open menu just above the menu icon
   const openMenu = () => {
     setVisible(true);
     if (iconRef.current) {
@@ -34,6 +35,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
     }
   }
 
+  //function to close the menu
   const closeMenu = () => {
     menuScale.value = withTiming(0, { duration: 100 }, () => {
       runOnJS(setVisible)(false)
@@ -41,15 +43,20 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
     rotation.value = withTiming(0, { duration: 200 })
   }
 
+  //function to go to the device page
   const navigateToDevice = () => {
     router.push(`/device`);
   }
 
+  //function to delete/remove from list plant
   const handleDeletePlant = async () => {
     try {
+      
+      // delete plant if user is creator
       if (item.users[0].$id == user.$id) {
         const response = await deletePlant(item.$id);
       }
+      //else just remove it from user's list
       else {
         const users = item.users.filter((item) => item.$id != user.$id)
         await updatePlantUsers(item.$id, users)
@@ -61,6 +68,8 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
       console.log(Error, error)
     }
   }
+
+  //using useAnimatedStyle for the menu
   const menuAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: menuScale.value }],
@@ -69,6 +78,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
     };
   });
 
+  //rotate icon when opening/closing menu
   const rotationStyle = useAnimatedStyle(() => {
     return {
       transform: [{ rotate: `${rotation.value}deg` }]
@@ -77,6 +87,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
 
   return (
     <>
+      {/* show menu icon */}
       <TouchableOpacity
         ref={iconRef}
         onPress={openMenu}
@@ -91,6 +102,8 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
           />
         </Animated.View>
       </TouchableOpacity>
+
+      {/* show menu if open */}
       {visible && (
         <Portal>
           <TouchableWithoutFeedback onPress={closeMenu} testID='background-test'>
@@ -109,6 +122,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                     }]}
                 className="absolute border"
               >
+                {/* option to go to the device page for more control */}
                 <TouchableOpacity
                   style={{ zIndex: 1000 }}
                   onPress={() => {
@@ -126,8 +140,10 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                   </View>
                 </TouchableOpacity>
 
+                {/* options to add/remove friends to the plant's list */}
                 {isCreator && (
                   <>
+                    {/* option to add friend to the plant's list */}
                     <TouchableOpacity
                       style={{ zIndex: 1000 }}
                       onPress={() => {
@@ -145,6 +161,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                       </View>
                     </TouchableOpacity>
 
+                    {/* option to remove friend to the plant's list */}
                     <TouchableOpacity
                       style={{ zIndex: 1000 }}
                       onPress={() => {
@@ -164,6 +181,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
                   </>
                 )}
 
+                {/* option to delete/remove from list plant */}
                 <TouchableOpacity
                   style={{ zIndex: 1000 }}
                   onPress={() => {
@@ -191,9 +209,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-
-  },
+  //style for the menu
   menuContent: {
     backgroundColor: '#f2f9f1',
     borderRadius: 10,

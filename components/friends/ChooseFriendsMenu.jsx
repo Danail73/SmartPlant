@@ -9,11 +9,15 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
     const [listFriends, setListFriends] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const width = wp('100%');
+
+    //add to the selection list
     const addItem = (item) => {
         const users = [...listFriends];
         users.push(item)
         setListFriends(users)
     }
+
+    //discard from selection list
     const discardItem = (item) => {
         if (withRequest) {
             const users = listFriends.filter((u) => u.friend.$id != item.friend.$id);
@@ -24,6 +28,7 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
         }
     }
 
+    //call function when button is pressed
     const handlePress = async () => {
         setIsLoading(true)
         await fn(listFriends)
@@ -42,6 +47,8 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                     <Text className="mt-5 font-pmedium" style={{fontSize: hp('1.8%')}}>{title}</Text>
                 </View>
                 <View className="bg-black h-[0.1rem] w-[90%] my-3"></View>
+
+                {/* show list with friends if any */}
                 {friends && friends.length>0 ? (
                     <FlatList
                         data={friends || []}
@@ -54,6 +61,7 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                         showsVerticalScrollIndicator={false}
                     />
                 ) : (
+                    //else show noResult image
                     <View className="items-center justify-center flex-col w-[80%]" style={{height: hp('20%')}}>
                         <Image
                             source={images.noResult}
@@ -66,6 +74,8 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                 )}
                 <View className="bg-black h-[0.1rem] w-[90%] my-3 mb-[70px]"></View>
             </View>
+
+            {/* show Cancel and Add/Remove buttons */}
             <View className="flex-row h-[70px] items-center justify-between px-[14%] absolute bottom-0 w-full">
                 <CustomButton
                     title='Cancel'
@@ -78,7 +88,7 @@ const ChooseFriendsMenu = ({ friends, cancel, currentUser, title, buttonTitle, f
                     handlePress={handlePress}
                     containerStyles={'border rounded-lg w-[40%] h-[70%] max-w-[130px]'}
                     textStyles={'font-pmedium text-lg'}
-                //disabled={listFriends.length>0 ? false : true}
+                    //disabled={listFriends.length>0 ? false : true}
                 />
             </View>
         </View>

@@ -12,6 +12,7 @@ const GlobalProvider = ({ children }) => {
     const { language, switchLanguage } = useLanguage();
     const [account, setAccount] = useState(null)
 
+    //fetch user data and set account
     useEffect(() => {
         const fetchUserData = async () => {
             try {

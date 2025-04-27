@@ -9,11 +9,13 @@ const LanguageOption = ({ title, handlePress, isVisible, textStyles, containerSt
     const [checkVisible, setCheckVisible] = useState(false)
     const checkScale = useSharedValue(0);
 
+    //function to show checkmark to selected option
     const showCheck = () => {
         setCheckVisible(true)
         checkScale.value = withTiming(1, { duration: 200 });
     }
 
+    //function to remove the check if language has been changed
     const closeCheck = () => {
         setCheckVisible(true)
         checkScale.value = withTiming(0, { duration: 200 }, () => {
@@ -21,6 +23,7 @@ const LanguageOption = ({ title, handlePress, isVisible, textStyles, containerSt
         });
     }
 
+    //using useAnimatedStyle for the language options
     const langOptionAnimatedStyle = useAnimatedStyle(() => {
         return {
             transform: [{ scale: checkScale.value }],
@@ -47,6 +50,8 @@ const LanguageOption = ({ title, handlePress, isVisible, textStyles, containerSt
         >
             <View className="flex-row items-center justify-center" style={containerStyles}>
                 <Text className="font-psemibold" style={textStyles}>{title}</Text>
+
+                {/* show checkmark if language is selected */}
                 {checkVisible && (
                     <Animated.Image
                         source={icons.check}

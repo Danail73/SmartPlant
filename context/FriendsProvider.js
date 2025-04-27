@@ -12,6 +12,7 @@ const FriendsProvider = ({ children }) => {
     const [invitedFriends, setInvitedFriends] = useState([]);
     const [others, setOthers] = useState([])
 
+    //function to fetch all friend request where current user is involved
     const fetchAllRequests = async () => {
         try {
             const requests = await getFriendRequests(user.$id)
@@ -21,21 +22,26 @@ const FriendsProvider = ({ children }) => {
         }
     }
 
+    //function to get all accepted requests
     const getAccepted = (reguests) => {
         const accepted = reguests.filter((item) => item.status == 'accepted')
         return accepted
 
     }
+
+    //function to get all ongoing invites
     const getInvites = (requests) => {
         const pendingInvites = requests.filter((item) => item.status === 'pending' && item.fromUser == user.$id)
         return pendingInvites
     }
+
+    //function to get all incoming invites
     const getIncoming = (requests) => {
         const incomingRequests = requests.filter((item) => item.status === 'pending' && item.toUser == user.$id)
         return incomingRequests
     }
 
-
+    //function to get user's friends from accepted requests
     const getFriends = (accepted, users) => {
         if (accepted.length > 0) {
             const tempIds = accepted.map((item) => item.fromUser)
@@ -63,6 +69,7 @@ const FriendsProvider = ({ children }) => {
         }
     }
 
+    //function to get list of people to whom current user has sent invitation
     const getRequestFriends = (pending, users) => {
         if (pending.length > 0) {
             const ids = pending.map((item) => item.toUser)
@@ -84,6 +91,7 @@ const FriendsProvider = ({ children }) => {
         }
     }
 
+    //function to get list of people who has sent invitation to the current user
     const getIncomingRequests = (incoming, users) => {
         if (incoming.length > 0) {
             const ids = incoming.map((item) => item.fromUser)
@@ -105,6 +113,7 @@ const FriendsProvider = ({ children }) => {
         }
     }
 
+    //function to get users by their ids
     const fetchUsersWithIds = (ids, users) => {
         if (ids.length > 0) {
             try {
@@ -116,12 +125,14 @@ const FriendsProvider = ({ children }) => {
         }
     }
 
+    //function to get all users except the current user
     const fetchUsers = async () => {
         const unfiltered = await getUsers()
         const filtered = unfiltered.filter((item) => item.$id != user.$id)
         return filtered
     }
 
+    //function to set all other people the current user can send requests
     const getOtherUsers = (users, fr, inv, req) => {
         const other = users.filter((item) =>
             (!fr || !fr.some(friend => friend.friend?.$id === item.$id)) &&
@@ -131,6 +142,7 @@ const FriendsProvider = ({ children }) => {
         setOthers(other);
     }
 
+    //function to set all the above
     const updateEverything = (requests, users) => {
         const accepted = getAccepted(requests);
         const pending = getInvites(requests);
@@ -142,6 +154,7 @@ const FriendsProvider = ({ children }) => {
         getOtherUsers(users, fr, req, inv);
     }
 
+    //function to fetch the data
     const fetchData = async () => {
         try {
             const [users, requests] = await Promise.all([
@@ -157,6 +170,7 @@ const FriendsProvider = ({ children }) => {
         }
     };
 
+    //fetch the data every time user changes
     useEffect(() => {
         if (user?.$id) {
             fetchData()

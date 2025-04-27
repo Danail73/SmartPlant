@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "Greeny",
+    "name": "Green Care",
     "slug": "ReactNative",
     "scheme": "react",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icons/plantsFilled.png",
+    "icon": "./assets/images/appLogo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/icons/plantsFilled.png",
+      "image": "./assets/images/appLogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#cccf9e"
     },
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icons/plantsFilled.png",
+        "foregroundImage": "./assets/images/appLogo.png",
         "backgroundColor": "#cccf9e"
       },
       "package": "com.musashi.smart_plant"

@@ -7,6 +7,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 
 const Container = ({ children, colors, statusBarStyle, areaStyles }) => {
 
+  // hiding navigation bar for Android
   useEffect(() => {
     if (Platform.OS == 'android') {
       NavigationBar.setBehaviorAsync('overlay-swipe')
@@ -14,6 +15,7 @@ const Container = ({ children, colors, statusBarStyle, areaStyles }) => {
     }
   })
 
+  //returning background with gradient used in all pages
   return (
     <LinearGradient
       colors={[colors[0], colors[1]]}

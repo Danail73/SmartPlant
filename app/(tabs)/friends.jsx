@@ -36,8 +36,10 @@ const Friends = () => {
   const [upperIconsVisible, setUpperIconsVisible] = useState(true)
   const [bottomIconsVisible, setBottomIconsVisible] = useState(true)
 
+  //function for changing text of the upper searchbar
   const handleChangeTextUpper = (query) => setUpperSearchQuery(query)
 
+  //function to clear text from the upper searchbar
   const handleClearUpper = () => {
     if (!upperSearchQuery) {
       setUpperSearchVisible(false)
@@ -46,8 +48,10 @@ const Friends = () => {
     setUpperSearchQuery('')
   }
 
+  //function for changing text of the bottom searchbar
   const handleChangeTextBottom = (query) => setBottomSearchQuery(query)
 
+  //function to clear text from the upper searchbar
   const handleClearBottom = () => {
     if (!bottomSearchQuery) {
       setBottomSearchVisible(false)
@@ -56,6 +60,7 @@ const Friends = () => {
     setBottomSearchQuery('')
   }
 
+  //function to get results from the upper searchbar
   const friendsSearchUpper = () => {
     const result = friends.filter((item) => item.friend.username.toLowerCase().includes(upperSearchQuery.toLowerCase()))
     if (result.length == 0)
@@ -63,6 +68,8 @@ const Friends = () => {
     return result
 
   }
+
+  //function to get results from the bottom searchbar
   const friendsSearchBottom = () => {
     const result = others.filter((item) => item.username.toLowerCase().includes(bottomSearchQuery.toLowerCase()))
     if (result.length == 0 || !bottomSearchQuery)
@@ -70,6 +77,7 @@ const Friends = () => {
     return result;
   };
 
+  //function to open the menu for managing friend requests
   const openRequestMenu = () => {
     setMenuVisible(true);
     menuTranslateX.value = withTiming(0, { duration: 700 });
@@ -77,6 +85,7 @@ const Friends = () => {
     rotation.value = withTiming(0, { duration: 700 })
   }
 
+  //function to close the menu for managing friend requests
   const closeRequestMenu = () => {
     menuTranslateX.value = withTiming(width, { duration: 700 }, () => {
       runOnJS(setMenuVisible)(false)
@@ -85,23 +94,26 @@ const Friends = () => {
     rotation.value = withTiming(180, { duration: 300 })
   }
 
+  //using useAnimatedStyle for the style of the request menu
   const menuAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: menuTranslateX.value }],
     };
   });
 
+  //using useAnimatedStyle for the arrow for closing the request menu
   const rotateAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ rotate: `${rotation.value}deg` }],
     };
   });
 
-
+  //function called after receiving update of the users and friendRequests collections
   const handleUpdated = (request) => {
     fetchData()
   }
 
+  //subscribing to the 
   useEffect(() => {
     const unsubscribeRequests = subscribeToFriendRequests(user.$id, handleUpdated)
     const unsubscribeUsers = subscribeToUsers(handleUpdated)
@@ -121,6 +133,8 @@ const Friends = () => {
         <View className="flex-row items-center justify-between" style={{ paddingHorizontal: wp('8%'), marginTop: hp('1.5%') }}>
           <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{t('Friends')}</Text>
           <View>
+
+            {/* button to open request menu */}
             <CustomButton
               useAnimatedIcon={true}
               imageSource={icons.menuAnimated}
@@ -130,6 +144,8 @@ const Friends = () => {
               textContainerStyles={'h-0 w-0'}
               handlePress={openRequestMenu}
             />
+
+            {/* indicator to show if there is incoming friend request */}
             {requestFriends && requestFriends.length > 0 && (
               <View className="rounded-full border w-6 h-6 items-center justify-center bg-red-600 ml-1 absolute right-[-7] top-[-5]">
                 <Text className="text-white text-xs">{requestFriends.length > 99 ? '99+' : requestFriends.length}</Text>
@@ -138,6 +154,8 @@ const Friends = () => {
           </View>
         </View>
         <View className="items-center justify-center" style={{ marginTop: hp('1.3%') }}>
+          
+          {/* if the searchbar is not open, showing text message and icons to open searchbar and deleteMenu */}
           {!upperSearchVisible && (
             <View className="flex-row items-center justify-center">
               <View className="bg-notFullWhite h-[0.1rem]" style={{ marginRight: wp('2.5%'), width: wp('8%') }}></View>
@@ -177,6 +195,8 @@ const Friends = () => {
               <View className="bg-notFullWhite h-[0.1rem]" style={{ marginRight: wp('2.5%'), width: wp('8%') }}></View>
             </View>
           )}
+
+          {/* showing searchbar when user opens it */}
           {upperSearchVisible && (
             <View className={`flex-row items-center bg-[#eee8f4] rounded-full`} style={{ paddingHorizontal: wp('2%'), width: wp('90%'), height: hp('7%'), maxHeight: 70 }}>
               <AnimatedIcon
@@ -204,6 +224,8 @@ const Friends = () => {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* when friendsSearchUpper function does not return null, showing list of friends*/}
           {friendsSearchUpper() ? (
             <FlatList
               data={friendsSearchUpper() || []}
@@ -216,6 +238,7 @@ const Friends = () => {
               showsVerticalScrollIndicator={false}
             />
           ) : (
+            //if friendsSearchUpper function returns null, showing noResult image
             <View className="items-center justify-center flex-col p-8 h-[300px]">
               <Image
                 source={images.noResult}
@@ -228,6 +251,7 @@ const Friends = () => {
           )}
         </View>
 
+        {/* the same for the bottom searchbar, but here showing list of other users (not friends)*/}
         <View className="items-center justify-center my-3">
           {!bottomSearchVisible && (
             <View className="flex-row items-center justify-center">
@@ -303,6 +327,8 @@ const Friends = () => {
             </View>
           )}
         </View>
+
+        {/* showing request menu when user opens it */}
         {menuVisible && (
           <TouchableWithoutFeedback className="flex-1 w-full h-full absolute" onPress={closeRequestMenu}>
             <View className="flex-1 w-full h-full absolute ">
@@ -316,6 +342,7 @@ const Friends = () => {
                   style={[menuAnimatedStyle, {width: wp('87%'), maxWidth: 670, height: hp('7%'), top: hp('45%')}]}
                   className="right-0 absolute bg-notFullWhite items-start justify-center rounded-l-lg border "
                 >
+                  {/* close option for the menu */}
                   <TouchableOpacity
                     onPress={closeRequestMenu}
                     className="items-center ml-[4%]"
@@ -337,6 +364,8 @@ const Friends = () => {
             </View>
           </TouchableWithoutFeedback>
         )}
+
+        {/* showing delete menu when user opens it */}
         {deleteMenuVisible && (
           <SafeAreaView className="flex-1 w-full h-full absolute">
             <BlurView
@@ -373,6 +402,7 @@ const Friends = () => {
 };
 
 const styles = StyleSheet.create({
+  //style for the request menu
   requestMenu: {
     position: 'absolute',
     right: 0,

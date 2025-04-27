@@ -7,6 +7,7 @@ const StatusCard = ({ label, labelStyles, value, valueStyles,
   return (
     <View className={`w-[140px] h-[160px] bg-notFullWhite m-2 p-4 rounded-xl items-center justify-center flex-col ${otherStyles}`} style={bonusContainerStyles}>
 
+      {/* icon for the Status Card */}
       {iconSource && (
         <Image
           source={iconSource}
@@ -23,6 +24,8 @@ const StatusCard = ({ label, labelStyles, value, valueStyles,
             <Text className={`font-bold text-gray-statusCard`} style={{ fontSize: hp('2%') > 18 ? 18 : hp('2%') }}>{label}</Text>
           </View>
         )}
+
+        {/* switch for lamp and water pump */}
         {showSwitch && (
           <View className="flex-row items-center ">
             <Text className="font-bold text-gray-statusCard" style={{ fontSize: hp('2%') > 18 ? 18 : hp('2%'), marginRight: hp('0.5%') }}>OFF</Text>

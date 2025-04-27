@@ -3,7 +3,7 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import PlantBoardMenu from '../components/plants/PlantBoardMenu';
 import { PaperProvider } from 'react-native-paper';
 
-// Mock contexts
+//mock useGlobalContext and usePlantsContext
 jest.mock('../context/GlobalProvider', () => ({
   useGlobalContext: () => ({
     user: { $id: 'user1' }
@@ -17,13 +17,13 @@ jest.mock('../context/PlantsProvider', () => ({
   })
 }));
 
-// Mock appwrite functions
+//mock appwrite functions
 jest.mock('../lib/appwrite', () => ({
   deletePlant: jest.fn(),
   updatePlantUsers: jest.fn()
 }));
 
-// Mock navigation
+//mock navigation functions
 jest.mock('expo-router', () => ({
   router: {
     push: jest.fn()
@@ -51,25 +51,27 @@ describe('PlantBoardMenu', () => {
       </PaperProvider>
     );
 
+  //check if the menu opens
   it('renders and toggles menu visibility', async () => {
     const { getByTestId, queryByText } = renderComponent();
 
-    // Menu button is present
+    //menu button is present
     const menuButton = getByTestId('menu-test');
     expect(menuButton).toBeTruthy();
 
-    // Click the menu button
+    //click the menu button
     fireEvent.press(menuButton);
 
-    // Wait for animation to complete
+    //wait for animation to complete and expect to see Edit option
     await waitFor(() => {
       expect(queryByText('Edit')).toBeTruthy();
     });
 
-    // Background click closes the menu
+    //check if background click closes the menu
     const background = getByTestId('background-test');
     fireEvent.press(background);
 
+    //check if the Edit option is no more visible
     await waitFor(() => {
       expect(queryByText('Edit')).toBeFalsy();
     });

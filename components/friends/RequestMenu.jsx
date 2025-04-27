@@ -13,6 +13,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
     const rotationUpper = useRef(new Animated.Value(0)).current;
     const rotationBottom = useRef(new Animated.Value(0)).current;
 
+    //function to open menu for incoming invites (sent to the current user)
     const toggleUpper = async () => {
         setUpperVisible(!upperVisible)
         let value;
@@ -28,6 +29,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
         }).start();
     }
 
+    //function to open ongoing invites (sent by the current user)
     const toggleBottom = () => {
         setBottomVisible(!bottomVisible)
         let value;
@@ -43,6 +45,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
         }).start();
     }
 
+    //style to rotate arrow icon of the menu
     const rotateInterpolateUpper = rotationUpper.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '90deg'],
@@ -71,6 +74,8 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                         source={icons.leftArrow}
                     />
                     <Text className="font-pmedium" style={{ fontSize: hp('1.7%') }}>{t('Incoming Requests')}</Text>
+
+                    {/* indicator to show the count of invites */}
                     {requestFriends.length > 0 && (
                         <View
                             className="rounded-full border items-center justify-center bg-red-600 ml-[2%]"
@@ -82,6 +87,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                 </Animated.View>
             </TouchableOpacity>
 
+            {/* show list with incoming invites */}
             {upperVisible && (
                 <View className="h-[40%] border">
                     <FlatList
@@ -115,6 +121,8 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                         source={icons.leftArrow}
                     />
                     <Text className="font-pmedium" style={{ fontSize: hp('1.7%') }}>{t('Pending Invites')}</Text>
+
+                    {/* indicator to show the count of invites */}
                     {invitedFriends.length > 0 && (
                         <View
                             className="rounded-full border items-center justify-center bg-gray-500 ml-[2%]"
@@ -125,6 +133,8 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                     )}
                 </Animated.View>
             </TouchableOpacity>
+
+            {/* show list with ongoing invites */}
             {bottomVisible && (
                 <View className="h-[40%] border">
                     <FlatList

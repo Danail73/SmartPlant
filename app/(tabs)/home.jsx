@@ -32,11 +32,14 @@ const Home = () => {
   const opacity = useSharedValue(0);
   const [addVisible, setAddVisible] = useState(false);
   const [removeVisible, setRemoveVisible] = useState(false);
+
+  //setting up a form for plantId and name needed to create plant
   const [form, setForm] = useState({
     plantId: '',
     name: '',
   });
 
+  //setting up data object for the chart
   const [data, setData] = useState({
     time: activePlant ? activePlant.time : [],
     temperature: activePlant ? activePlant.temperature : [],
@@ -47,6 +50,7 @@ const Home = () => {
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+  //managing show/hide of the keyboard so other components show correctly
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
       setKeyboardHeight(event.endCoordinates.height - 30);
@@ -62,10 +66,12 @@ const Home = () => {
     };
   }, []);
 
+  //function to clear form
   const clearForm = () => {
     setForm({ plantId: '', name: '' })
   }
 
+  //function to create a plant
   const handleCreatePlant = async () => {
     if (!form.plantId || !form.name) {
       Alert.alert("You must fill all forms")
@@ -90,6 +96,7 @@ const Home = () => {
     }
   }
 
+  //function for admin to create a plant
   const handleAdminCreate = async () => {
     if (!form.plantId) {
       Alert.alert("PlantId must have value")
@@ -107,6 +114,7 @@ const Home = () => {
     }
   }
 
+  //function to show menu to create plants
   const showModal = (isAdminMenu) => {
     if (!isAdminMenu) {
       setMenuVisible(true)
@@ -117,6 +125,7 @@ const Home = () => {
     opacity.value = withTiming(1, { duration: 200 })
   };
 
+  //function to hide menu for creating plants
   const hideModal = (isAdminMenu) => {
     scale.value = withTiming(0, { duration: 200 }, () => {
       if (!isAdminMenu) {
@@ -128,6 +137,7 @@ const Home = () => {
     opacity.value = withTiming(0, { duration: 200 })
   };
 
+  //function to handle Flatlist component change of the visible items
   const viewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
       setActivePlant(viewableItems[0].item)
@@ -139,6 +149,7 @@ const Home = () => {
     viewAreaCoveragePercentThreshold: 50,
   };
 
+  //function called to handle updates in the 'plants' collection - updating activePlant and plants object it the provider
   const handlePlantUpdated = useCallback((response) => {
     try {
       const eventType = response.events[0];
@@ -167,6 +178,7 @@ const Home = () => {
   }, [plants, activePlant, setPlants, setActivePlant, setActiveId, fetchRealTime]);
 
 
+  //using useAnimatedStyle for the create-plants menu
   const createMenuAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
@@ -174,8 +186,7 @@ const Home = () => {
     };
   })
 
-
-
+  //function to get items from the AsyncStorage by key
   const getStorageItem = async (key) => {
     try {
       const item = await AsyncStorage.getItem(key);
@@ -186,11 +197,13 @@ const Home = () => {
     }
   }
 
+  //subscribing to 'plants' collection
   useEffect(() => {
     const unsubscribe = subscribeToPlants(user.$id, handlePlantUpdated);
     return () => unsubscribe();
   }, [handlePlantUpdated, user?.$id])
 
+  //function to get the current time for the chart in specific format
   const getCurrentTime = () => {
     const now = new Date().toLocaleString("en-GB", {
       year: "numeric",
@@ -204,6 +217,7 @@ const Home = () => {
     return now;
   }
 
+  //function to update sensor values of the plant in the database
   const updateSensors = async (temp, hum, bri, wat, stat) => {
     try {
       const sensorValues = {
@@ -220,6 +234,8 @@ const Home = () => {
       console.log(error)
     }
   }
+  
+  //function to check if sensor values should be updated
   const update = async () => {
     try {
       const temp = await getStorageItem("temperature");
@@ -236,6 +252,8 @@ const Home = () => {
       console.log(error)
     }
   }
+
+  //repeat the check in every 5 mins and when activePlant changes
   useEffect(() => {
     const interval = setInterval(() => {
       update()
@@ -244,12 +262,7 @@ const Home = () => {
     return () => clearInterval(interval)
   }, [activePlant])
 
-  useEffect(() => {
-    if (account) {
-      console.log(account.prefs.role)
-    }
-  }, [account])
-
+  //clear data for chart when activePlant or user changes
   useEffect(() => {
     if (activePlant) {
       setData({
@@ -287,6 +300,7 @@ const Home = () => {
             <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{temperature ? temperature + '°C' : ''}</Text>
           </View>
 
+          {/* show current activePlant status message if user has plants */}
           {plants && plants.length > 0 && (
             <View
               className="flex-row items-center"
@@ -305,6 +319,7 @@ const Home = () => {
               </View>
             </View>
           )}
+          {/* show noResult image if user does not have plants */}
           {!plants || plants.length == 0 && (
             <View
               className="flex-row items-center my-3"
@@ -333,6 +348,7 @@ const Home = () => {
               <View
                 className="flex-row items-center justify-center gap-3"
               >
+                {/* show special create option if user is administrator */}
                 {(account && account.prefs.role === 'admin') && (
                   <TouchableOpacity
                     onPressOut={() => showModal(true)}
@@ -344,6 +360,7 @@ const Home = () => {
                     />
                   </TouchableOpacity>
                 )}
+                {/* show create-plant option for every user */}
                 <TouchableOpacity
                   onPressOut={() => showModal(false)}
                 >
@@ -355,6 +372,8 @@ const Home = () => {
                 </TouchableOpacity>
               </View>
             </View>
+
+            {/* show list of plant components if user has plants */}
             {(plants && plants.length > 0) ? (
               <View style={{ overflow: 'visible' }}>
                 <FlatList
@@ -381,13 +400,18 @@ const Home = () => {
                 />
               </View>
             ) : (
+              //show message if not
               <View>
                 <Text>{t('Looks like you still dont have any plants')}</Text>
               </View>
             )}
           </View>
+
+          {/* setting the chart to show changes in plant's sensor values */}
           <Chart data={data} width={wp('100%')} height={hp('33%')} containerStyles={{ marginTop: hp('2%') }} />
         </View>
+
+        {/* show create menu if user opens it */}
         {menuVisible && (
           <TouchableWithoutFeedback onPress={() => hideModal(false)}>
             <View style={{ width: wp('100%'), height: hp('100%'), position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
@@ -403,6 +427,7 @@ const Home = () => {
                     styles.createMenu, createMenuAnimatedStyle, { bottom: hp('1%') < 10 ? hp('1%') + keyboardHeight : 130 + keyboardHeight }
                   ]}
                 >
+                  {/* input for the plantId of the plant */}
                   <FormField
                     title="plantId"
                     placeholder={"Enter plantId"}
@@ -411,6 +436,8 @@ const Home = () => {
                     bonusInputStyles={{ height: hp('5%'), fontSize: hp('1.6%'), width: wp('56%'), paddingLeft: wp('2%') }}
                     handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
                   />
+
+                  {/* input for the name of the plant*/}
                   <FormField
                     title="name"
                     placeholder={"Enter name"}
@@ -420,6 +447,7 @@ const Home = () => {
                     handleChangeText={(e) => { setForm({ ...form, name: e }) }}
                   />
 
+                  {/* button to call create-plant function*/}
                   <View>
                     <TouchableOpacity
                       onPress={() => {
@@ -456,6 +484,8 @@ const Home = () => {
             </View>
           </TouchableWithoutFeedback>
         )}
+
+        {/* showing createMenu for admins when admin opens it */}
         {adminMenuVisible && (
           <TouchableWithoutFeedback onPress={() => hideModal(true)}>
             <View style={{ width: wp('100%'), height: hp('100%'), position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
@@ -471,6 +501,7 @@ const Home = () => {
                     styles.adminCreateMenu, createMenuAnimatedStyle, { bottom: hp('1%') < 10 ? hp('1%') + keyboardHeight : 130 + keyboardHeight }
                   ]}
                 >
+                  {/* input for the plantId of the plant */}
                   <FormField
                     title="plantId"
                     placeholder={"Enter plantId"}
@@ -480,6 +511,7 @@ const Home = () => {
                     handleChangeText={(e) => { setForm({ ...form, plantId: e }) }}
                   />
                   <View>
+                    {/* button to call create function */}
                     <TouchableOpacity
                       onPress={() => {
                         handleAdminCreate();
@@ -515,6 +547,8 @@ const Home = () => {
             </View>
           </TouchableWithoutFeedback>
         )}
+
+        {/* showing menu to add friends to a plant when user opens it */}
         {addVisible && (
           <SafeAreaView className="flex-1 w-full h-full absolute">
             <BlurView
@@ -547,6 +581,7 @@ const Home = () => {
           </SafeAreaView>
         )}
 
+        {/* showing menu to remove friends from a plant when user opens it */}
         {removeVisible && (
           <SafeAreaView className="flex-1 w-full h-full absolute">
             <BlurView
@@ -585,6 +620,7 @@ const Home = () => {
 };
 
 const styles = StyleSheet.create({
+  //style for every user's create menu
   createMenu: {
     position: 'absolute',
     bottom: 100,
@@ -593,6 +629,7 @@ const styles = StyleSheet.create({
     height: hp('34%'),
     borderRadius: 20,
   },
+  //style for admin's create menu
   adminCreateMenu: {
     position: 'absolute',
     bottom: 100,

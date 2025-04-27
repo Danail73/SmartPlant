@@ -3,11 +3,13 @@ import { render, fireEvent } from '@testing-library/react-native';
 import FormField from '../components/FormField';
 import { icons } from '../constants';
 
+//test for correct rendering of a FormField with set Username
 test('renders title when provided', () => {
   const { getByText } = render(<FormField title="Username" />);
   expect(getByText('Username')).toBeTruthy();
 });
 
+//test for correct handling of changing the text of the FormField
 test('handles text input change', () => {
   const mockChangeText = jest.fn();
   const { getByPlaceholderText } = render(
@@ -18,6 +20,7 @@ test('handles text input change', () => {
   expect(mockChangeText).toHaveBeenCalledWith('Hello World');
 });
 
+//test for correct hiding and showing text functionality of the eye icon of the FormField
 test('shows and hides text when hideText is true', () => {
   const { getByTestId } = render(
     <FormField 
@@ -35,6 +38,5 @@ test('shows and hides text when hideText is true', () => {
   const eyeIcon = getByTestId('eyeIcon');
   fireEvent.press(eyeIcon);
 
-  // Now, the input should be visible (not secure)
   expect(input.props.secureTextEntry).toBe(false);
 });

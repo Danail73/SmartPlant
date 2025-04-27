@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router';
 import { icons } from '../../constants';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP } from 'react-native-responsive-screen';
 
+//tab option object
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
     <View
@@ -33,6 +34,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
 const TabsLayout = () => {
   return (
       <Tabs
+        //style for the whole tabbar
         screenOptions={{
           tabBarShowLabel: false,
           tabBarActiveTintColor: '#2b65e3',
@@ -63,6 +65,8 @@ const TabsLayout = () => {
           },
         }}
       >
+
+        {/* setting home tab */}
         <Tabs.Screen
           name="home"
           style={{ paddingTop:0 }}
@@ -80,6 +84,7 @@ const TabsLayout = () => {
           }}
         />
 
+        {/* setting friends tab */}
         <Tabs.Screen
           name="friends"
           style={{  }}
@@ -97,7 +102,7 @@ const TabsLayout = () => {
           }}
         />
 
-
+        {/* setting profile tab */}
         <Tabs.Screen
           name="profile"
           style={{ paddingTop: 0 }}

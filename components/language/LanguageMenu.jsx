@@ -18,6 +18,7 @@ const LanguageMenu = ({ langContainerStyles, bonusLandContainerStyles, langMenuS
     const [visible, setVisible] = useState(false);
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
+    //function to open the menu just below the language menu icon
     const openMenu = () => {
         setVisible(true);
         if (iconRef.current) {
@@ -29,17 +30,20 @@ const LanguageMenu = ({ langContainerStyles, bonusLandContainerStyles, langMenuS
         }
     };
 
+    //function to close the menu
     const closeMenu = () => {
         langScale.value = withTiming(0, { duration: 100 }, () => {
             runOnJS(setVisible)(false);
         });
     };
 
+    //function to change the app language
     const changeLanguage = async (lang) => {
         await switchLanguage(lang);
         closeMenu();
     };
 
+    //using useAnimatedStyle for the language menu
     const menuAnimatedStyle = useAnimatedStyle(() => {
         return {
             transform: [{ scale: langScale.value }],
@@ -57,6 +61,7 @@ const LanguageMenu = ({ langContainerStyles, bonusLandContainerStyles, langMenuS
                 className={`${langContainerStyles}`}
                 style={[{ zIndex: 36 }, bonusLandContainerStyles]}
             >
+                {/* button to open the menu */}
                 <CustomButton
                     containerStyles={'bg-notFullWhite rounded-full items-center justify-center'}
                     useAnimatedIcon={true}
@@ -75,6 +80,8 @@ const LanguageMenu = ({ langContainerStyles, bonusLandContainerStyles, langMenuS
                     }}
                 />
             </View>
+
+            {/* show language menu if open */}
             {visible && (
                 <TouchableWithoutFeedback onPress={closeMenu}>
                     <View style={{ width: screenWidth, height: screenHeight, position: 'absolute', top: 0, left: 0, zIndex: 35 }}>
@@ -83,7 +90,10 @@ const LanguageMenu = ({ langContainerStyles, bonusLandContainerStyles, langMenuS
                             style={[menuAnimatedStyle, bonusLangMenuStyles, { transformOrigin: 'top'}]}
                         >
                             <View className="h-[0.1rem] w-[80%] bg-black " style={{ marginTop: hp('4%')}}></View>
+
+                            {/* show language options */}
                             <View className="w-[100%] items-start justify-center flex-col" style={{height: '60%', paddingLeft: hp('1.5%'), paddingTop: hp('0.2%')}}>
+                                {/* bulgarian */}
                                 <LanguageOption
                                     title="BG"
                                     handlePress={() => changeLanguage('bg')}
@@ -91,6 +101,7 @@ const LanguageMenu = ({ langContainerStyles, bonusLandContainerStyles, langMenuS
                                     textStyles={{fontSize: hp('2%') < 20 ? hp('2%') : 20}}
                                     containerStyles={{height: hp('3.4%')}}
                                 />
+                                {/* english */}
                                 <LanguageOption
                                     title="EN"
                                     handlePress={() => changeLanguage('en')}

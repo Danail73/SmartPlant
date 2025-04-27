@@ -12,16 +12,19 @@ const SignUp = () => {
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
+  //defining a form for the credentials
   const [form, setForm] = useState({
     username: '',
     email: '',
     password: ''
   })
-
+  
+  //getting the needed set functions from GlobalContext
   const { setUser, setIsLoggedIn, setAccount } = useGlobalContext();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  //submit function for registration
   const submit = async () => {
     if (!form.username || !form.email || !form.password) {
       Alert.alert('Error', 'Please fill in all the fields')
@@ -31,14 +34,22 @@ const SignUp = () => {
 
     try {
       const key = await generateRandomKey();
+      
+      //encrypting user's password 
       const encryptedPassword = await encryptPassword(form.password, key)
       const result = await createUser(form.email, form.password, encryptedPassword, key, form.username)
+
+      //setting user and logging the user
       setUser(result);
       setIsLoggedIn(true);
+
+      //setting account
       const acc = await getCurrentAccount();
       if (acc) {
         setAccount(acc);
       }
+
+      //redirecting to home
       router.replace('/home')
     }
     catch (error) {
@@ -51,6 +62,7 @@ const SignUp = () => {
 
   return (
     <SafeAreaView className="flex-1">
+      {/* setting background image */}
       <ImageBackground
         source={images.forestSignUp}
         className="flex-1 w-full h-full"
@@ -58,6 +70,7 @@ const SignUp = () => {
         onLoadStart={() => setLoading(true)}
         onLoad={() => setLoading(false)}
       >
+        {/* showing indicator while loading */}
         {loading && (
           <View className="absolute inset-0 justify-center items-center bg-black bg-opacity-25">
             <ActivityIndicator size="large" color="#ffffff" />
@@ -65,16 +78,17 @@ const SignUp = () => {
         )}
 
 
-
+        {/* setting up the login form */}
         <View className="flex-1 justify-center items-center">
           <View
             className=" bg-gray-200 rounded-lg opacity-85"
             style={{ width: wp('80%'), paddingVertical: hp('2%'), paddingHorizontal: wp('3%') }}
           >
             <Text className="text-2xl font-bold mb-8 text-gray-800 text-center">
-              Welcome to Greeny
+              Welcome to Green Care
             </Text>
 
+            {/* input for username */}
             <TextInput
               className="border w-full rounded"
               style={{ padding: hp('1%'), height: hp('6%'), marginBottom: hp('1%') }}
@@ -85,6 +99,7 @@ const SignUp = () => {
               onChangeText={(e) => setForm({ ...form, username: e })}
             />
 
+            {/* input for email */}
             <TextInput
               className="border w-full rounded"
               style={{ padding: hp('1%'), height: hp('6%'), marginBottom: hp('1%') }}
@@ -100,6 +115,8 @@ const SignUp = () => {
               className="border border-black w-full rounded flex-row items-center"
               style={{ marginBottom: hp('1%') }}
             >
+
+              {/* input for password */}
               <TextInput
                 className="rounded"
                 style={{ padding: hp('1%'), height: hp('6%'), width: '88%' }}
@@ -122,6 +139,7 @@ const SignUp = () => {
               </TouchableOpacity>
             </View>
 
+            {/* submit button */}
             <TouchableOpacity
               className="bg-blue-500 w-full rounded"
               style={{ paddingVertical: hp('1.5%') }}
@@ -131,6 +149,8 @@ const SignUp = () => {
                 Sign up
               </Text>
             </TouchableOpacity>
+
+            {/* option if user has an account */}
             <View
               className="flex-row justify-center"
               style={{ marginTop: hp('1%') }}
