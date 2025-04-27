@@ -222,7 +222,7 @@ const MqttProvider = ({ children }) => {
 
     //function to turn water pump on/off
     const pumpSwitch = () => {
-        if (!client || !client.isConnected()) return console.warn("MQTT not connected");
+        if (!client || !client.isConnected()) return console.log("MQTT not connected");
         const newState = !pump ? "ON" : "OFF";
         const msg = new Message(newState);
         msg.destinationName = `${plantId}/switch/pump/state`;
@@ -232,7 +232,7 @@ const MqttProvider = ({ children }) => {
 
     //function to turn lamp on/off
     const lampSwitch = () => {
-        if (!client || !client.isConnected()) return console.warn("MQTT not connected");
+        if (!client || !client.isConnected()) return console.log("MQTT not connected");
         const newState = !isEnabled ? "ON" : "OFF";
         const msg = new Message(JSON.stringify({ state: newState }));
         msg.destinationName = `${plantId}/light/lamp/state`;
