@@ -51,7 +51,7 @@ const PlantBoardComponent = ({ item, isReceiving, addCallback, removeCallback, i
                         style={{ tintColor: 'gray', width: hp('2%'), height: hp('2%') }}
                     />
                     <Text className="text-gray-700 font-psemibold mx-2" style={{ fontSize: hp('1.5%') }}>
-                        {item?.time[item?.time.length - 1].slice(0,10)}
+                        {item?.time[item?.time.length - 1]?.slice(0,10)}
                     </Text>
                 </View>
 

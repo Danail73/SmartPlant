@@ -260,7 +260,7 @@ const Home = () => {
     }, 300000)
 
     return () => clearInterval(interval)
-  }, [activePlant])
+  }, [activePlant?.$id])
 
   //clear data for chart when activePlant or user changes
   useEffect(() => {
