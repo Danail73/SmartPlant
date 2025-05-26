@@ -1,8 +1,8 @@
-import { Text, View, Image, KeyboardAvoidingView } from 'react-native'
+import { Text, View, Image, KeyboardAvoidingView, TouchableOpacity, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Container from '../../components/Container'
 import FormField from '../../components/FormField'
-import { signOut, updateEmail, updatePassword, updateUser, updateUsername } from '../../lib/appwrite'
+import { deleteCurrentAccount, signOut, updateEmail, updatePassword, updateUser, updateUsername } from '../../lib/appwrite'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { decryptPassword, encryptPassword } from '../../lib/crypto'
 import { icons } from '../../constants'
@@ -13,6 +13,7 @@ import { router } from 'expo-router'
 import LanguageMenu from '../../components/language/LanguageMenu'
 import { t } from '../../translations/i18n'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { BlurView } from 'expo-blur'
 
 const Profile = () => {
   const { friends } = useFriendsContext()
@@ -37,6 +38,7 @@ const Profile = () => {
     current: ''
   })
   const [saveVisible, setSaveVisible] = useState(false)
+  const [deleteVisible, setDeleteVisible] = useState(false)
 
   //function to decrypt user's password from database
   const getDecryptedPassword = async () => {
@@ -62,8 +64,31 @@ const Profile = () => {
       await signOut()
       setUser(null)
       setIsLoggedIn(false)
-      setAccount(false)
-      
+      setAccount(null)
+
+      //redirecting to index
+      router.replace('/')
+    } catch (error) { console.log(error) }
+  }
+
+  const deleteAccount = async () => {
+    try {
+      //clear all the sensor values to not show to the new user
+      storeItem("temperature", JSON.stringify(0));
+      storeItem("humidity", JSON.stringify(0));
+      storeItem("brightness", JSON.stringify(0));
+      storeItem("water", JSON.stringify(0));
+      storeItem("statusCode", JSON.stringify(0));
+      setPlants(null);
+      setActivePlant(null);
+
+      //calling delete function from appwrite 
+      await deleteCurrentAccount();
+
+      setUser(null)
+      setIsLoggedIn(false)
+      setAccount(null)
+
       //redirecting to index
       router.replace('/')
     } catch (error) { console.log(error) }
@@ -178,14 +203,54 @@ const Profile = () => {
             <Text className="font-psemibold text-[#f2f9f1] mb-2" style={{ fontSize: hp('2.5%') }}>{user?.username}</Text>
             <View className="border-2 rounded-full bottom-[-5%] z-20 bg-[#3A5332]" style={{ width: hp('10%'), height: hp('10%') }}>
               <View className="w-full h-full">
-                <View
+                <TouchableOpacity
                   className="w-full h-full items-center justify-center"
+                  onPress={() => {
+                    if(!deleteVisible) {
+                      setDeleteVisible(true)
+                    } else{
+                      Alert.alert(
+                        'Delete Account',
+                        'Are you sure you want to permanently delete your account? This action cannot be undone.',
+                        [
+                          {
+                            text: 'Cancel',
+                            style: 'cancel',
+                          },
+                          {
+                            text: 'Delete',
+                            style: 'destructive',
+                            onPress: () => deleteAccount(),
+                          },
+                        ],
+                        { cancelable: true }
+                      );
+                      setDeleteVisible(false)
+                    }
+                  }}
                 >
                   <Image
                     source={profilePic.current ? { uri: profilePic.current } : ''}
                     className="w-full h-full rounded-full"
                   />
-                </View>
+                  {deleteVisible && (
+                    <View
+                      className="w-full h-full absolute rounded-full overflow-hidden"
+                    >
+                      <BlurView
+                        className="w-full h-full items-center justify-center"
+                        tint='dark'
+                        intensity={80}
+                      >
+                        <Image
+                          source={icons.del}
+                          className="w-[40%] h-[40%]"
+                          style={{ tintColor: 'white' }}
+                        />
+                      </BlurView>
+                    </View>
+                  )}
+                </TouchableOpacity>
               </View>
             </View>
           </View>

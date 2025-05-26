@@ -62,7 +62,7 @@ const Friends = () => {
 
   //function to get results from the upper searchbar
   const friendsSearchUpper = () => {
-    const result = friends.filter((item) => item.friend.username.toLowerCase().includes(upperSearchQuery.toLowerCase()))
+    const result = friends.filter((item) => item.friend?.username.toLowerCase().includes(upperSearchQuery.toLowerCase()))
     if (result.length == 0)
       return null
     return result
@@ -71,7 +71,7 @@ const Friends = () => {
 
   //function to get results from the bottom searchbar
   const friendsSearchBottom = () => {
-    const result = others.filter((item) => item.username.toLowerCase().includes(bottomSearchQuery.toLowerCase()))
+    const result = others.filter((item) => item.username?.toLowerCase().includes(bottomSearchQuery.toLowerCase()))
     if (result.length == 0 || !bottomSearchQuery)
       return null
     return result;
