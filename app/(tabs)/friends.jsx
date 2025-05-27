@@ -176,7 +176,7 @@ const Friends = () => {
                       setUpperSearchVisible(true)
                       setBottomSearchVisible(false);
                       setBottomSearchQuery('')
-                      setUpperIconsVisible(false)
+                      setUpperIconsVisible(true)
                     }}
                   >
                     <AnimatedIcon
@@ -272,7 +272,7 @@ const Friends = () => {
                     setBottomSearchVisible(true)
                     setUpperSearchVisible(false)
                     setUpperSearchQuery('')
-                    setBottomIconsVisible(false)
+                    setBottomIconsVisible(true)
                   }}
                 >
                   <AnimatedIcon
@@ -325,7 +325,7 @@ const Friends = () => {
               showsVerticalScrollIndicator={false}
             />
           ) : (
-            <View className="items-center justify-center flex-col mt-2 p-8">
+            <View className="items-center justify-center flex-col p-8 h-[300px]">
               <Image
                 source={images.findFriends}
                 className="mb-3"

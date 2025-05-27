@@ -333,7 +333,7 @@ const Home = () => {
                 className="items-center justify-center"
                 style={{ paddingLeft: wp('1%') }}
               >
-                <Text className="font-pmedium text-notFullWhite" style={{ fontSize: hp('2%') }}>{status.message}</Text>
+                <Text className="font-pmedium text-notFullWhite text-center" style={{ fontSize: hp('2%') }}>{status.message}</Text>
               </View>
             </View>
           )}
@@ -349,10 +349,10 @@ const Home = () => {
                 resizeMode='contain'
               />
               <View
-                className="items-center justify-center pl-2"
+                className="items-center justify-center"
                 style={{ paddingLeft: wp('1%') }}
               >
-                <Text className="font-pmedium text-notFullWhite" style={{ fontSize: hp('1%') }}>Looks like you{'\n'}don't have plants</Text>
+                <Text className="font-pmedium text-notFullWhite text-center" style={{ fontSize: hp('2%') }}>Looks like you{'\n'}don't have plants</Text>
               </View>
             </View>
           )}
@@ -419,8 +419,8 @@ const Home = () => {
               </View>
             ) : (
               //show message if not
-              <View>
-                <Text>{t('Looks like you still dont have any plants')}</Text>
+              <View className="items-center justify-center" style={{paddingTop: hp('2%')}}>
+                <Text className="font-pmedium text-notFullWhite text-center" style={{ fontSize: hp('2%') }}>{t('Looks like you still dont have any plants')}</Text>
               </View>
             )}
           </View>
