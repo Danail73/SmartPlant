@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TextInput } from 'react-native';
+import { Text, View, TextInput, ActivityIndicator } from 'react-native';
 import { icons } from '../constants';
 import { router } from 'expo-router';
 import StatusCard from '../components/device/StatusCard';
@@ -10,7 +10,7 @@ import CustomButton from '../components/CustomButton';
 import { updatePlant, subscribeToPlants } from '../lib/appwrite';
 import { useMqttContext } from '../context/MqttProvider';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-
+import { BlurView } from 'expo-blur';
 
 const Device = () => {
   const { user } = useGlobalContext()
@@ -18,7 +18,7 @@ const Device = () => {
   const { client, temperature, brightness, waterLevel,
     isEnabled, pump, pumpSwitch, lampSwitch, humidity } = useMqttContext();
   const [edit, setEdit] = useState(false)
-
+  const [isLoading, setIsLoading] = useState(false)
   //form for plantId and name of plant
   const [form, setForm] = useState({
     plantId: '',
@@ -36,10 +36,12 @@ const Device = () => {
   //
   const handleUpdatePlant = async (id, name) => {
     try {
+      setIsLoading(true)
       const response = await updatePlant(activePlant.$id, id, name)
     } catch (error) {
       console.log(error)
     }
+    finally { setIsLoading(false) }
   }
 
   //handle updates in 'plants' collection
@@ -91,6 +93,15 @@ const Device = () => {
       colors={['#4ec09c', '#a8d981']}
       areaStyles={'items-center'}
     >
+      {isLoading && (
+        <BlurView
+          className="w-full h-full items-center justify-center absolute z-50"
+          intensity={70}
+          tint='systemChromeMaterial'
+        >
+          <ActivityIndicator size={'large'} color={'green'} />
+        </BlurView>
+      )}
       <View
         className="w-full justify-center items-center flex-row mt-[2%]"
         style={{ height: hp('10%') }}
@@ -245,7 +256,7 @@ const Device = () => {
             valueContainerStyles={{ marginTop: hp('0.3%') }}
           />
         </View>
-        
+
         {/*<View className="flex-row items-center justify-center">
           <StatusCard
             label="AUTO"

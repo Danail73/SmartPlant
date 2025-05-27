@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback, Alert, Keyboard } from 'react-native'
+import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback, Alert, Keyboard, ActivityIndicator } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import PlantBoardComponent from '../../components/plants/PlantBoardComponent'
 import { icons, images } from '../../constants'
@@ -32,6 +32,7 @@ const Home = () => {
   const opacity = useSharedValue(0);
   const [addVisible, setAddVisible] = useState(false);
   const [removeVisible, setRemoveVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   //setting up a form for plantId and name needed to create plant
   const [form, setForm] = useState({
@@ -80,6 +81,7 @@ const Home = () => {
       const exists = await plantIdExists(form.plantId)
       if (exists) {
         try {
+          setIsLoading(true)
           await createPlant(form.plantId, form.name, [user.$id]);
         }
         catch (error) {
@@ -87,6 +89,7 @@ const Home = () => {
         }
         finally {
           clearForm();
+          setIsLoading(false)
         }
       }
       else {
@@ -103,6 +106,7 @@ const Home = () => {
     }
     else {
       try {
+        setIsLoading(true)
         await createPlantAdmin(form.plantId);
       }
       catch (error) {
@@ -110,6 +114,7 @@ const Home = () => {
       }
       finally {
         clearForm();
+        setIsLoading(false)
       }
     }
   }
@@ -152,6 +157,7 @@ const Home = () => {
   //function called to handle updates in the 'plants' collection - updating activePlant and plants object it the provider
   const handlePlantUpdated = useCallback((response) => {
     try {
+      setIsLoading(true)
       const eventType = response.events[0];
       const updatedItem = response.payload;
 
@@ -175,6 +181,7 @@ const Home = () => {
     } catch (error) {
       console.log(error);
     }
+    finally { setIsLoading(false) }
   }, [plants, activePlant, setPlants, setActivePlant, setActiveId, fetchRealTime]);
 
 
@@ -234,10 +241,11 @@ const Home = () => {
       console.log(error)
     }
   }
-  
+
   //function to check if sensor values should be updated
   const update = async () => {
     try {
+      setIsLoading(true)
       const temp = await getStorageItem("temperature");
       const hum = await getStorageItem("humidity");
       const bri = await getStorageItem("brightness");
@@ -251,6 +259,7 @@ const Home = () => {
     } catch (error) {
       console.log(error)
     }
+    finally { setIsLoading(false) }
   }
 
   //repeat the check in every 5 mins and when activePlant changes
@@ -291,6 +300,15 @@ const Home = () => {
         colors={['#4ec09c', '#a8d981']}
         statusBarStyle={'light'}
       >
+        {isLoading && (
+          <BlurView
+            className="w-full h-full items-center justify-center absolute z-50"
+            intensity={70}
+            tint='systemChromeMaterial'
+          >
+            <ActivityIndicator size={'large'} color={'green'} />
+          </BlurView>
+        )}
         <View style={{ paddingHorizontal: wp('8%') }}>
           <View
             className={`items-center justify-between flex-row`}
@@ -568,13 +586,19 @@ const Home = () => {
                 title={'Choose friends to add'}
                 buttonTitle={'Add'}
                 fn={async (list) => {
+                  setIsLoading(true)
                   if (activePlant) {
-                    const newUsers = [...activePlant?.users];
-                    list.forEach((item) => {
-                      newUsers.push(item)
-                    })
-                    const response = await updatePlantUsers(activePlant?.$id, newUsers)
+                    try {
+                      const newUsers = [...activePlant?.users];
+                      list.forEach((item) => {
+                        newUsers.push(item)
+                      })
+                      const response = await updatePlantUsers(activePlant?.$id, newUsers)
+                    } catch (error) {
+                      console.log(error)
+                    }
                   }
+                  setIsLoading(false)
                 }}
               />
             </BlurView>
@@ -599,6 +623,7 @@ const Home = () => {
                 title={'Choose friends to remove'}
                 buttonTitle={'Remove'}
                 fn={async (list) => {
+                  setIsLoading(true)
                   if (activePlant) {
                     try {
                       let newUsers = activePlant.users.filter(
@@ -609,6 +634,7 @@ const Home = () => {
                       console.log(error)
                     }
                   }
+                  setIsLoading(false)
                 }}
               />
             </BlurView>

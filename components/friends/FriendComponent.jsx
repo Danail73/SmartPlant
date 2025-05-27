@@ -4,24 +4,28 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { icons } from '../../constants';
 import { respondFriendRequest, sendFriendRequest } from '../../lib/appwrite';
 
-const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, iconStyles, titleStyles, subtitleStyles, requestId, containerStyles }) => {
+const FriendComponent = ({ item, forInvite, fromUser, isPending, otherStyles, iconStyles, titleStyles, subtitleStyles, requestId, containerStyles, setIsLoading }) => {
 
     //function to send request to the user
     const handleSendRequest = async () => {
         try {
+            setIsLoading(true)
             const response = await sendFriendRequest(fromUser.$id, item.$id)
         } catch (error) {
             console.log(error)
         }
+        finally { setIsLoading(false) }
     }
 
     //function to accept/decline request
     const updateRequest = async (status) => {
         try {
+            setIsLoading(true)
             const response = await respondFriendRequest(requestId, status)
         } catch (error) {
             console.log(error)
         }
+        finally { setIsLoading(false) }
     }
 
     return (

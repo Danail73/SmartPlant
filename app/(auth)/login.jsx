@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { ImageBackground, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { router } from 'expo-router';
+import { BlurView } from 'expo-blur';
 import { images, icons } from '../../constants'
 import { getCurrentUser, signIn, getCurrentAccount } from '../../lib/appwrite';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useGlobalContext } from '../../context/GlobalProvider';
 
 const LoginScreen = () => {
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //defining a form for the credentials
   const [form, setForm] = useState({
@@ -27,30 +27,31 @@ const LoginScreen = () => {
     if (form.email === "" || form.password === "") {
       Alert.alert('Error', 'Please fill in all the fields')
     }
+    else {
+      setIsLoading(true);
 
-    setIsSubmitting(true);
+      try {
+        //calling the signIn function from appwrite file
+        await signIn(form.email, form.password);
+        const result = await getCurrentUser();
 
-    try {
-      //calling the signIn function from appwrite file
-      await signIn(form.email, form.password);
-      const result = await getCurrentUser();
-
-      //setting user and logging the user
-      setUser(result);
-      setIsLoggedIn(true);
-      //setting account
-      const acc = await getCurrentAccount();
-      if (acc) {
-        setAccount(acc);
+        //setting user and logging the user
+        setUser(result);
+        setIsLoggedIn(true);
+        //setting account
+        const acc = await getCurrentAccount();
+        if (acc) {
+          setAccount(acc);
+        }
+        //redirecting ro home
+        router.replace('/home')
       }
-      //redirecting ro home
-      router.replace('/home')
-    }
-    catch (error) {
-      Alert.alert('Error', error.message)
-    }
-    finally {
-      setIsSubmitting(false);
+      catch (error) {
+        Alert.alert('Error', error.message)
+      }
+      finally {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -61,14 +62,18 @@ const LoginScreen = () => {
         source={images.forestLogin}
         className="flex-1 w-full h-full"
         resizeMode="cover"
-        onLoadStart={() => setLoading(true)}
-        onLoad={() => setLoading(false)}
+        onLoadStart={() => setIsLoading(true)}
+        onLoad={() => setIsLoading(false)}
       >
         {/* showing indicator while loading */}
-        {loading && (
-          <View className="absolute inset-0 justify-center items-center bg-black bg-opacity-25">
-            <ActivityIndicator size="large" color="#ffffff" />
-          </View>
+        {isLoading && (
+          <BlurView
+            className="w-full h-full items-center justify-center absolute z-50"
+            intensity={70}
+            tint='systemChromeMaterial'
+          >
+            <ActivityIndicator size={'large'} color={'green'} />
+          </BlurView>
         )}
 
 

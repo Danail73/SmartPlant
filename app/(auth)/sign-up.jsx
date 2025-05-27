@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import { ImageBackground, SafeAreaView, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
+import { BlurView } from 'expo-blur';
 import { images, icons } from '../../constants';
 import { createUser, getCurrentAccount } from '../../lib/appwrite';
 import { useGlobalContext } from '../../context/GlobalProvider';
@@ -9,7 +10,7 @@ import { decryptPassword, encryptPassword, generateRandomKey } from '../../lib/c
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const SignUp = () => {
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   //defining a form for the credentials
@@ -18,45 +19,44 @@ const SignUp = () => {
     email: '',
     password: ''
   })
-  
+
   //getting the needed set functions from GlobalContext
   const { setUser, setIsLoggedIn, setAccount } = useGlobalContext();
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //submit function for registration
   const submit = async () => {
     if (!form.username || !form.email || !form.password) {
       Alert.alert('Error', 'Please fill in all the fields')
     }
+    else {
+      setIsLoading(true);
 
-    setIsSubmitting(true);
+      try {
+        const key = await generateRandomKey();
 
-    try {
-      const key = await generateRandomKey();
-      
-      //encrypting user's password 
-      const encryptedPassword = await encryptPassword(form.password, key)
-      const result = await createUser(form.email, form.password, encryptedPassword, key, form.username)
+        //encrypting user's password 
+        const encryptedPassword = await encryptPassword(form.password, key)
+        const result = await createUser(form.email, form.password, encryptedPassword, key, form.username)
 
-      //setting user and logging the user
-      setUser(result);
-      setIsLoggedIn(true);
+        //setting user and logging the user
+        setUser(result);
+        setIsLoggedIn(true);
 
-      //setting account
-      const acc = await getCurrentAccount();
-      if (acc) {
-        setAccount(acc);
+        //setting account
+        const acc = await getCurrentAccount();
+        if (acc) {
+          setAccount(acc);
+        }
+
+        //redirecting to home
+        router.replace('/home')
       }
-
-      //redirecting to home
-      router.replace('/home')
-    }
-    catch (error) {
-      Alert.alert('Error', error);
-    }
-    finally {
-      setIsSubmitting(false);
+      catch (error) {
+        Alert.alert('Error', error);
+      }
+      finally {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -67,14 +67,18 @@ const SignUp = () => {
         source={images.forestSignUp}
         className="flex-1 w-full h-full"
         resizeMode="cover"
-        onLoadStart={() => setLoading(true)}
-        onLoad={() => setLoading(false)}
+        onLoadStart={() => setIsLoading(true)}
+        onLoad={() => setIsLoading(false)}
       >
         {/* showing indicator while loading */}
-        {loading && (
-          <View className="absolute inset-0 justify-center items-center bg-black bg-opacity-25">
-            <ActivityIndicator size="large" color="#ffffff" />
-          </View>
+        {isLoading && (
+          <BlurView
+            className="w-full h-full items-center justify-center absolute z-50"
+            intensity={70}
+            tint='systemChromeMaterial'
+          >
+            <ActivityIndicator size={'large'} color={'green'} />
+          </BlurView>
         )}
 
 

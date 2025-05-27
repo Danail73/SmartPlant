@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, Image, Text, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { View, StyleSheet, Image, Text, TouchableOpacity, TouchableWithoutFeedback, Dimensions, ActivityIndicator } from 'react-native';
 import { Provider as PaperProvider, Portal } from 'react-native-paper';
 import { icons } from '../../constants';
 import { router } from 'expo-router';
@@ -8,6 +8,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { usePlantsContext } from '../../context/PlantsProvider';
+import { BlurView } from 'expo-blur';
 
 const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
   const { user } = useGlobalContext()
@@ -18,6 +19,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
   const menuTop = useSharedValue(0);
   const menuLeft = useSharedValue(0);
   const [visible, setVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
   const isCreator = user.$id === item.users[0].$id
@@ -51,7 +53,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
   //function to delete/remove from list plant
   const handleDeletePlant = async () => {
     try {
-      
+      setIsLoading(true)
       // delete plant if user is creator
       if (item.users[0].$id == user.$id) {
         const response = await deletePlant(item.$id);
@@ -67,6 +69,7 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
     } catch (error) {
       console.log(Error, error)
     }
+    finally { setIsLoading(false) }
   }
 
   //using useAnimatedStyle for the menu
@@ -87,6 +90,17 @@ const PlantBoardMenu = ({ item, addCallback, removeCallback, menuStyle }) => {
 
   return (
     <>
+      {isLoading && (
+        <Portal>
+          <BlurView
+            className="w-full h-full items-center justify-center absolute z-50"
+            intensity={70}
+            tint='systemChromeMaterial'
+          >
+            <ActivityIndicator size={'large'} color={'green'} />
+          </BlurView>
+        </Portal>
+      )}
       {/* show menu icon */}
       <TouchableOpacity
         ref={iconRef}

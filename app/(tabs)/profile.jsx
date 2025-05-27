@@ -1,4 +1,4 @@
-import { Text, View, Image, KeyboardAvoidingView, TouchableOpacity, Alert } from 'react-native'
+import { Text, View, Image, KeyboardAvoidingView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Container from '../../components/Container'
 import FormField from '../../components/FormField'
@@ -39,6 +39,7 @@ const Profile = () => {
   })
   const [saveVisible, setSaveVisible] = useState(false)
   const [deleteVisible, setDeleteVisible] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   //function to decrypt user's password from database
   const getDecryptedPassword = async () => {
@@ -51,6 +52,7 @@ const Profile = () => {
   //function for logging out
   const logout = async () => {
     try {
+      setIsLoading(true)
       //clear all the sensor values to not show to the new user
       storeItem("temperature", JSON.stringify(0));
       storeItem("humidity", JSON.stringify(0));
@@ -69,10 +71,12 @@ const Profile = () => {
       //redirecting to index
       router.replace('/')
     } catch (error) { console.log(error) }
+    finally { setIsLoading(false) }
   }
 
   const deleteAccount = async () => {
     try {
+      setIsLoading(true)
       //clear all the sensor values to not show to the new user
       storeItem("temperature", JSON.stringify(0));
       storeItem("humidity", JSON.stringify(0));
@@ -92,6 +96,7 @@ const Profile = () => {
       //redirecting to index
       router.replace('/')
     } catch (error) { console.log(error) }
+    finally { setIsLoading(false) }
   }
 
   //function to cancel changes to the credentials
@@ -146,6 +151,7 @@ const Profile = () => {
   //function to save the changes to the credentials
   const save = async () => {
     try {
+      setIsLoading(true)
       if (username.current != username.previous) {
         const response = await handleUpdateUsername()
       }
@@ -157,7 +163,8 @@ const Profile = () => {
       }
       const updatedUser = await handleUpdateUser();
       setUser(updatedUser)
-    } catch (error) { }
+    } catch (error) { console.log(error) }
+    finally { setIsLoading(false) }
   }
 
   //set the user's information
@@ -190,6 +197,15 @@ const Profile = () => {
       colors={['#4ec09c', '#a8d981']}
       statusBarStyle={'light'}
     >
+      {isLoading && (
+        <BlurView
+          className="w-full h-full items-center justify-center absolute z-50"
+          intensity={70}
+          tint='systemChromeMaterial'
+        >
+          <ActivityIndicator size={'large'} color={'green'} />
+        </BlurView>
+      )}
       {/* manage keyboard show/hide */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -206,9 +222,9 @@ const Profile = () => {
                 <TouchableOpacity
                   className="w-full h-full items-center justify-center"
                   onPress={() => {
-                    if(!deleteVisible) {
+                    if (!deleteVisible) {
                       setDeleteVisible(true)
-                    } else{
+                    } else {
                       Alert.alert(
                         'Delete Account',
                         'Are you sure you want to permanently delete your account? This action cannot be undone.',
@@ -390,7 +406,7 @@ const Profile = () => {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </Container>
+    </Container >
 
   )
 }

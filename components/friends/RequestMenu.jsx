@@ -6,7 +6,7 @@ import FriendComponent from './FriendComponent'
 import { t } from '../../translations/i18n'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
 
-const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
+const RequestMenu = ({ onPress, requestFriends, invitedFriends, setIsLoading }) => {
     const { user } = useGlobalContext();
     const [upperVisible, setUpperVisible] = useState(false)
     const [bottomVisible, setBottomVisible] = useState(false)
@@ -102,6 +102,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                                 requestId={item.request.$id}
                                 isPending={true}
                                 forInvite={false}
+                                setIsLoading={setIsLoading}
                             />
                         )}
                         className="my-2"
@@ -148,6 +149,7 @@ const RequestMenu = ({ onPress, requestFriends, invitedFriends }) => {
                                 containerStyles={{width: '88%'}}
                                 requestId={item.request.$id}
                                 forInvite={false}
+                                setIsLoading={setIsLoading}
                             />
                         )}
                         className="my-2"

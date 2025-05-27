@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Dimensions, FlatList, TouchableOpacity, Image, TextInput, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, Dimensions, FlatList, TouchableOpacity, Image, TextInput, SafeAreaView, StyleSheet, ActivityIndicator } from 'react-native';
 import Container from '../../components/Container';
 import { PaperProvider } from 'react-native-paper';
-import { respondFriendRequest, subscribeToFriendRequests, subscribeToUsers } from '../../lib/appwrite';
+import { deleteFriendRequest, respondFriendRequest, subscribeToFriendRequests, subscribeToUsers } from '../../lib/appwrite';
 import FriendComponent from '../../components/friends/FriendComponent';
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { icons, images } from '../../constants';
@@ -16,7 +16,6 @@ import { TouchableWithoutFeedback } from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import { t } from '../../translations/i18n'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-
 
 const { width, height } = Dimensions.get('window');
 
@@ -35,6 +34,7 @@ const Friends = () => {
   const [deleteMenuVisible, setDeleteMenuVisible] = useState(false);
   const [upperIconsVisible, setUpperIconsVisible] = useState(true)
   const [bottomIconsVisible, setBottomIconsVisible] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   //function for changing text of the upper searchbar
   const handleChangeTextUpper = (query) => setUpperSearchQuery(query)
@@ -130,6 +130,15 @@ const Friends = () => {
         colors={['#4ec09c', '#a8d981']}
         statusBarStyle={'light'}
       >
+        {isLoading && (
+          <BlurView
+            className="w-full h-full items-center justify-center absolute z-50"
+            intensity={70}
+            tint='systemChromeMaterial'
+          >
+            <ActivityIndicator size={'large'} color={'green'} />
+          </BlurView>
+        )}
         <View className="flex-row items-center justify-between" style={{ paddingHorizontal: wp('8%'), marginTop: hp('1.5%') }}>
           <Text className="text-notFullWhite font-pmedium" style={{ fontSize: hp('3%') }}>{t('Friends')}</Text>
           <View>
@@ -154,7 +163,7 @@ const Friends = () => {
           </View>
         </View>
         <View className="items-center justify-center" style={{ marginTop: hp('1.3%') }}>
-          
+
           {/* if the searchbar is not open, showing text message and icons to open searchbar and deleteMenu */}
           {!upperSearchVisible && (
             <View className="flex-row items-center justify-center">
@@ -231,10 +240,10 @@ const Friends = () => {
               data={friendsSearchUpper() || []}
               keyExtractor={(item) => item.friend.$id}
               renderItem={({ item }) => (
-                <FriendComponent item={item.friend} containerStyles={{width: wp('80%')}} />
+                <FriendComponent item={item.friend} containerStyles={{ width: wp('80%') }} />
               )}
               className="my-2"
-              style={{height: hp('30%')}}
+              style={{ height: hp('30%') }}
               showsVerticalScrollIndicator={false}
             />
           ) : (
@@ -286,7 +295,7 @@ const Friends = () => {
                 height={hp('4%')}
               />
               <TextInput
-                style={{ textAlignVertical: 'center',  marginLeft: wp('3%'), fontSize: hp('1.7%')  }}
+                style={{ textAlignVertical: 'center', marginLeft: wp('3%'), fontSize: hp('1.7%') }}
                 className={`w-[75%]  font-pregular text-[#4d4752] justify-center items-center `}
                 placeholder='Search for friends'
                 value={bottomSearchQuery}
@@ -309,10 +318,10 @@ const Friends = () => {
               data={friendsSearchBottom() || []}
               keyExtractor={(item) => item.$id || item.id.toString()}
               renderItem={({ item }) => (
-                <FriendComponent item={item} forInvite={true} fromUser={user} containerStyles={{width: wp('80%')}}  />
+                <FriendComponent item={item} forInvite={true} fromUser={user} containerStyles={{ width: wp('80%') }} setIsLoading={setIsLoading} />
               )}
               className="my-2"
-              style={{height: hp('30%')}}
+              style={{ height: hp('30%') }}
               showsVerticalScrollIndicator={false}
             />
           ) : (
@@ -323,7 +332,7 @@ const Friends = () => {
                 resizeMode='contain'
                 style={{ tintColor: '#4d4752', width: hp('13%'), height: hp('13%') }}
               />
-              <Text className="text-[#4d4752] font-pregular" style={{fontSize: hp('2%')}}>{t('Search for friends')}</Text>
+              <Text className="text-[#4d4752] font-pregular" style={{ fontSize: hp('2%') }}>{t('Search for friends')}</Text>
             </View>
           )}
         </View>
@@ -334,31 +343,31 @@ const Friends = () => {
             <View className="flex-1 w-full h-full absolute ">
               <BlurView
                 className="h-[104%]"
-                style={{height: hp('110%')}}
+                style={{ height: hp('110%') }}
                 intensity={40}
                 tint='dark'
               >
                 <Animated.View
-                  style={[menuAnimatedStyle, {width: wp('87%'), maxWidth: 670, height: hp('7%'), top: hp('45%')}]}
+                  style={[menuAnimatedStyle, { width: wp('87%'), maxWidth: 670, height: hp('7%'), top: hp('45%') }]}
                   className="right-0 absolute bg-notFullWhite items-start justify-center rounded-l-lg border "
                 >
                   {/* close option for the menu */}
                   <TouchableOpacity
                     onPress={closeRequestMenu}
                     className="items-center ml-[4%]"
-                    style={{marginLeft: wp('3%')}}
+                    style={{ marginLeft: wp('3%') }}
                   >
                     <Animated.Image
                       source={icons.rightArrow1}
                       resizeMode="contain"
-                      style={[rotateAnimatedStyle, {width:hp('4%'), height: hp('4%')}]}
+                      style={[rotateAnimatedStyle, { width: hp('4%'), height: hp('4%') }]}
                     />
                   </TouchableOpacity>
                 </Animated.View>
                 <Animated.View
                   style={[menuAnimatedStyle, styles.requestMenu]}
                 >
-                  <RequestMenu requestFriends={requestFriends} invitedFriends={invitedFriends} />
+                  <RequestMenu requestFriends={requestFriends} invitedFriends={invitedFriends} setIsLoading={setIsLoading} />
                 </Animated.View>
               </BlurView>
             </View>
@@ -384,13 +393,19 @@ const Friends = () => {
                 title={'Choose friends to remove'}
                 buttonTitle={'Remove'}
                 fn={(list) => {
-                  list.forEach(async (item) => {
-                    try {
-                      const response = await respondFriendRequest(item.request.$id, 'declined')
-                    } catch (error) {
-                      console.log(error)
-                    }
-                  })
+                  try {
+                    setIsLoading(true)
+                    list.forEach(async (item) => {
+                      try {
+                        const response = await deleteFriendRequest(item.request.$id)
+                      } catch (error) {
+                        console.log(error)
+                      }
+                    })
+                  } catch (error) {
+                    console.log(error)
+                  }
+                  finally { setIsLoading(false) }
                 }}
               />
             </BlurView>
